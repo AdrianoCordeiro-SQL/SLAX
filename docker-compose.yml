@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: app_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: portfolio_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    container_name: app_backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/portfolio_db
+    depends_on:
+      - db
+
+  frontend:
+  build: ./frontend
+  container_name: app_frontend
+  volumes:
+    - ./frontend:/app
+    - /app/node_modules
+    - /app/.next        
+  ports:
+    - "3000:3000"
+  environment:
+    - WATCHPACK_POLLING=true 
+    - NEXT_PUBLIC_API_URL=http://localhost:8000
+  stdin_open: true
+  tty: true
+
+volumes:
+  pg_data:
