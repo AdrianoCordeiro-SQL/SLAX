@@ -24,19 +24,19 @@ services:
       - db
 
   frontend:
-  build: ./frontend
-  container_name: app_frontend
-  volumes:
-    - ./frontend:/app
-    - /app/node_modules
-    - /app/.next        
-  ports:
-    - "3000:3000"
-  environment:
-    - WATCHPACK_POLLING=true 
-    - NEXT_PUBLIC_API_URL=http://localhost:8000
-  stdin_open: true
-  tty: true
+    build: ./frontend
+    container_name: app_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    environment:
+      - WATCHPACK_POLLING=true
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    stdin_open: true
+    tty: true
 
 volumes:
   pg_data:
