@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { authFetch } from "./auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -28,14 +29,14 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type EditUserInput = z.infer<typeof editUserSchema>;
 
 export async function fetchUsers(): Promise<Users> {
-  const res = await fetch(`${API_BASE}/users`);
+  const res = await authFetch(`${API_BASE}/users`);
   if (!res.ok) throw new Error(`Failed to fetch users: HTTP ${res.status}`);
   const data = await res.json();
   return usersSchema.parse(data);
 }
 
 export async function createUser(input: CreateUserInput): Promise<User> {
-  const res = await fetch(`${API_BASE}/users`, {
+  const res = await authFetch(`${API_BASE}/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -49,7 +50,7 @@ export async function createUser(input: CreateUserInput): Promise<User> {
 }
 
 export async function updateUser(userId: number, input: EditUserInput): Promise<User> {
-  const res = await fetch(`${API_BASE}/users/${userId}`, {
+  const res = await authFetch(`${API_BASE}/users/${userId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -63,6 +64,6 @@ export async function updateUser(userId: number, input: EditUserInput): Promise<
 }
 
 export async function deleteUser(userId: number): Promise<void> {
-  const res = await fetch(`${API_BASE}/users/${userId}`, { method: "DELETE" });
+  const res = await authFetch(`${API_BASE}/users/${userId}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`Failed to delete user: HTTP ${res.status}`);
 }
