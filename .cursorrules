@@ -1,0 +1,42 @@
+## 1. Regras Gerais de Código
+
+- Utilize **Named Exports** para todos os componentes e funções.
+- Siga os padrões de **Clean Code** e **SOLID**: funções pequenas, responsabilidade única, sem duplicação.
+- Sempre prefira legibilidade e tipagem forte (TypeScript/Pydantic). Evite `any` e type assertions desnecessárias.
+- Use **Lucide-React** para TODOS os ícones. Proibido SVGs manuais ou outras bibliotecas de ícones.
+- **Comentários:** Não adicione comentários que apenas descrevem o que o código faz. Comente apenas intenção não óbvia, trade-offs ou restrições que o código sozinho não consegue expressar.
+
+## 2. Frontend (Next.js 16 + Tailwind + shadcn/ui)
+
+- **Data Fetching:** Use EXCLUSIVAMENTE `@tanstack/react-query`.
+  - Proibido `useEffect` para chamadas de API.
+  - Proibido `useEffect` para reagir a estados de query/mutation (`isSuccess`, `isError`, `data`). Use os callbacks `onSuccess`, `onError` e `onSettled` diretamente no `useMutation` ou no segundo argumento de `mutate()`.
+
+- **Validação:** Todo contrato de API deve ter um schema Zod em `lib/api/<recurso>.ts`. O schema deve ser usado tanto para tipar o fetcher quanto para validar o retorno (`schema.parse(data)`).
+
+- **Formulários:** Use **React Hook Form** com `zodResolver` para formulários com 2+ campos ou validação. Para inputs simples e isolados (ex: campo de busca), `useState` é suficiente.
+
+- **Estado:**
+  - `useState` — estado local de componente (ex: `isOpen`, toggle, input simples).
+  - **Zustand** — apenas quando estado precisa ser compartilhado entre componentes sem relação hierárquica direta. Não crie stores antecipadamente; crie quando a necessidade real aparecer.
+  - Nunca use Context API para estado global.
+
+- **Arquitetura de Componentes** (fluxo obrigatório):
+  1. Schema Zod + fetcher/mutator em `lib/api/<recurso>.ts`
+  2. Custom Hook em `hooks/use<Recurso>.ts` com `useQuery` ou `useMutation`
+  3. Componente em `components/` consome apenas o hook e renderiza com shadcn/ui
+
+- **Estilização:** Use apenas Tailwind CSS. Não sobrescreva estilos internos dos componentes shadcn/ui diretamente — use a prop `className` nos pontos de extensão previstos.
+
+## 3. Backend (FastAPI + SQLAlchemy)
+
+- **Modelagem:** Use SQLAlchemy para modelos de banco. Use Pydantic V2 para schemas de entrada/saída da API (separados dos modelos ORM).
+- **Validação:** Schemas Pydantic devem validar entrada (`RequestBody`) e saída (`ResponseModel`) de todos os endpoints.
+- **Documentação:** Mantenha o Swagger limpo: use `tags` e `response_model` em todos os endpoints. `summary` é opcional — use apenas quando o nome da rota não for autoexplicativo.
+- **Linting:** O código deve ser compatível com as regras do Ruff. Não use `# noqa` sem justificativa.
+
+## 4. Integração e Docker
+
+- **Comunicação:** O frontend deve usar a variável de ambiente `NEXT_PUBLIC_API_URL` para a URL base da API. Proibido hardcodar `http://localhost:8000`.
+- **Docker:** Mantenha os Dockerfiles otimizados com multi-stage builds.
+- **CORS:** Em desenvolvimento, `http://localhost:3000` é aceitável. Em produção, o domínio permitido deve vir de variável de ambiente — nunca hardcodado no código de produção.
