@@ -135,6 +135,7 @@ export function RecentActivity() {
             Failed to load activity: {error.message}
           </div>
         )}
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -153,6 +154,7 @@ export function RecentActivity() {
                 ))}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
     </>

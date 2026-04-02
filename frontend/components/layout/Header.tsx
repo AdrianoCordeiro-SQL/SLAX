@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useSidebarStore } from "@/stores/useSidebarStore";
 
 function getFormattedDate() {
   return new Intl.DateTimeFormat("en-US", {
@@ -14,12 +15,31 @@ function getFormattedDate() {
 }
 
 export function Header() {
+  const toggle = useSidebarStore((s) => s.toggle);
+
   return (
-    <header className="h-16 px-6 flex items-center justify-between border-b border-border bg-background shrink-0">
-      <p className="text-sm text-muted-foreground">{getFormattedDate()}</p>
+    <header className="h-17.5 px-4 md:px-6 flex items-center justify-between border-b border-white/10 bg-[#313235] text-white shrink-0">
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden text-white hover:bg-white/10 hover:text-white"
+          onClick={toggle}
+          aria-label="Toggle sidebar"
+        >
+          <Menu size={20} />
+        </Button>
+        <p className="text-sm text-blue-300 hidden sm:block">
+          {getFormattedDate()}
+        </p>
+      </div>
 
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative text-white hover:bg-white/10 hover:text-white"
+        >
           <Bell size={18} />
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-500" />
         </Button>
@@ -27,13 +47,13 @@ export function Header() {
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src="" alt="Admin" />
-            <AvatarFallback className="bg-[#1e2d5a] text-white text-xs font-bold">
+            <AvatarFallback className="bg-white/15 text-white text-xs font-bold">
               AD
             </AvatarFallback>
           </Avatar>
-          <div className="leading-tight">
-            <p className="text-sm font-semibold">Admin User</p>
-            <p className="text-xs text-muted-foreground">Administrator</p>
+          <div className="leading-tight hidden sm:block">
+            <p className="text-sm font-semibold text-white">Admin User</p>
+            <p className="text-xs text-blue-300">Administrator</p>
           </div>
         </div>
       </div>
