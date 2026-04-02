@@ -1,9 +1,11 @@
 "use client";
 
-import { Bell, Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Bell, LogOut, Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useSidebarStore } from "@/stores/useSidebarStore";
+import { logout } from "@/lib/api/auth";
 
 function getFormattedDate() {
   return new Intl.DateTimeFormat("en-US", {
@@ -16,6 +18,12 @@ function getFormattedDate() {
 
 export function Header() {
   const toggle = useSidebarStore((s) => s.toggle);
+  const router = useRouter();
+
+  function handleLogout() {
+    logout();
+    router.push("/login");
+  }
 
   return (
     <header className="h-17.5 px-4 md:px-6 flex items-center justify-between border-b border-white/10 bg-[#313235] text-white shrink-0">
@@ -34,7 +42,7 @@ export function Header() {
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -56,6 +64,16 @@ export function Header() {
             <p className="text-xs text-white">Administrator</p>
           </div>
         </div>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-white hover:bg-white/10 hover:text-white"
+          onClick={handleLogout}
+          aria-label="Logout"
+        >
+          <LogOut size={18} />
+        </Button>
       </div>
     </header>
   );

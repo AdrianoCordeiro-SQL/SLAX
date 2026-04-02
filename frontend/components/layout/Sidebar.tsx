@@ -80,9 +80,7 @@ export function Sidebar() {
           </nav>
 
           <div className="shrink-0 px-5 py-3 border-t border-white/10">
-            <span className="text-xs text-white whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
-              SLAX
-            </span>
+            <span className="text-xs text-white whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300"></span>
           </div>
         </div>
       </aside>

@@ -3,8 +3,9 @@ from datetime import datetime, timedelta, timezone
 
 from sqlmodel import Session, select
 
+from .auth import hash_password
 from .database import create_db_and_tables, engine
-from .models import APILog, RevenueMetric, User
+from .models import Account, APILog, RevenueMetric, User
 
 USERS = [
     ("Carlos Martins", "https://i.pravatar.cc/150?img=1"),
@@ -34,6 +35,15 @@ STATUSES = ["Success", "Success", "Success", "Pending", "Failed"]
 
 def seed():
     with Session(engine) as session:
+        if not session.exec(select(Account).where(Account.email == "admin@slax.com")).first():
+            session.add(Account(
+                email="admin@slax.com",
+                hashed_password=hash_password("admin"),
+                name="Admin",
+            ))
+            session.commit()
+            print("Admin account created.")
+
         if session.exec(select(User)).first():
             print("Banco já possui dados. Seed ignorado.")
             return

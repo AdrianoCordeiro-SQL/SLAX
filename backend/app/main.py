@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlmodel import Session, col, func, select
 
+from .auth import authenticate, create_access_token, get_current_account
 from .database import create_db_and_tables, get_session
-from .models import APILog, RevenueMetric, User
+from .models import Account, APILog, RevenueMetric, User
 
 
 @asynccontextmanager
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_origins=["http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -40,6 +42,35 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     avatar_url: Optional[str] = None
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+CurrentAccount = Annotated[Account, Depends(get_current_account)]
+
+
+# --- Auth ---
+
+
+@app.post("/auth/login")
+def login(payload: LoginRequest, session: SessionDep):
+    account = authenticate(payload.email, payload.password, session)
+    if not account:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    token = create_access_token(account.id, account.email)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "account": {"id": account.id, "email": account.email, "name": account.name},
+    }
+
+
+@app.get("/auth/me")
+def get_me(account: CurrentAccount):
+    return {"id": account.id, "email": account.email, "name": account.name}
 
 
 # --- Routes ---
