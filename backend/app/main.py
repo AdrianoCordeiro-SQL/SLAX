@@ -146,6 +146,12 @@ def get_activity(session: SessionDep):
     return activity
 
 
+@app.get("/users")
+def list_users(session: SessionDep):
+    users = session.exec(select(User).order_by(col(User.created_at).desc())).all()
+    return users
+
+
 @app.post("/users", status_code=201)
 def create_user(payload: UserCreate, session: SessionDep):
     user = User(name=payload.name, avatar_url=payload.avatar_url)
