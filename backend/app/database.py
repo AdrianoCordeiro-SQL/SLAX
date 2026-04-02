@@ -1,6 +1,6 @@
 import os
 
-from sqlmodel import Session, SQLModel, create_all, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
 # O host 'db' vem do nome do serviço no seu docker-compose
 DATABASE_URL = os.getenv(
@@ -10,8 +10,7 @@ DATABASE_URL = os.getenv(
 engine = create_engine(DATABASE_URL, echo=True)
 
 
-def init_db():
-    # Cria as tabelas automaticamente se elas não existirem
+def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
 
