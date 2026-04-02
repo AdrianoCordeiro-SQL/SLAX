@@ -10,8 +10,7 @@ DATABASE_URL = os.getenv(
 engine = create_engine(DATABASE_URL, echo=True)
 
 
-def init_db():
-    # Cria as tabelas automaticamente se elas não existirem
+def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
 

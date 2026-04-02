@@ -1,27 +1,19 @@
-from fastapi import Depends, FastAPI
-from sqlmodel import Session
+from contextlib import asynccontextmanager
 
-from .database import get_session, init_db
-from .models import User
+from fastapi import FastAPI
 
-app = FastAPI(title="Meu Projeto Fullstack")
+from .database import create_db_and_tables
 
 
-# Roda quando o container sobe
-@app.on_event("startup")
-def on_startup():
-    init_db()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
+
+
+app = FastAPI(title="SLAX Analytics", lifespan=lifespan)
 
 
 @app.get("/")
 def read_root():
-    return {"status": "Online", "message": "Backend FastAPI rodando no Docker!"}
-
-
-# Exemplo de rota para testar o banco
-@app.post("/users/")
-def create_user(user: User, session: Session = Depends(get_session)):
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-    return user
+    return {"status": "Online", "message": "SLAX Analytics backend running."}
