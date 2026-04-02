@@ -23,7 +23,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 shrink-0 flex flex-col h-screen sticky top-0 bg-[#1e2d5a] text-white">
+    <aside className="w-64 shrink-0 flex flex-col h-screen sticky top-0 bg-[#313235] text-white">
       <div className="px-6 py-5 border-b border-white/10">
         <span className="text-xl font-bold tracking-wide">SLAX</span>
         <span className="ml-1 text-xs text-blue-300 font-medium uppercase tracking-widest">
@@ -42,7 +42,7 @@ export function Sidebar() {
                 "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 active
                   ? "bg-white/15 text-white"
-                  : "text-blue-200 hover:bg-white/10 hover:text-white"
+                  : "text-blue-200 hover:bg-white/10 hover:text-white",
               )}
             >
               <Icon size={18} />
@@ -53,7 +53,7 @@ export function Sidebar() {
       </nav>
 
       <div className="px-6 py-4 border-t border-white/10 text-xs text-blue-300">
-        v1.0.0 — SLAX MVP
+        v1.0.0 — SLAX
       </div>
     </aside>
   );
