@@ -1,4 +1,5 @@
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 
 export default function DashboardPage() {
@@ -12,6 +13,7 @@ export default function DashboardPage() {
       </div>
       <StatsCards />
       <PerformanceChart />
+      <RecentActivity />
     </div>
   );
 }
