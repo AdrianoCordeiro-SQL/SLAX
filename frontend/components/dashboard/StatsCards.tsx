@@ -4,25 +4,8 @@ import { Activity, Database, DollarSign, Users } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStats } from "@/hooks/useStats";
-
-const SPARKLINES: Record<string, { value: number }[]> = {
-  users: [
-    { value: 4 }, { value: 6 }, { value: 5 }, { value: 8 },
-    { value: 7 }, { value: 9 }, { value: 11 },
-  ],
-  requests: [
-    { value: 30 }, { value: 45 }, { value: 38 }, { value: 52 },
-    { value: 48 }, { value: 60 }, { value: 55 },
-  ],
-  health: [
-    { value: 98 }, { value: 99 }, { value: 97 }, { value: 100 },
-    { value: 99 }, { value: 98 }, { value: 100 },
-  ],
-  revenue: [
-    { value: 120 }, { value: 180 }, { value: 150 }, { value: 210 },
-    { value: 195 }, { value: 230 }, { value: 250 },
-  ],
-};
+import { useSparklines } from "@/hooks/useSparklines";
+import type { SparklinePoint } from "@/lib/api/sparklines";
 
 function getChangeVariant(change: string): string {
   if (change.startsWith("+")) return "bg-green-100 text-green-700";
@@ -41,13 +24,12 @@ interface StatCardProps {
   value: string;
   change: string;
   icon: React.ElementType;
-  sparklineKey: string;
+  sparklineData: SparklinePoint[];
 }
 
-function StatCard({ title, value, change, icon: Icon, sparklineKey }: StatCardProps) {
+function StatCard({ title, value, change, icon: Icon, sparklineData }: StatCardProps) {
   const badgeClass = getChangeVariant(change);
   const lineColor = getSparklineColor(change);
-  const data = SPARKLINES[sparklineKey];
 
   return (
     <Card className="flex flex-col gap-2">
@@ -70,7 +52,7 @@ function StatCard({ title, value, change, icon: Icon, sparklineKey }: StatCardPr
         </div>
         <div className="h-12 w-24 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={sparklineData}>
               <Line
                 type="monotone"
                 dataKey="value"
@@ -105,7 +87,10 @@ function SkeletonCard() {
 }
 
 export function StatsCards() {
-  const { data: stats, isLoading, error } = useStats();
+  const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
+  const { data: sparklines, isLoading: sparklinesLoading } = useSparklines();
+
+  const isLoading = statsLoading || sparklinesLoading;
 
   if (isLoading) {
     return (
@@ -117,13 +102,15 @@ export function StatsCards() {
     );
   }
 
-  if (error || !stats) {
+  if (statsError || !stats) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        Failed to load stats: {error?.message ?? "Unknown error"}
+        Failed to load stats: {statsError?.message ?? "Unknown error"}
       </div>
     );
   }
+
+  const empty: SparklinePoint[] = [];
 
   const cards: StatCardProps[] = [
     {
@@ -131,28 +118,28 @@ export function StatsCards() {
       value: stats.total_users.toLocaleString(),
       change: stats.users_change,
       icon: Users,
-      sparklineKey: "users",
+      sparklineData: sparklines?.users ?? empty,
     },
     {
       title: "API Requests",
       value: stats.api_requests.toLocaleString(),
       change: stats.requests_change,
       icon: Activity,
-      sparklineKey: "requests",
+      sparklineData: sparklines?.requests ?? empty,
     },
     {
       title: "Database Health",
       value: stats.db_health,
       change: stats.db_health_change,
       icon: Database,
-      sparklineKey: "health",
+      sparklineData: sparklines?.health ?? empty,
     },
     {
       title: "Revenue",
       value: `$${stats.revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: stats.revenue_change,
       icon: DollarSign,
-      sparklineKey: "revenue",
+      sparklineData: sparklines?.revenue ?? empty,
     },
   ];
 

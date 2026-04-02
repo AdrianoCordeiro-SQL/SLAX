@@ -131,6 +131,58 @@ def get_stats(session: SessionDep):
     }
 
 
+@app.get("/stats/sparklines")
+def get_stats_sparklines(session: SessionDep):
+    now = datetime.now(timezone.utc)
+    users_series = []
+    requests_series = []
+    revenue_series = []
+    health_series = []
+
+    for i in range(6, -1, -1):
+        day_start = (now - timedelta(days=i)).replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+
+        new_users = session.exec(
+            select(func.count(col(User.id))).where(
+                User.created_at >= day_start, User.created_at < day_end
+            )
+        ).one()
+        users_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": new_users})
+
+        total_logs = session.exec(
+            select(func.count(col(APILog.id))).where(
+                APILog.timestamp >= day_start, APILog.timestamp < day_end
+            )
+        ).one()
+        requests_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": total_logs})
+
+        day_revenue = session.exec(
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.recorded_at >= day_start,
+                RevenueMetric.recorded_at < day_end,
+            )
+        ).one() or 0.0
+        revenue_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": round(day_revenue, 2)})
+
+        success_logs = session.exec(
+            select(func.count(col(APILog.id))).where(
+                APILog.timestamp >= day_start,
+                APILog.timestamp < day_end,
+                APILog.status == "Success",
+            )
+        ).one()
+        health_pct = round(success_logs / total_logs * 100, 1) if total_logs else 100.0
+        health_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": health_pct})
+
+    return {
+        "users": users_series,
+        "requests": requests_series,
+        "revenue": revenue_series,
+        "health": health_series,
+    }
+
+
 @app.get("/performance")
 def get_performance(session: SessionDep):
     now = datetime.now(timezone.utc)
