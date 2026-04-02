@@ -3,8 +3,9 @@ from datetime import datetime, timedelta, timezone
 
 from sqlmodel import Session, select
 
+from .auth import hash_password
 from .database import create_db_and_tables, engine
-from .models import APILog, RevenueMetric, User
+from .models import Account, APILog, RevenueMetric, User
 
 USERS = [
     ("Carlos Martins", "https://i.pravatar.cc/150?img=1"),
@@ -34,6 +35,18 @@ STATUSES = ["Success", "Success", "Success", "Pending", "Failed"]
 
 def seed():
     with Session(engine) as session:
+        admin = session.exec(select(Account).where(Account.email == "admin@slax.com")).first()
+        if not admin:
+            admin = Account(
+                email="admin@slax.com",
+                hashed_password=hash_password("admin"),
+                name="Admin",
+            )
+            session.add(admin)
+            session.commit()
+            session.refresh(admin)
+            print("Admin account created.")
+
         if session.exec(select(User)).first():
             print("Banco já possui dados. Seed ignorado.")
             return
@@ -44,7 +57,7 @@ def seed():
         for i, (name, avatar_url) in enumerate(USERS):
             days_ago = random.randint(5, 60)
             created_at = now - timedelta(days=days_ago, hours=random.randint(0, 23))
-            user = User(name=name, avatar_url=avatar_url, created_at=created_at)
+            user = User(name=name, avatar_url=avatar_url, created_at=created_at, account_id=admin.id)
             session.add(user)
             users.append(user)
 
@@ -66,6 +79,7 @@ def seed():
                 )
                 log = APILog(
                     user_id=user.id,
+                    account_id=admin.id,
                     action=action,
                     status=status,
                     timestamp=timestamp,
@@ -77,7 +91,7 @@ def seed():
                 hour=12, minute=0, second=0, microsecond=0
             )
             value = round(random.uniform(200.0, 900.0), 2)
-            metric = RevenueMetric(value=value, recorded_at=recorded_at)
+            metric = RevenueMetric(value=value, recorded_at=recorded_at, account_id=admin.id)
             session.add(metric)
 
         session.commit()

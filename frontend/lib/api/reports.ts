@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { authFetch } from "./auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -22,7 +23,7 @@ export const reportSummarySchema = z.object({
 export type ReportSummary = z.infer<typeof reportSummarySchema>;
 
 export async function fetchReportSummary(start: string, end: string): Promise<ReportSummary> {
-  const res = await fetch(`${API_BASE}/reports/summary?${periodParams(start, end)}`);
+  const res = await authFetch(`${API_BASE}/reports/summary?${periodParams(start, end)}`);
   if (!res.ok) throw new Error(`Failed to fetch report summary: HTTP ${res.status}`);
   return reportSummarySchema.parse(await res.json());
 }
@@ -39,7 +40,7 @@ export const statusBreakdownSchema = z.array(statusBreakdownItemSchema);
 export type StatusBreakdownItem = z.infer<typeof statusBreakdownItemSchema>;
 
 export async function fetchStatusBreakdown(start: string, end: string): Promise<StatusBreakdownItem[]> {
-  const res = await fetch(`${API_BASE}/reports/status-breakdown?${periodParams(start, end)}`);
+  const res = await authFetch(`${API_BASE}/reports/status-breakdown?${periodParams(start, end)}`);
   if (!res.ok) throw new Error(`Failed to fetch status breakdown: HTTP ${res.status}`);
   return statusBreakdownSchema.parse(await res.json());
 }
@@ -56,7 +57,7 @@ export const topActionsSchema = z.array(topActionItemSchema);
 export type TopActionItem = z.infer<typeof topActionItemSchema>;
 
 export async function fetchTopActions(start: string, end: string): Promise<TopActionItem[]> {
-  const res = await fetch(`${API_BASE}/reports/top-actions?${periodParams(start, end)}`);
+  const res = await authFetch(`${API_BASE}/reports/top-actions?${periodParams(start, end)}`);
   if (!res.ok) throw new Error(`Failed to fetch top actions: HTTP ${res.status}`);
   return topActionsSchema.parse(await res.json());
 }
@@ -75,7 +76,7 @@ export const topUsersSchema = z.array(topUserItemSchema);
 export type TopUserItem = z.infer<typeof topUserItemSchema>;
 
 export async function fetchTopUsers(start: string, end: string): Promise<TopUserItem[]> {
-  const res = await fetch(`${API_BASE}/reports/top-users?${periodParams(start, end)}`);
+  const res = await authFetch(`${API_BASE}/reports/top-users?${periodParams(start, end)}`);
   if (!res.ok) throw new Error(`Failed to fetch top users: HTTP ${res.status}`);
   return topUsersSchema.parse(await res.json());
 }
@@ -92,7 +93,7 @@ export const revenueTrendSchema = z.array(revenueTrendPointSchema);
 export type RevenueTrendPoint = z.infer<typeof revenueTrendPointSchema>;
 
 export async function fetchRevenueTrend(start: string, end: string): Promise<RevenueTrendPoint[]> {
-  const res = await fetch(`${API_BASE}/reports/revenue-trend?${periodParams(start, end)}`);
+  const res = await authFetch(`${API_BASE}/reports/revenue-trend?${periodParams(start, end)}`);
   if (!res.ok) throw new Error(`Failed to fetch revenue trend: HTTP ${res.status}`);
   return revenueTrendSchema.parse(await res.json());
 }
@@ -141,7 +142,7 @@ export async function fetchReportLogs(
   params.set("page", String(filters.page ?? 1));
   params.set("per_page", String(filters.per_page ?? 20));
 
-  const res = await fetch(`${API_BASE}/reports/logs?${params.toString()}`);
+  const res = await authFetch(`${API_BASE}/reports/logs?${params.toString()}`);
   if (!res.ok) throw new Error(`Failed to fetch report logs: HTTP ${res.status}`);
   return logsResponseSchema.parse(await res.json());
 }

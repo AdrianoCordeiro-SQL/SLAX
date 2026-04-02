@@ -1,3 +1,8 @@
+---
+description: 
+alwaysApply: true
+---
+
 ## 1. Regras Gerais de Código
 
 - Utilize **Named Exports** para todos os componentes e funções.

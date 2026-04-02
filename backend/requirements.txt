@@ -3,3 +3,6 @@ uvicorn
 sqlmodel
 psycopg2-binary
 python-dotenv
+pyjwt
+passlib[bcrypt]
+bcrypt<4.0

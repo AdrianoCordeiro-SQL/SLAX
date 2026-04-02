@@ -1,43 +1,44 @@
 # SLAX Analytics — Roteiro de Desenvolvimento - MVP
 
-Dashboard baseado no design de referência.
-
 ---
 
 ## Stack completa
 
 ### Frontend
-| Tecnologia | Papel |
-| --- | --- |
-| Next.js 16 (App Router) | Framework React — SSR/SSG/SEO |
-| TypeScript | Tipagem forte |
-| Tailwind CSS | Estilização |
-| shadcn/ui | Componentes de UI |
-| Zod | Validação de schemas da API |
-| TanStack Query | Fetching e cache de dados do servidor |
-| Zustand | Estado global do cliente (UI state, filtros) |
-| React Hook Form + @hookform/resolvers | Formulários com validação via Zod |
-| Vitest + Testing Library | Testes unitários — API idêntica ao Jest |
+
+| Tecnologia                            | Papel                                        |
+| ------------------------------------- | -------------------------------------------- |
+| Next.js 16 (App Router)               | Framework React — SSR/SSG/SEO                |
+| TypeScript                            | Tipagem forte                                |
+| Tailwind CSS                          | Estilização                                  |
+| shadcn/ui                             | Componentes de UI                            |
+| Zod                                   | Validação de schemas da API                  |
+| TanStack Query                        | Fetching e cache de dados do servidor        |
+| Zustand                               | Estado global do cliente (UI state, filtros) |
+| React Hook Form + @hookform/resolvers | Formulários com validação via Zod            |
+| Vitest + Testing Library              | Testes unitários — API idêntica ao Jest      |
 
 ### Backend
-| Tecnologia | Papel |
-| --- | --- |
-| FastAPI | Alta performance — Swagger automático |
-| SQLAlchemy | ORM robusto |
-| Pydantic | Modelos de API |
-| Alembic | Migrations |
-| python-dotenv | Variáveis de ambiente |
-| passlib[bcrypt] | Hash de senhas |
-| python-jose | Tokens JWT |
-| pytest + httpx | Testes unitários e de integração |
-| Ruff | Linter + formatter (substitui black, isort, flake8) |
+
+| Tecnologia      | Papel                                               |
+| --------------- | --------------------------------------------------- |
+| FastAPI         | Alta performance — Swagger automático               |
+| SQLAlchemy      | ORM robusto                                         |
+| Pydantic        | Modelos de API                                      |
+| Alembic         | Migrations                                          |
+| python-dotenv   | Variáveis de ambiente                               |
+| passlib[bcrypt] | Hash de senhas                                      |
+| python-jose     | Tokens JWT                                          |
+| pytest + httpx  | Testes unitários e de integração                    |
+| Ruff            | Linter + formatter (substitui black, isort, flake8) |
 
 ### Infraestrutura
-| Tecnologia | Papel |
-| --- | --- |
-| PostgreSQL | Banco relacional |
+
+| Tecnologia       | Papel                            |
+| ---------------- | -------------------------------- |
+| PostgreSQL       | Banco relacional                 |
 | Docker + Compose | Reprodutibilidade — zero fricção |
-| GitHub Actions | CI/CD — lint + test a cada push |
+| GitHub Actions   | CI/CD — lint + test a cada push  |
 
 ---
 
@@ -184,7 +185,7 @@ Bibliotecas necessárias:
 ## Passo 11 — Validação e ajustes visuais
 
 - Conferir responsividade do layout
-- Ajustar cores para corresponder ao design (azul escuro `#1e2d5a` na sidebar, fundo cinza claro)
+- Ajustar cores para corresponder ao design
 - Testar fluxo completo: criar usuário → aparece na tabela
 
 ---
@@ -196,17 +197,3 @@ Bibliotecas necessárias:
 - Confirmar que hot reload funciona no desenvolvimento
 
 ---
-
-## Ordem de execução recomendada
-
-```
-Passo 1 → 2 → 3 (backend completo)
-         ↓
-Passo 4 → 5 → 6 → 7 → 8 → 9 → 10 (frontend)
-         ↓
-Passo 11 → 12 (finalização)
-```
-
----
-
-_Aguardando "começar!" para iniciar o Passo 1._

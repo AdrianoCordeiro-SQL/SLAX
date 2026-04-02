@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlmodel import Session, col, func, select
 
+from .auth import authenticate, create_access_token, get_current_account, hash_password
 from .database import create_db_and_tables, get_session
-from .models import APILog, RevenueMetric, User
+from .models import Account, APILog, RevenueMetric, User
 
 
 @asynccontextmanager
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_origins=["http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -42,6 +44,62 @@ class UserUpdate(BaseModel):
     avatar_url: Optional[str] = None
 
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
+CurrentAccount = Annotated[Account, Depends(get_current_account)]
+
+
+# --- Auth ---
+
+
+@app.post("/auth/login")
+def login(payload: LoginRequest, session: SessionDep):
+    account = authenticate(payload.email, payload.password, session)
+    if not account:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    token = create_access_token(account.id, account.email)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "account": {"id": account.id, "email": account.email, "name": account.name},
+    }
+
+
+@app.post("/auth/register", status_code=201)
+def register(payload: RegisterRequest, session: SessionDep):
+    existing = session.exec(select(Account).where(Account.email == payload.email)).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already registered")
+    account = Account(
+        email=payload.email,
+        hashed_password=hash_password(payload.password),
+        name=payload.name,
+    )
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+    token = create_access_token(account.id, account.email)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "account": {"id": account.id, "email": account.email, "name": account.name},
+    }
+
+
+@app.get("/auth/me")
+def get_me(account: CurrentAccount):
+    return {"id": account.id, "email": account.email, "name": account.name}
+
+
 # --- Routes ---
 
 @app.get("/")
@@ -50,38 +108,48 @@ def read_root():
 
 
 @app.get("/stats")
-def get_stats(session: SessionDep):
+def get_stats(session: SessionDep, account: CurrentAccount):
+    aid = account.id
     now = datetime.now(timezone.utc)
     week_start = now - timedelta(days=7)
     prev_week_start = now - timedelta(days=14)
 
-    total_users = session.exec(select(func.count(col(User.id)))).one()
+    total_users = session.exec(
+        select(func.count(col(User.id))).where(User.account_id == aid)
+    ).one()
     prev_users = session.exec(
-        select(func.count(col(User.id))).where(User.created_at < week_start)
+        select(func.count(col(User.id))).where(User.account_id == aid, User.created_at < week_start)
     ).one()
     new_users_this_week = total_users - prev_users
     prev_new_users = prev_users - session.exec(
-        select(func.count(col(User.id))).where(User.created_at < prev_week_start)
+        select(func.count(col(User.id))).where(User.account_id == aid, User.created_at < prev_week_start)
     ).one()
     users_change = _pct_change(new_users_this_week, prev_new_users)
 
-    api_requests = session.exec(select(func.count(col(APILog.id)))).one()
+    api_requests = session.exec(
+        select(func.count(col(APILog.id))).where(APILog.account_id == aid)
+    ).one()
     requests_this_week = session.exec(
-        select(func.count(col(APILog.id))).where(APILog.timestamp >= week_start)
+        select(func.count(col(APILog.id))).where(APILog.account_id == aid, APILog.timestamp >= week_start)
     ).one()
     requests_prev_week = session.exec(
         select(func.count(col(APILog.id))).where(
-            APILog.timestamp >= prev_week_start, APILog.timestamp < week_start
+            APILog.account_id == aid, APILog.timestamp >= prev_week_start, APILog.timestamp < week_start
         )
     ).one()
     requests_change = _pct_change(requests_this_week, requests_prev_week)
 
-    revenue_total = session.exec(select(func.sum(RevenueMetric.value))).one() or 0.0
+    revenue_total = session.exec(
+        select(func.sum(RevenueMetric.value)).where(RevenueMetric.account_id == aid)
+    ).one() or 0.0
     revenue_this_week = session.exec(
-        select(func.sum(RevenueMetric.value)).where(RevenueMetric.recorded_at >= week_start)
+        select(func.sum(RevenueMetric.value)).where(
+            RevenueMetric.account_id == aid, RevenueMetric.recorded_at >= week_start
+        )
     ).one() or 0.0
     revenue_prev_week = session.exec(
         select(func.sum(RevenueMetric.value)).where(
+            RevenueMetric.account_id == aid,
             RevenueMetric.recorded_at >= prev_week_start,
             RevenueMetric.recorded_at < week_start,
         )
@@ -100,19 +168,75 @@ def get_stats(session: SessionDep):
     }
 
 
+@app.get("/stats/sparklines")
+def get_stats_sparklines(session: SessionDep, account: CurrentAccount):
+    aid = account.id
+    now = datetime.now(timezone.utc)
+    users_series = []
+    requests_series = []
+    revenue_series = []
+    health_series = []
+
+    for i in range(6, -1, -1):
+        day_start = (now - timedelta(days=i)).replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+
+        new_users = session.exec(
+            select(func.count(col(User.id))).where(
+                User.account_id == aid, User.created_at >= day_start, User.created_at < day_end
+            )
+        ).one()
+        users_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": new_users})
+
+        total_logs = session.exec(
+            select(func.count(col(APILog.id))).where(
+                APILog.account_id == aid, APILog.timestamp >= day_start, APILog.timestamp < day_end
+            )
+        ).one()
+        requests_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": total_logs})
+
+        day_revenue = session.exec(
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.recorded_at >= day_start,
+                RevenueMetric.recorded_at < day_end,
+            )
+        ).one() or 0.0
+        revenue_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": round(day_revenue, 2)})
+
+        success_logs = session.exec(
+            select(func.count(col(APILog.id))).where(
+                APILog.account_id == aid,
+                APILog.timestamp >= day_start,
+                APILog.timestamp < day_end,
+                APILog.status == "Success",
+            )
+        ).one()
+        health_pct = round(success_logs / total_logs * 100, 1) if total_logs else 100.0
+        health_series.append({"date": day_start.strftime("%Y-%m-%d"), "value": health_pct})
+
+    return {
+        "users": users_series,
+        "requests": requests_series,
+        "revenue": revenue_series,
+        "health": health_series,
+    }
+
+
 @app.get("/performance")
-def get_performance(session: SessionDep):
+def get_performance(session: SessionDep, account: CurrentAccount):
+    aid = account.id
     now = datetime.now(timezone.utc)
     result = []
     for i in range(29, -1, -1):
         day_start = (now - timedelta(days=i)).replace(hour=0, minute=0, second=0, microsecond=0)
         day_end = day_start + timedelta(days=1)
 
-        logs = session.exec(
-            select(APILog).where(APILog.timestamp >= day_start, APILog.timestamp < day_end)
-        ).all()
-
-        requests_count = len(logs)
+        requests_count = session.exec(
+            select(func.count(col(APILog.id))).where(
+                APILog.account_id == aid, APILog.timestamp >= day_start, APILog.timestamp < day_end
+            )
+        ).one()
         latency = round(50 + (requests_count % 20) * 2.5, 1) if requests_count else 50.0
 
         result.append({
@@ -126,9 +250,12 @@ def get_performance(session: SessionDep):
 
 
 @app.get("/activity")
-def get_activity(session: SessionDep):
+def get_activity(session: SessionDep, account: CurrentAccount):
     logs = session.exec(
-        select(APILog).order_by(col(APILog.timestamp).desc()).limit(20)
+        select(APILog)
+        .where(APILog.account_id == account.id)
+        .order_by(col(APILog.timestamp).desc())
+        .limit(20)
     ).all()
 
     activity = []
@@ -147,14 +274,16 @@ def get_activity(session: SessionDep):
 
 
 @app.get("/users")
-def list_users(session: SessionDep):
-    users = session.exec(select(User).order_by(col(User.created_at).desc())).all()
+def list_users(session: SessionDep, account: CurrentAccount):
+    users = session.exec(
+        select(User).where(User.account_id == account.id).order_by(col(User.created_at).desc())
+    ).all()
     return users
 
 
 @app.post("/users", status_code=201)
-def create_user(payload: UserCreate, session: SessionDep):
-    user = User(name=payload.name, avatar_url=payload.avatar_url)
+def create_user(payload: UserCreate, session: SessionDep, account: CurrentAccount):
+    user = User(name=payload.name, avatar_url=payload.avatar_url, account_id=account.id)
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -162,8 +291,10 @@ def create_user(payload: UserCreate, session: SessionDep):
 
 
 @app.put("/users/{user_id}")
-def update_user(user_id: int, payload: UserUpdate, session: SessionDep):
-    user = session.get(User, user_id)
+def update_user(user_id: int, payload: UserUpdate, session: SessionDep, account: CurrentAccount):
+    user = session.exec(
+        select(User).where(User.id == user_id, User.account_id == account.id)
+    ).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if payload.name is not None:
@@ -177,8 +308,10 @@ def update_user(user_id: int, payload: UserUpdate, session: SessionDep):
 
 
 @app.delete("/users/{user_id}", status_code=204)
-def delete_user(user_id: int, session: SessionDep):
-    user = session.get(User, user_id)
+def delete_user(user_id: int, session: SessionDep, account: CurrentAccount):
+    user = session.exec(
+        select(User).where(User.id == user_id, User.account_id == account.id)
+    ).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     session.delete(user)
@@ -191,9 +324,11 @@ def delete_user(user_id: int, session: SessionDep):
 @app.get("/reports/summary")
 def report_summary(
     session: SessionDep,
+    account: CurrentAccount,
     start: Optional[str] = Query(None),
     end: Optional[str] = Query(None),
 ):
+    aid = account.id
     period_start, period_end = _parse_period(start, end)
     period_len = period_end - period_start
     prev_start = period_start - period_len
@@ -201,17 +336,18 @@ def report_summary(
 
     total_requests = session.exec(
         select(func.count(col(APILog.id))).where(
-            APILog.timestamp >= period_start, APILog.timestamp < period_end
+            APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
         )
     ).one()
     prev_requests = session.exec(
         select(func.count(col(APILog.id))).where(
-            APILog.timestamp >= prev_start, APILog.timestamp < prev_end
+            APILog.account_id == aid, APILog.timestamp >= prev_start, APILog.timestamp < prev_end
         )
     ).one()
 
     success_count = session.exec(
         select(func.count(col(APILog.id))).where(
+            APILog.account_id == aid,
             APILog.timestamp >= period_start,
             APILog.timestamp < period_end,
             APILog.status == "Success",
@@ -219,6 +355,7 @@ def report_summary(
     ).one()
     prev_success = session.exec(
         select(func.count(col(APILog.id))).where(
+            APILog.account_id == aid,
             APILog.timestamp >= prev_start,
             APILog.timestamp < prev_end,
             APILog.status == "Success",
@@ -229,12 +366,14 @@ def report_summary(
 
     total_revenue = session.exec(
         select(func.sum(RevenueMetric.value)).where(
+            RevenueMetric.account_id == aid,
             RevenueMetric.recorded_at >= period_start,
             RevenueMetric.recorded_at < period_end,
         )
     ).one() or 0.0
     prev_revenue = session.exec(
         select(func.sum(RevenueMetric.value)).where(
+            RevenueMetric.account_id == aid,
             RevenueMetric.recorded_at >= prev_start,
             RevenueMetric.recorded_at < prev_end,
         )
@@ -242,12 +381,12 @@ def report_summary(
 
     active_users = session.exec(
         select(func.count(func.distinct(APILog.user_id))).where(
-            APILog.timestamp >= period_start, APILog.timestamp < period_end
+            APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
         )
     ).one()
     prev_active = session.exec(
         select(func.count(func.distinct(APILog.user_id))).where(
-            APILog.timestamp >= prev_start, APILog.timestamp < prev_end
+            APILog.account_id == aid, APILog.timestamp >= prev_start, APILog.timestamp < prev_end
         )
     ).one()
 
@@ -266,13 +405,15 @@ def report_summary(
 @app.get("/reports/status-breakdown")
 def report_status_breakdown(
     session: SessionDep,
+    account: CurrentAccount,
     start: Optional[str] = Query(None),
     end: Optional[str] = Query(None),
 ):
+    aid = account.id
     period_start, period_end = _parse_period(start, end)
     rows = session.exec(
         select(APILog.status, func.count(col(APILog.id)))
-        .where(APILog.timestamp >= period_start, APILog.timestamp < period_end)
+        .where(APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end)
         .group_by(APILog.status)
     ).all()
     return [{"status": status, "count": count} for status, count in rows]
@@ -281,13 +422,15 @@ def report_status_breakdown(
 @app.get("/reports/top-actions")
 def report_top_actions(
     session: SessionDep,
+    account: CurrentAccount,
     start: Optional[str] = Query(None),
     end: Optional[str] = Query(None),
 ):
+    aid = account.id
     period_start, period_end = _parse_period(start, end)
     rows = session.exec(
         select(APILog.action, func.count(col(APILog.id)))
-        .where(APILog.timestamp >= period_start, APILog.timestamp < period_end)
+        .where(APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end)
         .group_by(APILog.action)
         .order_by(func.count(col(APILog.id)).desc())
         .limit(10)
@@ -298,13 +441,16 @@ def report_top_actions(
 @app.get("/reports/top-users")
 def report_top_users(
     session: SessionDep,
+    account: CurrentAccount,
     start: Optional[str] = Query(None),
     end: Optional[str] = Query(None),
 ):
+    aid = account.id
     period_start, period_end = _parse_period(start, end)
     rows = session.exec(
         select(APILog.user_id, func.count(col(APILog.id)))
         .where(
+            APILog.account_id == aid,
             APILog.timestamp >= period_start,
             APILog.timestamp < period_end,
             col(APILog.user_id).is_not(None),
@@ -329,13 +475,16 @@ def report_top_users(
 @app.get("/reports/revenue-trend")
 def report_revenue_trend(
     session: SessionDep,
+    account: CurrentAccount,
     start: Optional[str] = Query(None),
     end: Optional[str] = Query(None),
 ):
+    aid = account.id
     period_start, period_end = _parse_period(start, end)
     metrics = session.exec(
         select(RevenueMetric)
         .where(
+            RevenueMetric.account_id == aid,
             RevenueMetric.recorded_at >= period_start,
             RevenueMetric.recorded_at < period_end,
         )
@@ -353,6 +502,7 @@ def report_revenue_trend(
 @app.get("/reports/logs")
 def report_logs(
     session: SessionDep,
+    account: CurrentAccount,
     start: Optional[str] = Query(None),
     end: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -361,12 +511,13 @@ def report_logs(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
 ):
+    aid = account.id
     period_start, period_end = _parse_period(start, end)
     base = select(APILog).where(
-        APILog.timestamp >= period_start, APILog.timestamp < period_end
+        APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
     )
     count_q = select(func.count(col(APILog.id))).where(
-        APILog.timestamp >= period_start, APILog.timestamp < period_end
+        APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
     )
 
     if status:

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { authFetch } from "./auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -16,7 +17,7 @@ export const statsSchema = z.object({
 export type Stats = z.infer<typeof statsSchema>;
 
 export async function fetchStats(): Promise<Stats> {
-  const res = await fetch(`${API_BASE}/stats`);
+  const res = await authFetch(`${API_BASE}/stats`);
   if (!res.ok) throw new Error(`Failed to fetch stats: HTTP ${res.status}`);
   const data = await res.json();
   return statsSchema.parse(data);
