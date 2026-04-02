@@ -45,11 +45,11 @@ export function Sidebar() {
         )}
       >
         <div className="flex h-full w-64 flex-col text-white">
-          <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10 shrink-0">
+          <div className="flex items-center gap-3 px-4 py-4  shrink-0">
             <TrendingUp size={26} className="shrink-0 text-white" />
             <div className="flex flex-col leading-tight opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
               <span className="text-sm font-bold tracking-wide">SLAX</span>
-              <span className="text-xs text-blue-300 font-medium uppercase tracking-widest">
+              <span className="text-xs text-white font-medium uppercase tracking-widest">
                 Analytics
               </span>
             </div>
@@ -80,7 +80,7 @@ export function Sidebar() {
           </nav>
 
           <div className="shrink-0 px-5 py-3 border-t border-white/10">
-            <span className="text-xs text-blue-300 whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
+            <span className="text-xs text-white whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
               SLAX
             </span>
           </div>

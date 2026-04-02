@@ -29,7 +29,7 @@ export function Header() {
         >
           <Menu size={20} />
         </Button>
-        <p className="text-sm text-blue-300 hidden sm:block">
+        <p className="text-sm text-white hidden sm:block">
           {getFormattedDate()}
         </p>
       </div>
@@ -53,7 +53,7 @@ export function Header() {
           </Avatar>
           <div className="leading-tight hidden sm:block">
             <p className="text-sm font-semibold text-white">Admin User</p>
-            <p className="text-xs text-blue-300">Administrator</p>
+            <p className="text-xs text-white">Administrator</p>
           </div>
         </div>
       </div>
