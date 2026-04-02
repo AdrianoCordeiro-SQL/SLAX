@@ -1,0 +1,32 @@
+## 1. Regras Gerais de Código
+
+- Utilize **Named Exports** para todos os componentes e funções.
+- Siga os padrões de **Clean Code** e **SOLID**.
+- Sempre prefira legibilidade e tipagem forte (TypeScript/Pydantic).
+- Use **Lucide-React** para TODOS os ícones. Proibido SVGs manuais.
+
+## 2. Frontend (Next.js 16 + Tailwind + shadcn/ui)
+
+- **Data Fetching:** Use EXCLUSIVAMENTE @tanstack/react-query. É proibido o uso de `useEffect` para chamadas de API.
+- **Validação:** Todo contrato de API deve ter um schema Zod em `src/lib/api/*.ts`.
+- **Estado Global:** Use Zustand para UI state e filtros. Não use Context API.
+- **Arquitetura de Componentes:**
+
+1. Defina o schema Zod e fetcher em `src/lib/api/<recurso>.ts`.
+2. Crie o Custom Hook em `src/hooks/use<Recurso>.ts` usando `useQuery` ou `useMutation`.
+3. O componente em `src/components/` deve apenas consumir o hook e renderizar a UI (shadcn/ui).
+
+- **Estilização:** Use apenas Tailwind CSS. Respeite o design system do shadcn/ui.
+
+## 3. Backend (FastAPI + SQLModel/SQLAlchemy)
+
+- **Modelagem:** Use SQLModel para unir modelos de banco e schemas de API sempre que possível.
+- **Validação:** Use Pydantic V2 para schemas de entrada/saída.
+- **Documentação:** Mantenha o Swagger limpo e funcional.
+- **Linting:** O código deve ser compatível com as regras do Ruff.
+
+## 4. Integração e Docker
+
+- **Comunicação:** O frontend deve usar a variável `NEXT_PUBLIC_API_URL`.
+- **Docker:** Mantenha os Dockerfiles otimizados (Multi-stage builds).
+- **CORS:** O backend deve permitir apenas o domínio do frontend definido no ambiente.
