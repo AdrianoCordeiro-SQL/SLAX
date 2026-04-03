@@ -1,4 +1,4 @@
-"""Test configuration: env must be set before any import from app."""
+"""Configuração dos testes: variáveis de ambiente antes de qualquer import de app."""
 
 from __future__ import annotations
 
@@ -17,6 +17,8 @@ from app.main import app
 
 @pytest.fixture
 def session() -> Session:
+    """Recria o esquema e devolve uma sessão SQLModel partilhada pelo teste."""
+
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     with Session(engine) as s:
@@ -25,7 +27,7 @@ def session() -> Session:
 
 @pytest.fixture
 def client(session: Session) -> TestClient:
-    """TestClient with shared in-memory DB via overridden get_session."""
+    """TestClient com a mesma BD em memória via override de get_session."""
 
     def override_get_session():
         yield session

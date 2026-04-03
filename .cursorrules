@@ -4,8 +4,11 @@
 - Siga os padrões de **Clean Code** e **SOLID**: funções pequenas, responsabilidade única, sem duplicação.
 - Sempre prefira legibilidade e tipagem forte (TypeScript/Pydantic). Evite `any` e type assertions desnecessárias.
 - Use **Lucide-React** para TODOS os ícones. Proibido SVGs manuais ou outras bibliotecas de ícones.
-- **Comentários:** Não adicione comentários que apenas descrevem o que o código faz. Comente apenas intenção não óbvia, trade-offs ou restrições que o código sozinho não consegue expressar.
 - As explicações de código e respostas em geral precisam ser em pt-BR.
+- Logo **após** os imports, inclua um comentário em português-BR explicando **o que este arquivo faz** no sistema: responsabilidade, entradas/saídas principais (API, hooks, componentes), e contexto se não for óbvio pelo nome.
+- Não substitui comentários pontuais: evite repetir o que cada função faz linha a linha; o foco é o **papel do módulo/arquivo**.
+- Omitir apenas em reexports triviais ou arquivos gerados (especificar na PR se for o caso).
+- Todos os comentários devem ser em português-BR.
 
 ## 2. Frontend (Next.js 16 + Tailwind + shadcn/ui)
 
@@ -35,6 +38,8 @@
 - **Validação:** Schemas Pydantic devem validar entrada (`RequestBody`) e saída (`ResponseModel`) de todos os endpoints.
 - **Documentação:** Mantenha o Swagger limpo: use `tags` e `response_model` em todos os endpoints. `summary` é opcional — use apenas quando o nome da rota não for autoexplicativo.
 - **Linting:** O código deve ser compatível com as regras do Ruff. Não use `# noqa` sem justificativa.
+
+- **Testes (pytest):** Código em `backend/tests/`. Docstrings em **português-BR** no módulo (após imports), em cada função `test_*` e nas fixtures do `conftest.py`. Nomes das funções de teste e identificadores podem permanecer em inglês. Manter o padrão do projeto: `pytest.ini`, `conftest` com env de teste (SQLite em memória) e override de `get_session` quando fizer sentido.
 
 ## 5. Layout e Navegação
 

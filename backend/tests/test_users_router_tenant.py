@@ -1,4 +1,4 @@
-"""Cross-tenant HTTP access on /users."""
+"""Acesso HTTP entre tenants no prefixo /users."""
 
 from __future__ import annotations
 
@@ -11,6 +11,8 @@ from app.services.users import create_user
 
 
 def test_cannot_modify_other_tenant_user_via_api(session: Session, client: TestClient):
+    """Conta A não pode alterar nem apagar utilizador da conta B; B continua a gerir o seu."""
+
     register_account(
         session, RegisterRequest(name="A", email="ca@example.com", password="pw123456")
     )

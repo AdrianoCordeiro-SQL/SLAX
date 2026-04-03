@@ -1,4 +1,4 @@
-"""Password hashing, authenticate, and Bearer resolution via /auth/me."""
+"""Hash de senha, authenticate e resolução do Bearer em GET /auth/me."""
 
 from __future__ import annotations
 
@@ -11,18 +11,21 @@ from sqlmodel import Session
 
 from app.auth import authenticate, hash_password, verify_password
 from app.auth_tokens import ALGORITHM, SECRET_KEY
-from app.models import Account
 from app.schemas import RegisterRequest
 from app.services.account import register_account
 
 
 def test_hash_and_verify_round_trip():
+    """hash_password e verify_password devem aceitar a senha correta e rejeitar a errada."""
+
     h = hash_password("correct-password")
     assert verify_password("correct-password", h) is True
     assert verify_password("wrong-password", h) is False
 
 
 def test_authenticate_success(session: Session):
+    """authenticate deve devolver a conta quando e-mail e senha estão corretos."""
+
     acc = register_account(
         session, RegisterRequest(name="N", email="ok@example.com", password="pw123456")
     )
@@ -31,6 +34,8 @@ def test_authenticate_success(session: Session):
 
 
 def test_authenticate_wrong_password(session: Session):
+    """authenticate deve devolver None quando a senha está errada."""
+
     register_account(
         session, RegisterRequest(name="N", email="ok2@example.com", password="pw123456")
     )
@@ -39,12 +44,16 @@ def test_authenticate_wrong_password(session: Session):
 
 @pytest.mark.integration
 def test_get_me_without_bearer_returns_401(client: TestClient):
+    """GET /auth/me sem Authorization deve responder 401."""
+
     r = client.get("/auth/me")
     assert r.status_code == 401
 
 
 @pytest.mark.integration
 def test_get_me_invalid_token_401(client: TestClient):
+    """GET /auth/me com token inválido deve responder 401 com detalhe esperado."""
+
     r = client.get("/auth/me", headers={"Authorization": "Bearer invalid"})
     assert r.status_code == 401
     assert r.json()["detail"] == "Invalid token"
@@ -52,6 +61,8 @@ def test_get_me_invalid_token_401(client: TestClient):
 
 @pytest.mark.integration
 def test_get_me_expired_token_401(client: TestClient):
+    """GET /auth/me com JWT expirado deve responder 401."""
+
     token = jwt.encode(
         {"sub": "1", "email": "a@b.c", "exp": datetime.now(timezone.utc) - timedelta(minutes=1)},
         SECRET_KEY,
@@ -64,6 +75,8 @@ def test_get_me_expired_token_401(client: TestClient):
 
 @pytest.mark.integration
 def test_get_me_unknown_account_id_401(session: Session, client: TestClient):
+    """GET /auth/me com sub apontando para conta inexistente deve responder 401."""
+
     token = jwt.encode(
         {
             "sub": "99999",
@@ -80,6 +93,8 @@ def test_get_me_unknown_account_id_401(session: Session, client: TestClient):
 
 @pytest.mark.integration
 def test_get_me_deleted_account_401(session: Session, client: TestClient):
+    """GET /auth/me após eliminar a conta na BD deve responder 401."""
+
     acc = register_account(
         session, RegisterRequest(name="Del", email="del@example.com", password="pw123456")
     )
@@ -101,6 +116,8 @@ def test_get_me_deleted_account_401(session: Session, client: TestClient):
 
 @pytest.mark.integration
 def test_get_me_valid_token_200(session: Session, client: TestClient):
+    """GET /auth/me com JWT válido e conta existente deve responder 200."""
+
     acc = register_account(
         session, RegisterRequest(name="Ok", email="valid@example.com", password="pw123456")
     )

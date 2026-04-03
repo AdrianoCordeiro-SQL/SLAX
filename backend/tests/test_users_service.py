@@ -1,4 +1,4 @@
-"""Tenant isolation in user CRUD."""
+"""Isolamento por tenant no CRUD de utilizadores (serviço)."""
 
 from __future__ import annotations
 
@@ -12,6 +12,8 @@ from app.services.users import create_user, delete_user, update_user
 
 
 def test_update_user_other_tenant_raises(session: Session):
+    """Atualizar utilizador de outro tenant deve levantar UserNotFoundForAccount."""
+
     a = register_account(
         session, RegisterRequest(name="A", email="ta@example.com", password="pw123456")
     )
@@ -24,6 +26,8 @@ def test_update_user_other_tenant_raises(session: Session):
 
 
 def test_delete_user_other_tenant_raises(session: Session):
+    """Eliminar utilizador de outro tenant deve levantar UserNotFoundForAccount."""
+
     a = register_account(
         session, RegisterRequest(name="A", email="da@example.com", password="pw123456")
     )

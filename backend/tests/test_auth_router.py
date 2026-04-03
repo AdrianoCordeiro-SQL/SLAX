@@ -1,16 +1,17 @@
-"""HTTP flows for /auth."""
+"""Fluxos HTTP do prefixo /auth."""
 
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.auth_tokens import ALGORITHM, SECRET_KEY
 from app.schemas import RegisterRequest
 from app.services.account import register_account
 
 
 def test_register_201(client: TestClient):
+    """POST /auth/register deve criar conta e devolver token (201)."""
+
     r = client.post(
         "/auth/register",
         json={"name": "Reg", "email": "reg@example.com", "password": "pw123456"},
@@ -23,6 +24,8 @@ def test_register_201(client: TestClient):
 
 
 def test_login_invalid_401(client: TestClient):
+    """POST /auth/login com credenciais inexistentes deve responder 401."""
+
     r = client.post(
         "/auth/login",
         json={"email": "nobody@example.com", "password": "pw123456"},
@@ -31,6 +34,8 @@ def test_login_invalid_401(client: TestClient):
 
 
 def test_me_with_bearer_200(session: Session, client: TestClient):
+    """GET /auth/me com Bearer obtido por login deve devolver o perfil (200)."""
+
     register_account(
         session, RegisterRequest(name="M", email="me@example.com", password="pw123456")
     )
@@ -46,6 +51,8 @@ def test_me_with_bearer_200(session: Session, client: TestClient):
 
 
 def test_patch_me_and_change_password(session: Session, client: TestClient):
+    """PATCH /auth/me, troca de senha com atual errada (400) e correta (204)."""
+
     register_account(
         session, RegisterRequest(name="M", email="patch@example.com", password="oldpass123")
     )
