@@ -44,7 +44,7 @@ export function Sidebar() {
   return (
     <aside
         className={cn(
-          "group/sidebar hidden md:block fixed inset-y-0 left-0 z-40 h-screen overflow-hidden bg-[#313235]",
+          "peer/sidebar group/sidebar hidden md:block fixed inset-y-0 left-0 z-40 h-screen overflow-hidden bg-[#313235]",
           "transition-all duration-300 ease-in-out",
           "md:w-16 md:hover:w-64 md:hover:shadow-xl",
         )}
