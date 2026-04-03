@@ -8,7 +8,6 @@ import {
   TrendingUp,
   Users,
   ScrollText,
-  Settings,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,7 +21,6 @@ const navItems = [
   { label: "Reports", href: "/reports", icon: FileBarChart2 },
   { label: "Users", href: "/users", icon: Users },
   { label: "API Logs", href: "/api-logs", icon: ScrollText },
-  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 function getInitials(name: string): string {

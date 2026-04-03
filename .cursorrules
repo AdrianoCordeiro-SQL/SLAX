@@ -35,6 +35,13 @@
 - **Documentação:** Mantenha o Swagger limpo: use `tags` e `response_model` em todos os endpoints. `summary` é opcional — use apenas quando o nome da rota não for autoexplicativo.
 - **Linting:** O código deve ser compatível com as regras do Ruff. Não use `# noqa` sem justificativa.
 
+## 5. Layout e Navegação
+
+- O `Header` contém APENAS: data formatada e sino de notificações. Nunca adicione perfil, avatar ou logout no Header.
+- O perfil do usuário autenticado (avatar, nome, link "Editar perfil") fica EXCLUSIVAMENTE no topo da `Sidebar`, consumindo `useAccount()`.
+- O botão de logout fica EXCLUSIVAMENTE no rodapé da `Sidebar`.
+- Dados do usuário logado nunca devem ser hardcoded — sempre via `useAccount()`.
+
 ## 4. Integração e Docker
 
 - **Comunicação:** O frontend deve usar a variável de ambiente `NEXT_PUBLIC_API_URL` para a URL base da API. Proibido hardcodar `http://localhost:8000`.
