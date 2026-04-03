@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { register } from "@/lib/api/auth";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,6 +39,7 @@ export default function RegisterPage() {
 
     try {
       await register(name, email, password);
+      toast.success("Seu cadastro foi efetuado com sucesso!");
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cadastro falhou");
