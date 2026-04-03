@@ -35,12 +35,16 @@ SessionDep = Annotated[Session, Depends(get_session)]
 # --- Schemas ---
 
 class UserCreate(BaseModel):
-    name: str
+    first_name: str
+    last_name: Optional[str] = None
+    email: Optional[str] = None
     avatar_url: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
     avatar_url: Optional[str] = None
 
 
@@ -336,7 +340,14 @@ def list_users(session: SessionDep, account: CurrentAccount):
 
 @app.post("/users", status_code=201)
 def create_user(payload: UserCreate, session: SessionDep, account: CurrentAccount):
-    user = User(name=payload.name, avatar_url=payload.avatar_url, account_id=account.id)
+    full_name = f"{payload.first_name} {payload.last_name}".strip() if payload.last_name else payload.first_name
+    user = User(
+        name=full_name,
+        last_name=payload.last_name,
+        email=payload.email,
+        avatar_url=payload.avatar_url,
+        account_id=account.id,
+    )
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -348,8 +359,12 @@ def update_user(user_id: int, payload: UserUpdate, session: SessionDep, account:
     user = session.get(User, user_id)
     if not user or user.account_id != account.id:
         raise HTTPException(status_code=404, detail="User not found")
-    if payload.name is not None:
-        user.name = payload.name
+    if payload.first_name is not None:
+        user.name = f"{payload.first_name} {payload.last_name}".strip() if payload.last_name else payload.first_name
+    if payload.last_name is not None:
+        user.last_name = payload.last_name
+    if payload.email is not None:
+        user.email = payload.email
     if payload.avatar_url is not None:
         user.avatar_url = payload.avatar_url
     session.add(user)

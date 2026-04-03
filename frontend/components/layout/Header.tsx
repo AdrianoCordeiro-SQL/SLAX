@@ -1,8 +1,7 @@
 "use client";
 
-import { Bell, Menu } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSidebarStore } from "@/stores/useSidebarStore";
 
 function getFormattedDate() {
   return new Intl.DateTimeFormat("en-US", {
@@ -14,20 +13,9 @@ function getFormattedDate() {
 }
 
 export function Header() {
-  const toggle = useSidebarStore((s) => s.toggle);
-
   return (
     <header className="h-17.5 px-4 md:px-6 flex items-center justify-between border-b border-white/10 bg-[#313235] text-white shrink-0">
       <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden text-white hover:bg-white/10 hover:text-white"
-          onClick={toggle}
-          aria-label="Toggle sidebar"
-        >
-          <Menu size={20} />
-        </Button>
         <p className="text-sm text-white hidden sm:block">
           {getFormattedDate()}
         </p>

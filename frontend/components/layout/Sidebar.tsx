@@ -11,7 +11,6 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSidebarStore } from "@/stores/useSidebarStore";
 import { useAccount } from "@/hooks/useAccount";
 import { logout } from "@/lib/api/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,7 +34,6 @@ function getInitials(name: string): string {
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isOpen, close } = useSidebarStore();
   const { data: account } = useAccount();
 
   function handleLogout() {
@@ -44,22 +42,12 @@ export function Sidebar() {
   }
 
   return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/40 md:hidden animate-in fade-in duration-300"
-          onClick={close}
-          aria-hidden="true"
-        />
-      )}
-
-      <aside
+    <aside
         className={cn(
-          "group/sidebar fixed inset-y-0 left-0 z-40 overflow-hidden bg-[#313235]",
+          "group/sidebar hidden md:block fixed inset-y-0 left-0 z-40 overflow-hidden bg-[#313235]",
           "transition-all duration-300 ease-in-out",
-          "w-64 md:w-16 md:hover:w-64",
+          "md:w-16 md:hover:w-64",
           "md:sticky md:top-0 md:z-auto md:translate-x-0 md:shrink-0 md:h-screen",
-          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex h-full w-64 flex-col text-white">
@@ -78,7 +66,6 @@ export function Sidebar() {
           <div className="shrink-0 px-2 pb-2 border-b border-white/10">
             <Link
               href="/profile"
-              onClick={close}
               className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-white/10 transition-colors"
             >
               <Avatar className="h-8 w-8 shrink-0">
@@ -107,7 +94,6 @@ export function Sidebar() {
                 <Link
                   key={href}
                   href={href}
-                  onClick={close}
                   className={cn(
                     "flex items-center gap-3 rounded-lg text-sm font-medium transition-colors px-3 py-2.5",
                     active
@@ -138,7 +124,6 @@ export function Sidebar() {
             </button>
           </div>
         </div>
-      </aside>
-    </>
+    </aside>
   );
 }

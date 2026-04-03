@@ -6,6 +6,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export const userSchema = z.object({
   id: z.number(),
   name: z.string(),
+  last_name: z.string().nullable(),
+  email: z.string().nullable(),
   avatar_url: z.string().nullable(),
   created_at: z.string(),
 });
@@ -16,13 +18,15 @@ export type User = z.infer<typeof userSchema>;
 export type Users = z.infer<typeof usersSchema>;
 
 export const createUserSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  avatar_url: z.string().url("Invalid URL").optional().or(z.literal("")),
+  first_name: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
+  last_name: z.string().optional(),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  avatar_url: z.string().optional(),
 });
 
 export const editUserSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  avatar_url: z.string().url("Invalid URL").optional().or(z.literal("")),
+  name: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
+  avatar_url: z.string().url("URL inválida").optional().or(z.literal("")),
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;
@@ -40,7 +44,9 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: input.name,
+      first_name: input.first_name,
+      last_name: input.last_name || null,
+      email: input.email || null,
       avatar_url: input.avatar_url || null,
     }),
   });
@@ -54,7 +60,7 @@ export async function updateUser(userId: number, input: EditUserInput): Promise<
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: input.name,
+      first_name: input.name,
       avatar_url: input.avatar_url || null,
     }),
   });

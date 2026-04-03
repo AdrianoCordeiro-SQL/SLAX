@@ -5,6 +5,7 @@
 - Sempre prefira legibilidade e tipagem forte (TypeScript/Pydantic). Evite `any` e type assertions desnecessárias.
 - Use **Lucide-React** para TODOS os ícones. Proibido SVGs manuais ou outras bibliotecas de ícones.
 - **Comentários:** Não adicione comentários que apenas descrevem o que o código faz. Comente apenas intenção não óbvia, trade-offs ou restrições que o código sozinho não consegue expressar.
+- As explicações de código e respostas em geral precisam ser em pt-BR.
 
 ## 2. Frontend (Next.js 16 + Tailwind + shadcn/ui)
 
