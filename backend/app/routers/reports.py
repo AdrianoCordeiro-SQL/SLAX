@@ -23,6 +23,8 @@ from ..services.reports import (
     build_top_users,
 )
 
+# Rotas HTTP do prefixo /reports: resumos, gráficos agregados e listagem paginada de logs.
+
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 SessionDep = Annotated[Session, Depends(get_session)]

@@ -3,6 +3,8 @@ from typing import Optional
 
 from sqlmodel import Field, SQLModel
 
+# Modelos ORM (conta, usuários do tenant, logs de API e métricas de receita).
+
 
 class Account(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

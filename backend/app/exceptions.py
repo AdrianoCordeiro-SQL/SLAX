@@ -1,3 +1,6 @@
+# Exceções de domínio convertidas em respostas HTTP pelos handlers registrados em main.
+
+
 class EmailAlreadyRegistered(Exception):
     """Raised when registering with an email that already exists."""
 

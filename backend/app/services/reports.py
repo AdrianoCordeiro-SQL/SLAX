@@ -7,6 +7,8 @@ from ..models import APILog, RevenueMetric, User
 from ..utils import parse_period, pct_change
 from .log_items import serialize_api_log_row
 
+# Consultas e agregações para relatórios (resumo, breakdowns, tendências e logs paginados).
+
 
 def build_report_summary(
     session: Session,

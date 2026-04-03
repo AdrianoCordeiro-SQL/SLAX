@@ -2,6 +2,8 @@ import os
 
 from sqlmodel import Session, SQLModel, create_engine
 
+# Engine SQLModel/PostgreSQL, criação de tabelas e gerador de sessão usado pelo Depends do FastAPI.
+
 # O host 'db' vem do nome do serviço no seu docker-compose
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://user:password@db:5432/portfolio_db"

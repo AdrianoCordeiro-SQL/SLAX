@@ -8,6 +8,8 @@ from .database import create_db_and_tables
 from .exceptions import EmailAlreadyRegistered, UserNotFoundForAccount, WrongCurrentPassword
 from .routers import auth, dashboard, reports, users
 
+# Aplicação FastAPI: CORS, lifespan, tratamento de exceções de domínio e registro dos routers da API.
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

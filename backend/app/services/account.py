@@ -6,6 +6,8 @@ from ..exceptions import EmailAlreadyRegistered, WrongCurrentPassword
 from ..models import Account
 from ..schemas import AccountUpdate, PasswordChange, RegisterRequest
 
+# Regras de conta: registro, montagem da resposta de autenticação, perfil e alteração de senha.
+
 
 def account_to_auth_dict(account: Account) -> dict:
     return {

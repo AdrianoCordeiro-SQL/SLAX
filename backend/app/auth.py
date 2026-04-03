@@ -10,6 +10,8 @@ from .auth_tokens import decode_access_token
 from .database import get_session
 from .models import Account
 
+# Senhas com bcrypt, login por e-mail/senha e dependency que resolve a conta a partir do Bearer JWT.
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 

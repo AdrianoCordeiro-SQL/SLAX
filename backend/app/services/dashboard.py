@@ -6,6 +6,8 @@ from ..models import APILog, RevenueMetric, User
 from ..utils import pct_change
 from .log_items import serialize_api_log_row
 
+# Agregações SQL e montagem de dados para o dashboard (stats, sparklines, performance, atividade).
+
 
 def build_stats(session: Session, account_id: int) -> dict:
     now = datetime.now(timezone.utc)

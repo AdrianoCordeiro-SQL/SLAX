@@ -20,6 +20,8 @@ from ..services.dashboard import (
     build_stats,
 )
 
+# Rotas do dashboard: health, estatísticas, sparklines, série de performance e feed de atividade.
+
 router = APIRouter(tags=["dashboard"])
 
 SessionDep = Annotated[Session, Depends(get_session)]

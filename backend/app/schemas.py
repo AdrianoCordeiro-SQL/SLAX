@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+# Modelos Pydantic de entrada e saída (corpos de requisição e respostas JSON da API).
+
 
 # --- Request Schemas ---
 

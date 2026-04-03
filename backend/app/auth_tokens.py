@@ -1,9 +1,9 @@
-"""JWT encode/decode without FastAPI or HTTP concerns."""
-
 import os
 from datetime import datetime, timedelta, timezone
 
 import jwt
+
+# Criação e decodificação de tokens JWT sem depender do FastAPI (erros propagados como exceções PyJWT).
 
 SECRET_KEY = os.getenv("JWT_SECRET", "slax-dev-secret-change-in-production")
 ALGORITHM = "HS256"

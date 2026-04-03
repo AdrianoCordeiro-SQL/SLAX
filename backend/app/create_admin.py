@@ -4,6 +4,8 @@ from .auth import hash_password
 from .database import create_db_and_tables, engine
 from .models import Account
 
+# Script executável para criar uma conta administrativa inicial (uso local ou setup).
+
 
 def create_admin(email: str = "admin@slax.com", password: str = "admin", name: str = "Admin") -> None:
     with Session(engine) as session:

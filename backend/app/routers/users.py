@@ -10,6 +10,8 @@ from ..models import Account
 from ..schemas import UserCreate, UserOut, UserUpdate
 from ..services.users import create_user, delete_user, list_users, update_user as update_user_svc
 
+# Rotas HTTP do prefixo /users: listagem e CRUD de usuários do tenant autenticado.
+
 router = APIRouter(prefix="/users", tags=["users"])
 
 SessionDep = Annotated[Session, Depends(get_session)]

@@ -23,6 +23,8 @@ from ..services.account import (
     update_account_profile,
 )
 
+# Rotas HTTP do prefixo /auth: registro, login, leitura/atualização de perfil e troca de senha.
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 SessionDep = Annotated[Session, Depends(get_session)]

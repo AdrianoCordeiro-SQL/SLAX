@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+# Funções puras auxiliares: intervalo de datas para relatórios e formatação de variação percentual.
+
 
 def parse_period(
     start: Optional[str], end: Optional[str]

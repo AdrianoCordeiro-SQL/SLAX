@@ -4,6 +4,8 @@ from ..exceptions import UserNotFoundForAccount
 from ..models import User
 from ..schemas import UserCreate, UserUpdate
 
+# Operações de CRUD em User restritas ao account_id do tenant autenticado.
+
 
 def list_users(session: Session, account_id: int) -> list[User]:
     return session.exec(
