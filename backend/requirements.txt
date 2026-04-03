@@ -5,4 +5,7 @@ psycopg2-binary
 python-dotenv
 pyjwt
 passlib[bcrypt]
-bcrypt<4.0
+bcrypt>=3.2,<4.0
+pytest
+httpx
+pytest-cov
