@@ -4,15 +4,7 @@ import { useRef } from "react";
 import { Pencil } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUpdateAccount } from "@/hooks/useAccount";
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
+import { getInitials } from "@/lib/format";
 
 interface AvatarEditorProps {
   name: string;

@@ -25,15 +25,7 @@ import { useReportLogs } from "@/hooks/useReports";
 import type { LogItem, LogFilters } from "@/lib/api/reports";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { LOG_STATUSES, type LogStatus } from "@/lib/constants/status";
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
+import { getInitials } from "@/lib/format";
 
 function formatTimestamp(iso: string): string {
   const d = new Date(iso);

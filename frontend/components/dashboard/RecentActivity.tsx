@@ -13,6 +13,7 @@ import {
 import { useActivity } from "@/hooks/useActivity";
 import type { ActivityItem } from "@/lib/api/activity";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { getInitials } from "@/lib/format";
 
 function formatTimestamp(iso: string): string {
   const date = new Date(iso);
@@ -22,15 +23,6 @@ function formatTimestamp(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 }
 
 function ActivityRow({ item }: { item: ActivityItem }) {

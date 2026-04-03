@@ -10,43 +10,24 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AsyncChartCard } from "@/components/charts/AsyncChartCard";
+import { ChartLineSkeleton } from "@/components/charts/ChartLineSkeleton";
 import { usePerformance } from "@/hooks/usePerformance";
-
-function SkeletonChart() {
-  return (
-    <Card className="animate-pulse">
-      <CardHeader>
-        <div className="h-5 w-64 rounded bg-gray-200" />
-      </CardHeader>
-      <CardContent>
-        <div className="h-64 w-full rounded bg-gray-200" />
-      </CardContent>
-    </Card>
-  );
-}
 
 export function PerformanceChart() {
   const { data, isLoading, error } = usePerformance();
-
-  if (isLoading) return <SkeletonChart />;
-
-  if (error || !data) {
-    return (
-      <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        Failed to load performance data: {error?.message ?? "Unknown error"}
-      </div>
-    );
-  }
+  const empty = !data?.length;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">
-          Performance Over Time (Last 30 Days)
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <AsyncChartCard
+      title="Performance Over Time (Last 30 Days)"
+      isLoading={isLoading}
+      error={error}
+      empty={empty}
+      errorPrefix="Failed to load performance data"
+      skeleton={<ChartLineSkeleton />}
+    >
+      {data && data.length > 0 ? (
         <ResponsiveContainer width="100%" height={280}>
           <LineChart
             data={data}
@@ -140,7 +121,7 @@ export function PerformanceChart() {
             />
           </LineChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      ) : null}
+    </AsyncChartCard>
   );
 }

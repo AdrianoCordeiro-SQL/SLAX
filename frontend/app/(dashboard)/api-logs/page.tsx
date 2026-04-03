@@ -3,17 +3,10 @@
 import { useState } from "react";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import { LogsTable } from "@/components/reports/LogsTable";
-
-function toISODate(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
-const DEFAULT_END = toISODate(new Date());
-const DEFAULT_START = toISODate(new Date(Date.now() - 30 * 86_400_000));
+import { getDefaultReportDateRange } from "@/lib/date-range";
 
 export default function ApiLogsPage() {
-  const [start, setStart] = useState(DEFAULT_START);
-  const [end, setEnd] = useState(DEFAULT_END);
+  const [{ start, end }, setRange] = useState(getDefaultReportDateRange);
 
   return (
     <div className="flex flex-col gap-6">
@@ -27,10 +20,7 @@ export default function ApiLogsPage() {
         <DateRangeFilter
           start={start}
           end={end}
-          onChange={(s, e) => {
-            setStart(s);
-            setEnd(e);
-          }}
+          onChange={(s, e) => setRange({ start: s, end: e })}
         />
       </div>
 

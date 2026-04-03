@@ -10,6 +10,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getInitials } from "@/lib/format";
 import { useAccount } from "@/hooks/useAccount";
 import { logout } from "@/lib/api/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,15 +21,6 @@ const navItems = [
   { label: "Users", href: "/users", icon: Users },
   { label: "API Logs", href: "/api-logs", icon: ScrollText },
 ];
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 export function BottomNav() {
   const pathname = usePathname();

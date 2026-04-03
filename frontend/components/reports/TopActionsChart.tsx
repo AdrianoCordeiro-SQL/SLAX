@@ -9,21 +9,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AsyncChartCard } from "@/components/charts/AsyncChartCard";
+import { ChartLineSkeleton } from "@/components/charts/ChartLineSkeleton";
 import { useTopActions } from "@/hooks/useReports";
-
-function SkeletonChart() {
-  return (
-    <Card className="animate-pulse">
-      <CardHeader>
-        <div className="h-5 w-48 rounded bg-gray-200" />
-      </CardHeader>
-      <CardContent>
-        <div className="h-64 w-full rounded bg-gray-200" />
-      </CardContent>
-    </Card>
-  );
-}
 
 interface TopActionsChartProps {
   start: string;
@@ -32,38 +20,18 @@ interface TopActionsChartProps {
 
 export function TopActionsChart({ start, end }: TopActionsChartProps) {
   const { data, isLoading, error } = useTopActions(start, end);
-
-  if (isLoading) return <SkeletonChart />;
-
-  if (error || !data) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-sm text-red-700">
-          Failed to load top actions: {error?.message ?? "Unknown error"}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (data.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">Top Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-          No data for this period
-        </CardContent>
-      </Card>
-    );
-  }
+  const empty = !data?.length;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">Top Actions</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <AsyncChartCard
+      title="Top Actions"
+      isLoading={isLoading}
+      error={error}
+      empty={empty}
+      errorPrefix="Failed to load top actions"
+      skeleton={<ChartLineSkeleton />}
+    >
+      {data && data.length > 0 ? (
         <ResponsiveContainer width="100%" height={280}>
           <BarChart
             data={data}
@@ -104,7 +72,7 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
             <Bar dataKey="count" fill="#1e2d5a" radius={[0, 4, 4, 0]} barSize={20} />
           </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      ) : null}
+    </AsyncChartCard>
   );
 }

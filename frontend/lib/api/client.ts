@@ -1,4 +1,4 @@
-import { getToken, logout } from "./auth";
+import { getToken, handleSessionExpired } from "./session";
 
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
   const token = getToken();
@@ -8,8 +8,7 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
   const res = await fetch(input, { ...init, headers });
 
   if (res.status === 401 && typeof window !== "undefined") {
-    logout();
-    window.location.href = "/login";
+    handleSessionExpired();
   }
 
   return res;

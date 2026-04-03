@@ -1,22 +1,10 @@
 "use client";
 
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AsyncChartCard } from "@/components/charts/AsyncChartCard";
+import { ChartPieSkeleton } from "@/components/charts/ChartPieSkeleton";
 import { useStatusBreakdown } from "@/hooks/useReports";
 import { FALLBACK_CHART_COLOR, STATUS_CHART_COLORS } from "@/lib/constants/status";
-
-function SkeletonChart() {
-  return (
-    <Card className="animate-pulse">
-      <CardHeader>
-        <div className="h-5 w-48 rounded bg-gray-200" />
-      </CardHeader>
-      <CardContent className="flex items-center justify-center">
-        <div className="h-56 w-56 rounded-full bg-gray-200" />
-      </CardContent>
-    </Card>
-  );
-}
 
 interface StatusBreakdownChartProps {
   start: string;
@@ -25,38 +13,18 @@ interface StatusBreakdownChartProps {
 
 export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) {
   const { data, isLoading, error } = useStatusBreakdown(start, end);
-
-  if (isLoading) return <SkeletonChart />;
-
-  if (error || !data) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-sm text-red-700">
-          Failed to load status breakdown: {error?.message ?? "Unknown error"}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (data.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">Status Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-          No data for this period
-        </CardContent>
-      </Card>
-    );
-  }
+  const empty = !data?.length;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">Status Breakdown</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <AsyncChartCard
+      title="Status Breakdown"
+      isLoading={isLoading}
+      error={error}
+      empty={empty}
+      errorPrefix="Failed to load status breakdown"
+      skeleton={<ChartPieSkeleton />}
+    >
+      {data && data.length > 0 ? (
         <ResponsiveContainer width="100%" height={280}>
           <PieChart>
             <Pie
@@ -93,7 +61,7 @@ export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) 
             />
           </PieChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      ) : null}
+    </AsyncChartCard>
   );
 }
