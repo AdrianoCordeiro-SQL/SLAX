@@ -96,10 +96,21 @@ export function PerformanceChart() {
                 border: "1px solid #e5e7eb",
                 fontSize: 12,
               }}
-              formatter={(value: number, name: string) =>
-                name === "latency" ? [`${value} ms`, "Latency"] : [value, "Requests"]
-              }
-              labelFormatter={(label: number) => `Day ${label}`}
+              formatter={(value, name) => {
+                const n = String(name ?? "");
+                const num =
+                  typeof value === "number"
+                    ? value
+                    : typeof value === "string"
+                      ? Number(value)
+                      : Array.isArray(value)
+                        ? Number(value[0] ?? 0)
+                        : Number(value ?? 0);
+                return n === "latency"
+                  ? [`${num} ms`, "Latency"]
+                  : [num, "Requests"];
+              }}
+              labelFormatter={(label) => `Day ${label}`}
             />
             <Legend
               verticalAlign="bottom"

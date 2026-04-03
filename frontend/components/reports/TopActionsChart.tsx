@@ -91,7 +91,15 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
                 border: "1px solid #e5e7eb",
                 fontSize: 12,
               }}
-              formatter={(value: number) => [value, "Requests"]}
+              formatter={(value) => {
+                const num =
+                  typeof value === "number"
+                    ? value
+                    : typeof value === "string"
+                      ? Number(value)
+                      : Number(value ?? 0);
+                return [num, "Requests"];
+              }}
             />
             <Bar dataKey="count" fill="#1e2d5a" radius={[0, 4, 4, 0]} barSize={20} />
           </BarChart>

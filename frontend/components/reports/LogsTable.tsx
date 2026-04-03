@@ -24,7 +24,7 @@ import {
 import { useReportLogs } from "@/hooks/useReports";
 import type { LogItem, LogFilters } from "@/lib/api/reports";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { LOG_STATUSES } from "@/lib/constants/status";
+import { LOG_STATUSES, type LogStatus } from "@/lib/constants/status";
 
 function getInitials(name: string): string {
   return name
@@ -106,7 +106,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
             onValueChange={(v) =>
               setFilters((f) => ({
                 ...f,
-                status: v === "all" ? undefined : v,
+                status: v === "all" ? undefined : (v as LogStatus),
                 page: 1,
               }))
             }

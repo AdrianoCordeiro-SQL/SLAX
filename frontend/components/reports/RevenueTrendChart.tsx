@@ -97,9 +97,18 @@ export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
                 border: "1px solid #e5e7eb",
                 fontSize: 12,
               }}
-              formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
-              labelFormatter={(label: string) => {
-                const d = new Date(label);
+              formatter={(value) => {
+                const num =
+                  typeof value === "number"
+                    ? value
+                    : typeof value === "string"
+                      ? Number(value)
+                      : Number(value ?? 0);
+                return [`$${num.toFixed(2)}`, "Revenue"];
+              }}
+              labelFormatter={(label) => {
+                const s = typeof label === "string" ? label : String(label);
+                const d = new Date(s);
                 return d.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TrendingUp, Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { login } from "@/lib/api/auth";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/";
@@ -129,5 +129,19 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#1c1c1e] px-4">
+          <Loader2 className="h-8 w-8 animate-spin text-white/40" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
