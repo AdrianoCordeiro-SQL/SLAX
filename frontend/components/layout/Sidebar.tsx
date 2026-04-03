@@ -75,20 +75,25 @@ export function Sidebar() {
           </div>
 
           {/* Profile block */}
-          <div className="shrink-0 px-2 pb-3 border-b border-white/10">
+          <div className="shrink-0 px-2 pb-2 border-b border-white/10">
             <Link
               href="/profile"
               onClick={close}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/10 transition-colors"
+              className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-white/10 transition-colors"
             >
               <Avatar className="h-8 w-8 shrink-0">
-                <AvatarImage src={account?.avatar_url ?? ""} alt={account?.name ?? ""} />
+                <AvatarImage
+                  src={account?.avatar_url ?? ""}
+                  alt={account?.name ?? ""}
+                />
                 <AvatarFallback className="bg-white/15 text-white text-xs font-bold">
                   {account ? getInitials(account.name) : "…"}
                 </AvatarFallback>
               </Avatar>
               <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap leading-tight">
-                <p className="text-sm font-semibold truncate">{account?.name ?? "—"}</p>
+                <p className="text-sm font-semibold truncate">
+                  {account?.name ?? "—"}
+                </p>
                 <p className="text-xs text-blue-200">Editar perfil</p>
               </div>
             </Link>
