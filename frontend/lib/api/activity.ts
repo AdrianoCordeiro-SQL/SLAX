@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LOG_STATUSES } from "@/lib/constants/status";
+import { apiFetch } from "./client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -18,7 +19,7 @@ export type ActivityItem = z.infer<typeof activityItemSchema>;
 export type Activity = z.infer<typeof activitySchema>;
 
 export async function fetchActivity(): Promise<Activity> {
-  const res = await fetch(`${API_BASE}/activity`);
+  const res = await apiFetch(`${API_BASE}/activity`);
   if (!res.ok) throw new Error(`Failed to fetch activity: HTTP ${res.status}`);
   const data = await res.json();
   return activitySchema.parse(data);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { apiFetch } from "./client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -14,7 +15,7 @@ export type PerformancePoint = z.infer<typeof performancePointSchema>;
 export type Performance = z.infer<typeof performanceSchema>;
 
 export async function fetchPerformance(): Promise<Performance> {
-  const res = await fetch(`${API_BASE}/performance`);
+  const res = await apiFetch(`${API_BASE}/performance`);
   if (!res.ok) throw new Error(`Failed to fetch performance: HTTP ${res.status}`);
   const data = await res.json();
   return performanceSchema.parse(data);

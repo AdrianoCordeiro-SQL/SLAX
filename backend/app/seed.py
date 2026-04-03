@@ -35,13 +35,16 @@ STATUSES = ["Success", "Success", "Success", "Pending", "Failed"]
 
 def seed():
     with Session(engine) as session:
-        if not session.exec(select(Account).where(Account.email == "admin@slax.com")).first():
-            session.add(Account(
+        admin = session.exec(select(Account).where(Account.email == "admin@slax.com")).first()
+        if not admin:
+            admin = Account(
                 email="admin@slax.com",
                 hashed_password=hash_password("admin"),
                 name="Admin",
-            ))
+            )
+            session.add(admin)
             session.commit()
+            session.refresh(admin)
             print("Admin account created.")
 
         if session.exec(select(User)).first():
@@ -54,7 +57,7 @@ def seed():
         for i, (name, avatar_url) in enumerate(USERS):
             days_ago = random.randint(5, 60)
             created_at = now - timedelta(days=days_ago, hours=random.randint(0, 23))
-            user = User(name=name, avatar_url=avatar_url, created_at=created_at)
+            user = User(name=name, avatar_url=avatar_url, created_at=created_at, account_id=admin.id)
             session.add(user)
             users.append(user)
 
@@ -79,6 +82,7 @@ def seed():
                     action=action,
                     status=status,
                     timestamp=timestamp,
+                    account_id=admin.id,
                 )
                 session.add(log)
 
@@ -87,7 +91,7 @@ def seed():
                 hour=12, minute=0, second=0, microsecond=0
             )
             value = round(random.uniform(200.0, 900.0), 2)
-            metric = RevenueMetric(value=value, recorded_at=recorded_at)
+            metric = RevenueMetric(value=value, recorded_at=recorded_at, account_id=admin.id)
             session.add(metric)
 
         session.commit()

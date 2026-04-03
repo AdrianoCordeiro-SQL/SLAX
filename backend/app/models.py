@@ -15,6 +15,7 @@ class Account(SQLModel, table=True):
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    account_id: int = Field(foreign_key="account.id", index=True)
     name: str
     avatar_url: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -22,6 +23,7 @@ class User(SQLModel, table=True):
 
 class APILog(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    account_id: int = Field(foreign_key="account.id", index=True)
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     action: str
     status: str
@@ -30,5 +32,6 @@ class APILog(SQLModel, table=True):
 
 class RevenueMetric(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    account_id: int = Field(foreign_key="account.id", index=True)
     value: float
     recorded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
