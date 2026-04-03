@@ -8,23 +8,13 @@ import { RevenueTrendChart } from "@/components/reports/RevenueTrendChart";
 import { StatusBreakdownChart } from "@/components/reports/StatusBreakdownChart";
 import { TopActionsChart } from "@/components/reports/TopActionsChart";
 import { TopUsersRanking } from "@/components/reports/TopUsersRanking";
-
-function toISODate(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
-const DEFAULT_END = toISODate(new Date());
-const DEFAULT_START = toISODate(
-  new Date(Date.now() - 30 * 86_400_000),
-);
+import { getDefaultReportDateRange } from "@/lib/date-range";
 
 export default function ReportsPage() {
-  const [start, setStart] = useState(DEFAULT_START);
-  const [end, setEnd] = useState(DEFAULT_END);
+  const [{ start, end }, setRange] = useState(getDefaultReportDateRange);
 
   function handleRangeChange(s: string, e: string) {
-    setStart(s);
-    setEnd(e);
+    setRange({ start: s, end: e });
   }
 
   return (

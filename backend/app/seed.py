@@ -7,6 +7,8 @@ from .auth import hash_password
 from .database import create_db_and_tables, engine
 from .models import Account, APILog, RevenueMetric, User
 
+# Script para popular o banco com conta de demonstração, usuários, logs e métricas sintéticas.
+
 USERS = [
     ("Carlos Martins", "https://i.pravatar.cc/150?img=1"),
     ("Bruno Costa", "https://i.pravatar.cc/150?img=2"),
@@ -83,6 +85,7 @@ def seed():
                     action=action,
                     status=status,
                     timestamp=timestamp,
+                    account_id=admin.id,
                 )
                 session.add(log)
 

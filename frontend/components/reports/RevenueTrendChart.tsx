@@ -9,21 +9,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AsyncChartCard } from "@/components/charts/AsyncChartCard";
+import { ChartLineSkeleton } from "@/components/charts/ChartLineSkeleton";
 import { useRevenueTrend } from "@/hooks/useReports";
-
-function SkeletonChart() {
-  return (
-    <Card className="animate-pulse">
-      <CardHeader>
-        <div className="h-5 w-48 rounded bg-gray-200" />
-      </CardHeader>
-      <CardContent>
-        <div className="h-64 w-full rounded bg-gray-200" />
-      </CardContent>
-    </Card>
-  );
-}
 
 interface RevenueTrendChartProps {
   start: string;
@@ -32,38 +20,18 @@ interface RevenueTrendChartProps {
 
 export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
   const { data, isLoading, error } = useRevenueTrend(start, end);
-
-  if (isLoading) return <SkeletonChart />;
-
-  if (error || !data) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-sm text-red-700">
-          Failed to load revenue trend: {error?.message ?? "Unknown error"}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (data.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">Revenue Trend</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-          No data for this period
-        </CardContent>
-      </Card>
-    );
-  }
+  const empty = !data?.length;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">Revenue Trend</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <AsyncChartCard
+      title="Revenue Trend"
+      isLoading={isLoading}
+      error={error}
+      empty={empty}
+      errorPrefix="Failed to load revenue trend"
+      skeleton={<ChartLineSkeleton />}
+    >
+      {data && data.length > 0 ? (
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={data} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
             <defs>
@@ -97,9 +65,18 @@ export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
                 border: "1px solid #e5e7eb",
                 fontSize: 12,
               }}
-              formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
-              labelFormatter={(label: string) => {
-                const d = new Date(label);
+              formatter={(value) => {
+                const num =
+                  typeof value === "number"
+                    ? value
+                    : typeof value === "string"
+                      ? Number(value)
+                      : Number(value ?? 0);
+                return [`$${num.toFixed(2)}`, "Revenue"];
+              }}
+              labelFormatter={(label) => {
+                const s = typeof label === "string" ? label : String(label);
+                const d = new Date(s);
                 return d.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
@@ -117,7 +94,7 @@ export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
             />
           </AreaChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      ) : null}
+    </AsyncChartCard>
   );
 }

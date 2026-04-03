@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -13,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import { useActivity } from "@/hooks/useActivity";
 import type { ActivityItem } from "@/lib/api/activity";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { getInitials } from "@/lib/format";
 
 function formatTimestamp(iso: string): string {
   const date = new Date(iso);
@@ -22,29 +23,6 @@ function formatTimestamp(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    Success: "bg-green-100 text-green-700 border-green-200",
-    Pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    Failed: "bg-red-100 text-red-700 border-red-200",
-  };
-  const cls = styles[status] ?? "bg-gray-100 text-gray-600 border-gray-200";
-  return (
-    <Badge variant="outline" className={cls}>
-      {status}
-    </Badge>
-  );
 }
 
 function ActivityRow({ item }: { item: ActivityItem }) {

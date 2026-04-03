@@ -9,7 +9,11 @@ alwaysApply: true
 - Siga os padrões de **Clean Code** e **SOLID**: funções pequenas, responsabilidade única, sem duplicação.
 - Sempre prefira legibilidade e tipagem forte (TypeScript/Pydantic). Evite `any` e type assertions desnecessárias.
 - Use **Lucide-React** para TODOS os ícones. Proibido SVGs manuais ou outras bibliotecas de ícones.
-- **Comentários:** Não adicione comentários que apenas descrevem o que o código faz. Comente apenas intenção não óbvia, trade-offs ou restrições que o código sozinho não consegue expressar.
+- As explicações de código e respostas em geral precisam ser em pt-BR.
+- Logo **após** os imports, inclua um comentário em português-BR explicando **o que este arquivo faz** no sistema: responsabilidade, entradas/saídas principais (API, hooks, componentes), e contexto se não for óbvio pelo nome.
+- Não substitui comentários pontuais: evite repetir o que cada função faz linha a linha; o foco é o **papel do módulo/arquivo**.
+- Omitir apenas em reexports triviais ou arquivos gerados (especificar na PR se for o caso).
+- Todos os comentários devem ser em português-BR.
 
 ## 2. Frontend (Next.js 16 + Tailwind + shadcn/ui)
 
@@ -33,12 +37,23 @@ alwaysApply: true
 
 - **Estilização:** Use apenas Tailwind CSS. Não sobrescreva estilos internos dos componentes shadcn/ui diretamente — use a prop `className` nos pontos de extensão previstos.
 
+- **Testes (Vitest):** Ficheiros `*.test.ts` ou `*.test.tsx` **no mesmo diretório** do módulo testado (ex.: `frontend/lib/format.ts` e `frontend/lib/format.test.ts`). Stack: **Vitest** (ambiente `jsdom`, ver `frontend/vitest.config.ts`), **Testing Library** (`@testing-library/react`, `@testing-library/user-event`) para componentes. Comentários e descrições dos testes em **português-BR**. Scripts: `npm run test`, `npm run test:run`, `npm run test:ui` no `frontend/package.json`. Não usar uma pasta única `frontend/tests/` como destino principal dos testes (diferente do backend).
+
 ## 3. Backend (FastAPI + SQLAlchemy)
 
 - **Modelagem:** Use SQLAlchemy para modelos de banco. Use Pydantic V2 para schemas de entrada/saída da API (separados dos modelos ORM).
 - **Validação:** Schemas Pydantic devem validar entrada (`RequestBody`) e saída (`ResponseModel`) de todos os endpoints.
 - **Documentação:** Mantenha o Swagger limpo: use `tags` e `response_model` em todos os endpoints. `summary` é opcional — use apenas quando o nome da rota não for autoexplicativo.
 - **Linting:** O código deve ser compatível com as regras do Ruff. Não use `# noqa` sem justificativa.
+
+- **Testes (pytest):** Código em `backend/tests/`. Docstrings em **português-BR** no módulo (após imports), em cada função `test_*` e nas fixtures do `conftest.py`. Nomes das funções de teste e identificadores podem permanecer em inglês. Manter o padrão do projeto: `pytest.ini`, `conftest` com env de teste (SQLite em memória) e override de `get_session` quando fizer sentido.
+
+## 5. Layout e Navegação
+
+- O `Header` contém APENAS: data formatada e sino de notificações. Nunca adicione perfil, avatar ou logout no Header.
+- O perfil do usuário autenticado (avatar, nome, link "Editar perfil") fica EXCLUSIVAMENTE no topo da `Sidebar`, consumindo `useAccount()`.
+- O botão de logout fica EXCLUSIVAMENTE no rodapé da `Sidebar`.
+- Dados do usuário logado nunca devem ser hardcoded — sempre via `useAccount()`.
 
 ## 4. Integração e Docker
 

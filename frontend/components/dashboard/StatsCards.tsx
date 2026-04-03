@@ -3,21 +3,11 @@
 import { Activity, Database, DollarSign, Users } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
 import { useStats } from "@/hooks/useStats";
 import { useSparklines } from "@/hooks/useSparklines";
 import type { SparklinePoint } from "@/lib/api/sparklines";
-
-function getChangeVariant(change: string): string {
-  if (change.startsWith("+")) return "bg-green-100 text-green-700";
-  if (change.startsWith("-")) return "bg-red-100 text-red-700";
-  return "bg-gray-100 text-gray-600";
-}
-
-function getSparklineColor(change: string): string {
-  if (change.startsWith("+")) return "#16a34a";
-  if (change.startsWith("-")) return "#dc2626";
-  return "#6b7280";
-}
+import { getChangeBadgeClasses, getChangeSparklineColor } from "@/lib/change-variant";
 
 interface StatCardProps {
   title: string;
@@ -28,8 +18,8 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, change, icon: Icon, sparklineData }: StatCardProps) {
-  const badgeClass = getChangeVariant(change);
-  const lineColor = getSparklineColor(change);
+  const badgeClass = getChangeBadgeClasses(change);
+  const lineColor = getChangeSparklineColor(change);
 
   return (
     <Card className="flex flex-col gap-2">
@@ -68,24 +58,6 @@ function StatCard({ title, value, change, icon: Icon, sparklineData }: StatCardP
   );
 }
 
-function SkeletonCard() {
-  return (
-    <Card className="flex flex-col gap-2 animate-pulse">
-      <CardHeader className="flex flex-row items-center justify-between pb-1">
-        <div className="h-4 w-28 rounded bg-gray-200" />
-        <div className="h-7 w-7 rounded-md bg-gray-200" />
-      </CardHeader>
-      <CardContent className="flex items-end justify-between gap-2">
-        <div className="flex flex-col gap-2">
-          <div className="h-7 w-20 rounded bg-gray-200" />
-          <div className="h-4 w-12 rounded-full bg-gray-200" />
-        </div>
-        <div className="h-12 w-24 rounded bg-gray-200" />
-      </CardContent>
-    </Card>
-  );
-}
-
 export function StatsCards() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
   const { data: sparklines, isLoading: sparklinesLoading } = useSparklines();
@@ -96,7 +68,7 @@ export function StatsCards() {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <SkeletonCard key={i} />
+          <SummaryMetricCardSkeleton key={i} withSparklinePlaceholder />
         ))}
       </div>
     );
