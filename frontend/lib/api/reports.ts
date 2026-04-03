@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LOG_STATUSES, type LogStatus } from "@/lib/constants/status";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -30,7 +31,7 @@ export async function fetchReportSummary(start: string, end: string): Promise<Re
 // --- Status Breakdown ---
 
 export const statusBreakdownItemSchema = z.object({
-  status: z.string(),
+  status: z.enum(LOG_STATUSES),
   count: z.number(),
 });
 
@@ -105,7 +106,7 @@ export const logItemSchema = z.object({
   avatar_url: z.string().nullable(),
   action: z.string(),
   timestamp: z.string(),
-  status: z.string(),
+  status: z.enum(LOG_STATUSES),
 });
 
 export const logsResponseSchema = z.object({
@@ -120,7 +121,7 @@ export type LogItem = z.infer<typeof logItemSchema>;
 export type LogsResponse = z.infer<typeof logsResponseSchema>;
 
 export interface LogFilters {
-  status?: string;
+  status?: LogStatus;
   action?: string;
   user_id?: number;
   page?: number;

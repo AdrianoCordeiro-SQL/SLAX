@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LOG_STATUSES } from "@/lib/constants/status";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -8,7 +9,7 @@ export const activityItemSchema = z.object({
   avatar_url: z.string().nullable(),
   action: z.string(),
   timestamp: z.string(),
-  status: z.string(),
+  status: z.enum(LOG_STATUSES),
 });
 
 export const activitySchema = z.array(activityItemSchema);

@@ -3,13 +3,7 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStatusBreakdown } from "@/hooks/useReports";
-
-const STATUS_COLORS: Record<string, string> = {
-  Success: "#16a34a",
-  Failed: "#dc2626",
-  Pending: "#eab308",
-};
-const FALLBACK_COLOR = "#6b7280";
+import { FALLBACK_CHART_COLOR, STATUS_CHART_COLORS } from "@/lib/constants/status";
 
 function SkeletonChart() {
   return (
@@ -79,7 +73,7 @@ export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) 
               {data.map((entry) => (
                 <Cell
                   key={entry.status}
-                  fill={STATUS_COLORS[entry.status] ?? FALLBACK_COLOR}
+                  fill={STATUS_CHART_COLORS[entry.status] ?? FALLBACK_CHART_COLOR}
                 />
               ))}
             </Pie>

@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,8 +23,8 @@ import {
 } from "@/components/ui/table";
 import { useReportLogs } from "@/hooks/useReports";
 import type { LogItem, LogFilters } from "@/lib/api/reports";
-
-const STATUS_OPTIONS = ["Success", "Failed", "Pending"];
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { LOG_STATUSES } from "@/lib/constants/status";
 
 function getInitials(name: string): string {
   return name
@@ -44,20 +43,6 @@ function formatTimestamp(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    Success: "bg-green-100 text-green-700 border-green-200",
-    Pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    Failed: "bg-red-100 text-red-700 border-red-200",
-  };
-  const cls = styles[status] ?? "bg-gray-100 text-gray-600 border-gray-200";
-  return (
-    <Badge variant="outline" className={cls}>
-      {status}
-    </Badge>
-  );
 }
 
 function SkeletonRow() {
@@ -131,7 +116,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              {STATUS_OPTIONS.map((s) => (
+              {LOG_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
                 </SelectItem>
