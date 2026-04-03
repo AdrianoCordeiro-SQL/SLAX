@@ -44,10 +44,9 @@ export function Sidebar() {
   return (
     <aside
         className={cn(
-          "group/sidebar hidden md:block fixed inset-y-0 left-0 z-40 overflow-hidden bg-[#313235]",
+          "group/sidebar hidden md:block fixed inset-y-0 left-0 z-40 h-screen overflow-hidden bg-[#313235]",
           "transition-all duration-300 ease-in-out",
-          "md:w-16 md:hover:w-64",
-          "md:sticky md:top-0 md:z-auto md:translate-x-0 md:shrink-0 md:h-screen",
+          "md:w-16 md:hover:w-64 md:hover:shadow-xl",
         )}
       >
         <div className="flex h-full w-64 flex-col text-white">
