@@ -9,6 +9,7 @@ class Account(SQLModel, table=True):
     email: str = Field(unique=True, index=True)
     hashed_password: str
     name: str
+    avatar_url: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

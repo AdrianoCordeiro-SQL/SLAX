@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlmodel import Session, col, func, select
 
-from .auth import authenticate, create_access_token, get_current_account
+from .auth import authenticate, create_access_token, get_current_account, hash_password, verify_password
 from .database import create_db_and_tables, get_session
 from .models import Account, APILog, RevenueMetric, User
 
@@ -49,6 +49,16 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class AccountUpdate(BaseModel):
+    name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
 CurrentAccount = Annotated[Account, Depends(get_current_account)]
 
 
@@ -64,13 +74,49 @@ def login(payload: LoginRequest, session: SessionDep):
     return {
         "access_token": token,
         "token_type": "bearer",
-        "account": {"id": account.id, "email": account.email, "name": account.name},
+        "account": {
+            "id": account.id,
+            "email": account.email,
+            "name": account.name,
+            "avatar_url": account.avatar_url,
+        },
     }
 
 
 @app.get("/auth/me")
 def get_me(account: CurrentAccount):
-    return {"id": account.id, "email": account.email, "name": account.name}
+    return {
+        "id": account.id,
+        "email": account.email,
+        "name": account.name,
+        "avatar_url": account.avatar_url,
+    }
+
+
+@app.patch("/auth/me")
+def update_me(payload: AccountUpdate, account: CurrentAccount, session: SessionDep):
+    if payload.name is not None:
+        account.name = payload.name
+    if payload.avatar_url is not None:
+        account.avatar_url = payload.avatar_url
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+    return {
+        "id": account.id,
+        "email": account.email,
+        "name": account.name,
+        "avatar_url": account.avatar_url,
+    }
+
+
+@app.post("/auth/change-password", status_code=204)
+def change_password(payload: PasswordChange, account: CurrentAccount, session: SessionDep):
+    if not verify_password(payload.current_password, account.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    account.hashed_password = hash_password(payload.new_password)
+    session.add(account)
+    session.commit()
 
 
 # --- Routes ---
