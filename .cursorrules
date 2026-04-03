@@ -32,6 +32,8 @@
 
 - **Estilização:** Use apenas Tailwind CSS. Não sobrescreva estilos internos dos componentes shadcn/ui diretamente — use a prop `className` nos pontos de extensão previstos.
 
+- **Testes (Vitest):** Ficheiros `*.test.ts` ou `*.test.tsx` **no mesmo diretório** do módulo testado (ex.: `frontend/lib/format.ts` e `frontend/lib/format.test.ts`). Stack: **Vitest** (ambiente `jsdom`, ver `frontend/vitest.config.ts`), **Testing Library** (`@testing-library/react`, `@testing-library/user-event`) para componentes. Comentários e descrições dos testes em **português-BR**. Scripts: `npm run test`, `npm run test:run`, `npm run test:ui` no `frontend/package.json`. Não usar uma pasta única `frontend/tests/` como destino principal dos testes (diferente do backend).
+
 ## 3. Backend (FastAPI + SQLAlchemy)
 
 - **Modelagem:** Use SQLAlchemy para modelos de banco. Use Pydantic V2 para schemas de entrada/saída da API (separados dos modelos ORM).
