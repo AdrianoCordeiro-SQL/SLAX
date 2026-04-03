@@ -49,6 +49,12 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
 class AccountUpdate(BaseModel):
     name: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -63,6 +69,32 @@ CurrentAccount = Annotated[Account, Depends(get_current_account)]
 
 
 # --- Auth ---
+
+
+@app.post("/auth/register", status_code=201)
+def register(payload: RegisterRequest, session: SessionDep):
+    existing = session.exec(select(Account).where(Account.email == payload.email)).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already registered")
+    account = Account(
+        name=payload.name,
+        email=payload.email,
+        hashed_password=hash_password(payload.password),
+    )
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+    token = create_access_token(account.id, account.email)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "account": {
+            "id": account.id,
+            "email": account.email,
+            "name": account.name,
+            "avatar_url": account.avatar_url,
+        },
+    }
 
 
 @app.post("/auth/login")

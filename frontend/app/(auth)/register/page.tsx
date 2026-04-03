@@ -1,41 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { TrendingUp, Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { login } from "@/lib/api/auth";
+import { register } from "@/lib/api/auth";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const from = searchParams.get("from") || "/";
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      router.push(from);
+      await register(name, email, password);
+      router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login falhou");
+      setError(err instanceof Error ? err.message : "Cadastro falhou");
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1c1c1e] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#1c1c1e] px-4 py-8">
       <div className="w-full max-w-sm bg-[#232325] border border-white/10 rounded-2xl shadow-2xl p-8 space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3 text-center">
@@ -43,13 +55,29 @@ export default function LoginPage() {
             <TrendingUp size={28} className="text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-wide">SLAX</h1>
-            <p className="text-xs text-white/50 mt-0.5">Insights que impulsionam decisões.</p>
+            <h1 className="text-xl font-bold text-white tracking-wide">Criar Conta</h1>
+            <p className="text-xs text-white/50 mt-0.5">Junte-se ao SLAX Analytics hoje.</p>
           </div>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="name" className="text-sm font-medium text-white/80">
+              Nome completo
+            </label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="João Silva"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoComplete="name"
+              className="h-10 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-white/20"
+            />
+          </div>
+
           <div className="space-y-1.5">
             <label htmlFor="email" className="text-sm font-medium text-white/80">
               E-mail
@@ -67,14 +95,9 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-sm font-medium text-white/80">
-                Senha
-              </label>
-              <span className="text-xs text-white/40 hover:text-white/60 cursor-pointer transition-colors">
-                Esqueceu a senha?
-              </span>
-            </div>
+            <label htmlFor="password" className="text-sm font-medium text-white/80">
+              Senha
+            </label>
             <div className="relative">
               <Input
                 id="password"
@@ -83,7 +106,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
                 className="h-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-white/20"
               />
               <button
@@ -94,6 +117,33 @@ export default function LoginPage() {
                 aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="confirm-password" className="text-sm font-medium text-white/80">
+              Confirmar senha
+            </label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirm ? "text" : "password"}
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+                className="h-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-white/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                tabIndex={-1}
+                aria-label={showConfirm ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
@@ -112,19 +162,19 @@ export default function LoginPage() {
             {isLoading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Entrando…
+                Cadastrando…
               </>
             ) : (
-              "Entrar"
+              "Cadastrar"
             )}
           </Button>
         </form>
 
         {/* Footer */}
         <p className="text-center text-sm text-white/40">
-          Ainda não tem uma conta?{" "}
-          <Link href="/register" className="text-white/70 hover:text-white transition-colors font-medium">
-            Cadastre-se
+          Já tem uma conta?{" "}
+          <Link href="/login" className="text-white/70 hover:text-white transition-colors font-medium">
+            Faça login
           </Link>
         </p>
       </div>

@@ -38,6 +38,28 @@ export const loginResponseSchema = z.object({
 export type Account = z.infer<typeof accountSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
+export async function register(name: string, email: string, password: string): Promise<LoginResponse> {
+  const res = await fetch(`${API_BASE}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  if (res.status === 409) {
+    throw new Error("Este e-mail já está cadastrado");
+  }
+  if (!res.ok) {
+    throw new Error(`Cadastro falhou: HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const parsed = loginResponseSchema.parse(data);
+
+  document.cookie = `${TOKEN_COOKIE}=${parsed.access_token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+
+  return parsed;
+}
+
 export async function login(email: string, password: string): Promise<LoginResponse> {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
