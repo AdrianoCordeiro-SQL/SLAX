@@ -81,6 +81,7 @@ def seed():
                 )
                 log = APILog(
                     user_id=user.id,
+                    account_id=admin.id,
                     action=action,
                     status=status,
                     timestamp=timestamp,
