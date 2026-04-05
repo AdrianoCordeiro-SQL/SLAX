@@ -25,6 +25,7 @@ export function PerformanceChart() {
       error={error}
       empty={empty}
       errorPrefix="Failed to load performance data"
+      emptyMessage="No API requests recorded in the last 30 days. Navigate the app (Dashboard, Users, Reports) to record real activity, or run python -m app.seed in the backend for sample data."
       skeleton={<ChartLineSkeleton />}
     >
       {data && data.length > 0 ? (

@@ -29,6 +29,7 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
       error={error}
       empty={empty}
       errorPrefix="Failed to load top actions"
+      emptyMessage="No API logs in this period to aggregate. Navigate the app or adjust the range."
       skeleton={<ChartLineSkeleton />}
     >
       {data && data.length > 0 ? (

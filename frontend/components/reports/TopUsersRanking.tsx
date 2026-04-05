@@ -43,7 +43,7 @@ export function TopUsersRanking({ start, end }: TopUsersRankingProps) {
 
         {data && data.length === 0 && (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            No data for this period
+            No users with API activity in this period. Use the app or adjust the date range.
           </p>
         )}
 

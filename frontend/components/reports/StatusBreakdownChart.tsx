@@ -22,6 +22,7 @@ export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) 
       error={error}
       empty={empty}
       errorPrefix="Failed to load status breakdown"
+      emptyMessage="No API logs in this period. Use the app or widen the date range."
       skeleton={<ChartPieSkeleton />}
     >
       {data && data.length > 0 ? (

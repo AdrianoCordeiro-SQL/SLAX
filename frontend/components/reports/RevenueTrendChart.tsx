@@ -29,6 +29,7 @@ export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
       error={error}
       empty={empty}
       errorPrefix="Failed to load revenue trend"
+      emptyMessage="No revenue data in this period. Revenue comes from stored metrics (e.g. seed data), not from API calls."
       skeleton={<ChartLineSkeleton />}
     >
       {data && data.length > 0 ? (

@@ -66,6 +66,8 @@ function SkeletonRow() {
 
 export function RecentActivity() {
   const { data: activity, isLoading, error } = useActivity();
+  const showEmpty =
+    !isLoading && !error && (!activity || activity.length === 0);
 
   return (
     <Card>
@@ -80,25 +82,37 @@ export function RecentActivity() {
             Failed to load activity: {error.message}
           </div>
         )}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-6">User</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading
-                ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-                : activity?.map((item) => (
-                    <ActivityRow key={item.id} item={item} />
-                  ))}
-            </TableBody>
-          </Table>
-        </div>
+        {showEmpty ? (
+          <div className="flex flex-col items-center justify-center px-6 py-12 text-center text-sm text-muted-foreground">
+            <p className="max-w-md">
+              No activity yet. Authenticated API calls are logged automatically as you use the app. Try opening Reports or Users, or run{" "}
+              <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
+                python -m app.seed
+              </code>{" "}
+              for demo data.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-6">User</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+                  : activity?.map((item) => (
+                      <ActivityRow key={item.id} item={item} />
+                    ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

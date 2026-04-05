@@ -11,6 +11,7 @@ from .exceptions import (
     UserNotFoundForAccount,
     WrongCurrentPassword,
 )
+from .middleware.audit_log import AuditLogMiddleware
 from .routers import auth, dashboard, reports, users
 
 # Aplicação FastAPI: CORS, lifespan, tratamento de exceções de domínio e registro dos routers da API.
@@ -54,6 +55,7 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
+app.add_middleware(AuditLogMiddleware)
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(users.router)

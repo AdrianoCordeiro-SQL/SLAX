@@ -161,40 +161,58 @@ export function LogsTable({ start, end }: LogsTableProps) {
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <SkeletonRow key={i} />
                   ))
-                : data?.items.map((item) => (
-                    <TableRow
-                      key={item.id}
-                      className={isFetching ? "opacity-60" : ""}
-                    >
-                      <TableCell className="pl-6">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar size="sm">
-                            {item.avatar_url && (
-                              <AvatarImage
-                                src={item.avatar_url}
-                                alt={item.user}
-                              />
-                            )}
-                            <AvatarFallback>
-                              {getInitials(item.user)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium text-foreground">
-                            {item.user}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground font-mono text-xs">
-                        {item.action}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {formatTimestamp(item.timestamp)}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={item.status} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                : error
+                  ? null
+                  : !data?.items || data.items.length === 0
+                    ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={4}
+                            className="px-6 py-12 text-center text-sm text-muted-foreground"
+                          >
+                            No logs in this date range. Adjust the range or use the app to
+                            generate API activity. For sample rows, run{" "}
+                            <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
+                              python -m app.seed
+                            </code>{" "}
+                            in the backend.
+                          </TableCell>
+                        </TableRow>
+                      )
+                    : data.items.map((item) => (
+                      <TableRow
+                        key={item.id}
+                        className={isFetching ? "opacity-60" : ""}
+                      >
+                        <TableCell className="pl-6">
+                          <div className="flex items-center gap-2.5">
+                            <Avatar size="sm">
+                              {item.avatar_url && (
+                                <AvatarImage
+                                  src={item.avatar_url}
+                                  alt={item.user}
+                                />
+                              )}
+                              <AvatarFallback>
+                                {getInitials(item.user)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium text-foreground">
+                              {item.user}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground font-mono text-xs">
+                          {item.action}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {formatTimestamp(item.timestamp)}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={item.status} />
+                        </TableCell>
+                      </TableRow>
+                      ))}
             </TableBody>
           </Table>
         </div>
