@@ -21,6 +21,7 @@ interface RevenueTrendChartProps {
 export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
   const { data, isLoading, error } = useRevenueTrend(start, end);
   const empty = !data?.length;
+  const longRange = (data?.length ?? 0) > 120;
 
   return (
     <AsyncChartCard
@@ -50,7 +51,7 @@ export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
                 const d = new Date(v);
                 return `${d.getMonth() + 1}/${d.getDate()}`;
               }}
-              interval="preserveStartEnd"
+              interval={longRange ? Math.ceil((data?.length ?? 0) / 12) : "preserveStartEnd"}
             />
             <YAxis
               tickLine={false}

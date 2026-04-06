@@ -8,8 +8,8 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-800">LogSlax Commerce Monitor / Visão geral</h1>
         <p className="text-sm text-muted-foreground">
-          Bem-vindo de volta. Acompanhe eventos, estabilidade da API e receita da sua plataforma
-          de e-commerce nos últimos 30 dias.
+          Bem-vindo de volta. Acompanhe eventos e receita da sua operação de e-commerce nos
+          últimos 30 dias.
         </p>
       </div>
       <StatsCards />

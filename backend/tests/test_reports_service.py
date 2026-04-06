@@ -130,6 +130,11 @@ def test_build_logs_paginated_filtros_e_pagina(session: Session):
     assert filtered["total"] == 1
     assert filtered["items"][0]["action"] == "B"
 
+    partial = build_logs_paginated(
+        session, aid, START, END, status=None, action="a", user_id=None, page=1, per_page=10
+    )
+    assert partial["total"] == 2
+
     by_user = build_logs_paginated(
         session, aid, START, END, status=None, action=None, user_id=ua_id, page=1, per_page=10
     )

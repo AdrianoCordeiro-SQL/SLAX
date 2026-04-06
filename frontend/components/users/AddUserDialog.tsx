@@ -37,6 +37,9 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
     formState: { errors },
   } = useForm<CreateUserInput>({
     resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      generate_platform_activity: false,
+    },
   });
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -183,6 +186,24 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                 <p className="text-xs text-red-600">{errors.value.message}</p>
               )}
             </div>
+          </div>
+
+          <div className="space-y-1.5 rounded-md border border-border bg-muted/30 px-3 py-2.5">
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-input"
+                {...register("generate_platform_activity")}
+              />
+              <span className="text-sm leading-snug">
+                <span className="font-medium text-foreground">
+                  Gerar atividade recente para este cliente
+                </span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  Exemplo: Cliente favoritou um produto eletrônico.
+                </span>
+              </span>
+            </label>
           </div>
 
           <DialogFooter className="pt-2">

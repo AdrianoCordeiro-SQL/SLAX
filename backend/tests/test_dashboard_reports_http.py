@@ -51,7 +51,7 @@ def test_get_raiz_health_sem_auth_200(client: TestClient):
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "Online"
-    assert "LogSlax Commerce Monitor API" in body["message"]
+    assert "LogSlax Commerce Monitor" in body["message"]
 
 
 @pytest.mark.parametrize("path", PROTECTED_PATHS)
@@ -74,8 +74,6 @@ def test_get_stats_com_bearer_estrutura_200(client: TestClient):
         "users_change",
         "api_requests",
         "requests_change",
-        "db_health",
-        "db_health_change",
         "revenue",
         "revenue_change",
     ):

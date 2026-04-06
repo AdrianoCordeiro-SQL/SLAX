@@ -203,8 +203,9 @@ def build_logs_paginated(
         base = base.where(APILog.status == status)
         count_q = count_q.where(APILog.status == status)
     if action:
-        base = base.where(APILog.action == action)
-        count_q = count_q.where(APILog.action == action)
+        like_expr = f"%{action}%"
+        base = base.where(APILog.action.ilike(like_expr))
+        count_q = count_q.where(APILog.action.ilike(like_expr))
     if user_id is not None:
         base = base.where(APILog.user_id == user_id)
         count_q = count_q.where(APILog.user_id == user_id)

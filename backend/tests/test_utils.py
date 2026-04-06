@@ -39,6 +39,14 @@ def test_parse_period_so_start_usa_agora_como_fim():
     assert period_start == datetime(2024, 5, 1, 0, 0, 0, tzinfo=timezone.utc)
 
 
+def test_parse_period_end_date_inclui_dia_final():
+    """Quando end vem como YYYY-MM-DD, inclui o dia inteiro na janela."""
+
+    period_start, period_end = parse_period("2024-01-01", "2024-01-11")
+    assert period_start == datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    assert period_end == datetime(2024, 1, 12, 0, 0, 0, tzinfo=timezone.utc)
+
+
 def test_pct_change_previous_zero_current_positivo():
     """Quando previous é 0 e current > 0, retorna +100%."""
 

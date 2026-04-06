@@ -20,7 +20,7 @@ export function PerformanceChart() {
 
   return (
     <AsyncChartCard
-      title="Volume de eventos vs latência (últimos 30 dias)"
+      title="Atividade de clientes vs volume de eventos (últimos 30 dias)"
       isLoading={isLoading}
       error={error}
       empty={empty}
@@ -64,7 +64,7 @@ export function PerformanceChart() {
               tick={{ fontSize: 12, fill: "#6b7280" }}
               width={52}
               label={{
-                value: "Latência (ms, simulada)",
+                value: "Engajamento",
                 angle: 90,
                 position: "insideRight",
                 offset: 16,
@@ -88,7 +88,7 @@ export function PerformanceChart() {
                         ? Number(value[0] ?? 0)
                         : Number(value ?? 0);
                 return n === "latency"
-                  ? [`${num} ms`, "Latência (simulada)"]
+                  ? [num, "Engajamento"]
                   : [num, "Volume de eventos"];
               }}
               labelFormatter={(label) => `Dia ${label}`}
@@ -100,7 +100,7 @@ export function PerformanceChart() {
               formatter={(value: string) =>
                 value === "requests"
                   ? "Volume de eventos"
-                  : "Latência (ms, simulada)"
+                  : "Engajamento"
               }
             />
             <Line

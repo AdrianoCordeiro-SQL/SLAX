@@ -30,6 +30,7 @@ import { getInitials } from "@/lib/format";
 function formatTimestamp(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleString("pt-BR", {
+    year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",

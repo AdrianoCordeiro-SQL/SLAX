@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, CheckCircle2, DollarSign, Users } from "lucide-react";
+import { Activity, DollarSign, Users } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
@@ -97,18 +97,11 @@ export function StatsCards() {
       sparklineData: sparklines?.users ?? empty,
     },
     {
-      title: "Transações feitas",
+      title: "Atividades recentes",
       value: stats.api_requests.toLocaleString(),
       change: transactionCountLabel,
       icon: Activity,
       sparklineData: sparklines?.requests ?? empty,
-    },
-    {
-      title: "Taxa de sucesso",
-      value: stats.db_health,
-      change: stats.db_health_change,
-      icon: CheckCircle2,
-      sparklineData: sparklines?.health ?? empty,
     },
     {
       title: "Receita líquida",

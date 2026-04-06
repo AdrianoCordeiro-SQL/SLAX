@@ -57,46 +57,11 @@ def build_stats(session: Session, account_id: int) -> dict:
     ).one() or 0.0
     revenue_change = pct_change(revenue_this_week, revenue_prev_week)
 
-    total_logs_week = session.exec(
-        select(func.count(col(APILog.id))).where(APILog.account_id == aid, APILog.timestamp >= week_start)
-    ).one()
-    success_logs_week = session.exec(
-        select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid,
-            APILog.timestamp >= week_start,
-            APILog.status == "Success",
-        )
-    ).one()
-    rate_week = (
-        100.0 if total_logs_week == 0 else round(success_logs_week / total_logs_week * 100, 1)
-    )
-
-    total_logs_prev = session.exec(
-        select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid,
-            APILog.timestamp >= prev_week_start,
-            APILog.timestamp < week_start,
-        )
-    ).one()
-    success_logs_prev = session.exec(
-        select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid,
-            APILog.timestamp >= prev_week_start,
-            APILog.timestamp < week_start,
-            APILog.status == "Success",
-        )
-    ).one()
-    rate_prev = (
-        100.0 if total_logs_prev == 0 else round(success_logs_prev / total_logs_prev * 100, 1)
-    )
-
     return {
         "total_users": total_users,
         "users_change": users_change,
         "api_requests": api_requests,
         "requests_change": requests_change,
-        "db_health": f"{rate_week:.1f}%",
-        "db_health_change": pct_change(rate_week, rate_prev),
         "revenue": round(revenue_total, 2),
         "revenue_change": revenue_change,
     }

@@ -13,6 +13,7 @@ class UserCreate(BaseModel):
     first_name: str
     product: str
     value: float = Field(gt=0)
+    generate_platform_activity: bool = False
     last_name: Optional[str] = None
     email: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -86,8 +87,6 @@ class StatsResponse(BaseModel):
     users_change: str
     api_requests: int
     requests_change: str
-    db_health: str
-    db_health_change: str
     revenue: float
     revenue_change: str
 

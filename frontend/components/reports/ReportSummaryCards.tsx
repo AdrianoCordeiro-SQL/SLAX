@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, CheckCircle2, DollarSign, Users } from "lucide-react";
+import { Activity, DollarSign, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
 import { useReportSummary } from "@/hooks/useReports";
@@ -64,18 +64,17 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
     );
   }
 
+  const transactionCountLabel =
+    data.total_requests === 1
+      ? "1 transação no período"
+      : `${data.total_requests.toLocaleString()} transações no período`;
+
   const cards: SummaryCardProps[] = [
     {
-      title: "Chamadas da API",
+      title: "Atividades recentes",
       value: data.total_requests.toLocaleString(),
-      change: data.requests_change,
+      change: transactionCountLabel,
       icon: Activity,
-    },
-    {
-      title: "Taxa de sucesso",
-      value: `${data.success_rate}%`,
-      change: data.success_rate_change,
-      icon: CheckCircle2,
     },
     {
       title: "Receita",
@@ -97,7 +96,7 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => (
         <SummaryCard key={card.title} {...card} />
       ))}

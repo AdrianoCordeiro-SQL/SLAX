@@ -25,6 +25,7 @@ export const createUserSchema = z.object({
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   product: z.string().min(2, "Produto deve ter ao menos 2 caracteres"),
   value: z.coerce.number().positive("Valor deve ser maior que zero"),
+  generate_platform_activity: z.boolean().default(false),
   avatar_url: z.string().optional(),
 });
 
@@ -51,6 +52,7 @@ export async function createUser(input: CreateUserInput): Promise<User> {
       first_name: input.first_name,
       product: input.product,
       value: input.value,
+      generate_platform_activity: input.generate_platform_activity ?? false,
       last_name: input.last_name || null,
       email: input.email || null,
       avatar_url: input.avatar_url || null,

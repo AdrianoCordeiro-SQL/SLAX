@@ -23,8 +23,7 @@ export default function ReportsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Relatórios</h1>
           <p className="text-sm text-muted-foreground">
-            Acompanhe volume de eventos, estabilidade da API, receita e atividade dos clientes por
-            período.
+            Acompanhe volume de eventos, receita e atividade dos clientes por período.
           </p>
         </div>
         <DateRangeFilter start={start} end={end} onChange={handleRangeChange} />

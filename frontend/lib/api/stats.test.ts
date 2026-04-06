@@ -10,8 +10,6 @@ const validStatsPayload = {
   users_change: "+10.0%",
   api_requests: 100,
   requests_change: "-5.0%",
-  db_health: "99.2%",
-  db_health_change: "+1.0%",
   revenue: 99.5,
   revenue_change: "+0.0%",
 };

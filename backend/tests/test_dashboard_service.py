@@ -82,8 +82,6 @@ def test_build_stats_janelas_e_pct_change(session: Session):
     assert out["requests_change"] == pct_change(1, 1)
     assert out["revenue"] == 30.0
     assert out["revenue_change"] == pct_change(10.0, 20.0)
-    assert out["db_health"] == "100.0%"
-    assert out["db_health_change"] == pct_change(100.0, 100.0)
     assert out["users_change"] == pct_change(1, 0)
 
 

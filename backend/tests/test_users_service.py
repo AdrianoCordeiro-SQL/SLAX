@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
+
 import pytest
 from sqlmodel import Session, select
 
@@ -88,10 +90,55 @@ def test_create_user_persists_product_value_and_history(session: Session):
 
     logs = session.exec(select(APILog).where(APILog.user_id == user.id)).all()
     assert len(logs) == 1
-    assert "purchase: Notebook" in logs[0].action
+    assert logs[0].action == "Comprou Notebook"
 
     metrics = session.exec(
         select(RevenueMetric).where(RevenueMetric.account_id == account.id)
     ).all()
     assert len(metrics) == 1
     assert metrics[0].value == pytest.approx(1999.9)
+
+
+def test_create_user_with_platform_activity_adds_extra_recent_log(session: Session):
+    """Quando solicitado, cria 5-30 atividades aleatórias distribuídas em até 365 dias."""
+
+    account = register_account(
+        session, RegisterRequest(name="A", email="activity@example.com", password="pw123456")
+    )
+    user = create_user(
+        session,
+        account.id,
+        UserCreate(
+            first_name="Cliente",
+            product="Notebook",
+            value=3500,
+            generate_platform_activity=True,
+        ),
+    )
+
+    logs = session.exec(select(APILog).where(APILog.user_id == user.id)).all()
+    assert 6 <= len(logs) <= 31  # 1 compra inicial + 5..30 simuladas
+
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(days=365)
+
+    def _to_aware_utc(dt: datetime) -> datetime:
+        return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+
+    assert all(start <= _to_aware_utc(log.timestamp) <= now for log in logs)
+
+    simulated_logs = [log for log in logs if log.action != "Comprou Notebook"]
+    assert all(
+        log.action.startswith("Adicionou um comentário ao produto ")
+        or log.action.startswith("Adicionou ")
+        and log.action.endswith(" ao carrinho")
+        or log.action.startswith("Comprou ")
+        for log in simulated_logs
+    )
+
+    purchase_logs = [log for log in logs if log.action.startswith("Comprou ")]
+    metrics = session.exec(
+        select(RevenueMetric).where(RevenueMetric.account_id == account.id)
+    ).all()
+    # Cada atividade de compra gera RevenueMetric; também inclui a compra base do cadastro.
+    assert len(metrics) == len(purchase_logs)

@@ -12,8 +12,6 @@ const statsJson = {
   users_change: "0%",
   api_requests: 0,
   requests_change: "0%",
-  db_health: "100.0%",
-  db_health_change: "+0.0%",
   revenue: 0,
   revenue_change: "0%",
 };
