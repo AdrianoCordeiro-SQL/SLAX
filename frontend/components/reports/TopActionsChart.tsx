@@ -24,11 +24,11 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
 
   return (
     <AsyncChartCard
-      title="Top payment events"
+      title="Principais eventos"
       isLoading={isLoading}
       error={error}
       empty={empty}
-      errorPrefix="Failed to load top payment events"
+      errorPrefix="Falha ao carregar principais eventos"
       skeleton={<ChartLineSkeleton />}
     >
       {data && data.length > 0 ? (
@@ -66,7 +66,7 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
                     : typeof value === "string"
                       ? Number(value)
                       : Number(value ?? 0);
-                return [num, "Events"];
+                return [num, "Eventos"];
               }}
             />
             <Bar dataKey="count" fill="#1e2d5a" radius={[0, 4, 4, 0]} barSize={20} />

@@ -53,7 +53,10 @@ export default function RegisterPage() {
 
   return (
     <AuthScreenShell className="py-8">
-      <AuthBrandHeader title="Criar Conta" subtitle="Junte-se ao SLAX Pay (demo) hoje." />
+      <AuthBrandHeader
+        title="Criar conta"
+        subtitle="Comece a monitorar a atividade da sua plataforma de e-commerce."
+      />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">

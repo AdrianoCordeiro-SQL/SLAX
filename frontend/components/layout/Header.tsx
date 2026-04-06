@@ -4,7 +4,7 @@ import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function getFormattedDate() {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
     year: "numeric",
     month: "long",

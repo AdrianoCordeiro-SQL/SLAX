@@ -17,7 +17,7 @@ import { getInitials } from "@/lib/format";
 
 function formatTimestamp(iso: string): string {
   const date = new Date(iso);
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("pt-BR", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -84,22 +84,22 @@ export function RecentActivity() {
     <Card>
       <CardHeader>
         <CardTitle className="text-base font-semibold">
-          Recent payment activity
+          Atividade recente da plataforma
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {error && (
           <div className="px-6 py-3 text-sm text-red-700">
-            Failed to load activity: {error.message}
+            Falha ao carregar atividade: {error.message}
           </div>
         )}
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">Customer</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Timestamp</TableHead>
+                <TableHead className="pl-6">Cliente</TableHead>
+                <TableHead>Ação</TableHead>
+                <TableHead>Horário</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>

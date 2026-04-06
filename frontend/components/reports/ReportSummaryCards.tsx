@@ -59,32 +59,37 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
   if (error || !data) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        Failed to load report summary: {error?.message ?? "Unknown error"}
+        Falha ao carregar resumo dos relatórios: {error?.message ?? "Erro desconhecido"}
       </div>
     );
   }
 
   const cards: SummaryCardProps[] = [
     {
-      title: "Payment API calls",
+      title: "Chamadas da API",
       value: data.total_requests.toLocaleString(),
       change: data.requests_change,
       icon: Activity,
     },
     {
-      title: "Success Rate",
+      title: "Taxa de sucesso",
       value: `${data.success_rate}%`,
       change: data.success_rate_change,
       icon: CheckCircle2,
     },
     {
-      title: "Revenue",
-      value: `$${data.total_revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      title: "Receita",
+      value: new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(data.total_revenue),
       change: data.revenue_change,
       icon: DollarSign,
     },
     {
-      title: "Active customers",
+      title: "Clientes ativos",
       value: data.active_users.toLocaleString(),
       change: data.active_users_change,
       icon: Users,

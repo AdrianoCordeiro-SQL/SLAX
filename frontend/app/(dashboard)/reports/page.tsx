@@ -21,9 +21,10 @@ export default function ReportsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Reports</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Relatórios</h1>
           <p className="text-sm text-muted-foreground">
-            Payment volume, success rate, revenue, and customer activity by period.
+            Acompanhe volume de eventos, estabilidade da API, receita e atividade dos clientes por
+            período.
           </p>
         </div>
         <DateRangeFilter start={start} end={end} onChange={handleRangeChange} />

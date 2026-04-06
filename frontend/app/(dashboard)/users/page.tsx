@@ -34,9 +34,9 @@ export default function UsersPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Customers</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
             <p className="text-sm text-muted-foreground">
-              Manage customers linked to your SLAX Pay account.
+              Gerencie os clientes e compras monitoradas na sua operação de e-commerce.
             </p>
           </div>
           <button
@@ -45,7 +45,7 @@ export default function UsersPage() {
             className="cursor-pointer inline-flex items-center gap-1.5 rounded-md bg-[#1e2d5a] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1e2d5a]/90 self-start sm:self-auto"
           >
             <UserPlus size={15} />
-            Add User
+            Adicionar cliente
           </button>
         </div>
 

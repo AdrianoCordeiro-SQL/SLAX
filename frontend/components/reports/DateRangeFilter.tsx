@@ -52,7 +52,7 @@ export function DateRangeFilter({ start, end, onChange }: DateRangeFilterProps) 
           onChange={(e) => onChange(e.target.value, end)}
           className="rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
         />
-        <span>to</span>
+        <span>até</span>
         <input
           type="date"
           value={end}

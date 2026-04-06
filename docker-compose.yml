@@ -26,7 +26,7 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/portfolio_db
-      # Login de visitante (POST /auth/demo). A conta tem de existir (ex. após seed com admin@slax.com).
+      # Acesso visitante (POST /auth/demo). A conta precisa existir (ex.: após seed com admin@slax.com).
       - DEMO_LOGIN_EMAIL=admin@slax.com
       - DEMO_LOGIN_PASSWORD=admin123
     depends_on:

@@ -29,7 +29,7 @@ import { getInitials } from "@/lib/format";
 
 function formatTimestamp(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleString("en-US", {
+  return d.toLocaleString("pt-BR", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -64,7 +64,7 @@ function exportCSV(items: LogItem[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "report-logs.csv";
+  a.download = "eventos-plataforma.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -90,7 +90,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
   return (
     <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="text-base font-semibold">Payment events</CardTitle>
+        <CardTitle className="text-base font-semibold">Eventos da plataforma</CardTitle>
 
         <div className="flex flex-wrap items-center gap-2">
           <Select
@@ -107,7 +107,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="all">Todos os status</SelectItem>
               {LOG_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
@@ -117,7 +117,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
           </Select>
 
           <Input
-            placeholder="Filter event..."
+            placeholder="Filtrar evento..."
             value={actionSearch}
             onChange={(e) => {
               setActionSearch(e.target.value);
@@ -134,7 +134,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
             onClick={() => data && exportCSV(data.items)}
           >
             <Download size={13} />
-            Export CSV
+            Exportar CSV
           </Button>
         </div>
       </CardHeader>
@@ -142,7 +142,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
       <CardContent className="p-0">
         {error && (
           <div className="px-6 py-3 text-sm text-red-700">
-            Failed to load payment events: {error.message}
+            Falha ao carregar eventos da plataforma: {error.message}
           </div>
         )}
 
@@ -150,9 +150,9 @@ export function LogsTable({ start, end }: LogsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">Customer</TableHead>
-                <TableHead>Event</TableHead>
-                <TableHead>Timestamp</TableHead>
+                <TableHead className="pl-6">Cliente</TableHead>
+                <TableHead>Evento</TableHead>
+                <TableHead>Horário</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -202,7 +202,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
         {data && data.pages > 1 && (
           <div className="flex items-center justify-between border-t px-6 py-3">
             <span className="text-xs text-muted-foreground">
-              Page {data.page} of {data.pages} ({data.total} total)
+              Página {data.page} de {data.pages} ({data.total} no total)
             </span>
             <div className="flex items-center gap-1">
               <Button

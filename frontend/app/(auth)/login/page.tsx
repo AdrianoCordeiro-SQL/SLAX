@@ -59,8 +59,8 @@ function LoginForm() {
   return (
     <AuthScreenShell>
       <AuthBrandHeader
-        title="SLAX Pay"
-        subtitle="API de pagamentos para desenvolvedores (demo)."
+        title="LogSlax Commerce Monitor"
+        subtitle="Monitoramento de eventos e performance para plataformas de e-commerce."
       />
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -132,11 +132,12 @@ function LoginForm() {
                 Abrindo demonstração…
               </>
             ) : (
-              "Entrar como visitante (dados de demonstração)"
+              "Entrar como visitante"
             )}
           </Button>
           <p className="text-center text-xs text-white/45 leading-relaxed px-1">
-            Conta partilhada para ver o painel com dados de exemplo. Prefere uma experiência própria?{" "}
+            Conta compartilhada para explorar a plataforma com dados de exemplo. Quer uma
+            experiência própria?{" "}
             <Link href="/register" className="text-white/65 hover:text-white font-medium">
               Cadastre-se
             </Link>

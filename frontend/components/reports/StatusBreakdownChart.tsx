@@ -17,11 +17,11 @@ export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) 
 
   return (
     <AsyncChartCard
-      title="Status Breakdown"
+      title="Distribuição por status"
       isLoading={isLoading}
       error={error}
       empty={empty}
-      errorPrefix="Failed to load status breakdown"
+      errorPrefix="Falha ao carregar distribuição por status"
       skeleton={<ChartPieSkeleton />}
     >
       {data && data.length > 0 ? (

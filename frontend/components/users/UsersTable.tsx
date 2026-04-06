@@ -76,14 +76,14 @@ function UserRow({ user, onEdit, onDelete }: UserRowProps) {
           <button
             onClick={() => onEdit(user)}
             className="cursor-pointer rounded p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Edit user"
+            aria-label="Editar cliente"
           >
             <Pencil size={14} />
           </button>
           <button
             onClick={() => onDelete(user)}
             className="cursor-pointer rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-600"
-            aria-label="Delete user"
+            aria-label="Excluir cliente"
           >
             <Trash2 size={14} />
           </button>
@@ -113,18 +113,18 @@ export function UsersTable({
       <CardContent className="p-0">
         {error && (
           <div className="px-6 py-3 text-sm text-red-700">
-            Failed to load users: {error.message}
+            Falha ao carregar clientes: {error.message}
           </div>
         )}
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">Customer</TableHead>
-                <TableHead>Purchase</TableHead>
+                <TableHead className="pl-6">Cliente</TableHead>
+                <TableHead>Compra</TableHead>
                 <TableHead>ID</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="pr-6">Actions</TableHead>
+                <TableHead>Cadastro</TableHead>
+                <TableHead className="pr-6">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -134,7 +134,7 @@ export function UsersTable({
                   ? (
                     <TableRow>
                       <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                        No users yet. Add your first user above.
+                        Ainda não há clientes cadastrados. Adicione o primeiro cliente acima.
                       </TableCell>
                     </TableRow>
                   )

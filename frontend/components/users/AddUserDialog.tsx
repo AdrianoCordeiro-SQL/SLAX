@@ -73,7 +73,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Adicionar Usuário</DialogTitle>
+          <DialogTitle>Adicionar cliente</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-4">
           <div className="flex flex-col items-center gap-2">

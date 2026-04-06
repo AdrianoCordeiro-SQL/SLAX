@@ -11,7 +11,7 @@ def create_admin(email: str = "admin@slax.com", password: str = "admin", name: s
     with Session(engine) as session:
         existing = session.exec(select(Account).where(Account.email == email)).first()
         if existing:
-            print(f"Account '{email}' already exists. Skipping.")
+            print(f"Conta '{email}' já existe. Ignorando criação.")
             return
         session.add(Account(
             email=email,
@@ -19,7 +19,7 @@ def create_admin(email: str = "admin@slax.com", password: str = "admin", name: s
             name=name,
         ))
         session.commit()
-        print(f"Admin account created: {email}")
+        print(f"Conta administrativa criada: {email}")
 
 
 if __name__ == "__main__":

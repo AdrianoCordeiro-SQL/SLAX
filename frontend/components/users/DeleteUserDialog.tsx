@@ -28,12 +28,12 @@ export function DeleteUserDialog({ user, onOpenChange }: DeleteUserDialogProps) 
     <Dialog open={!!user} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Delete User</DialogTitle>
+          <DialogTitle>Excluir cliente</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Are you sure you want to delete{" "}
+          Tem certeza que deseja excluir{" "}
           <span className="font-semibold text-foreground">{user?.name}</span>?
-          This action cannot be undone.
+          Essa ação não pode ser desfeita.
         </p>
         <DialogFooter className="pt-2">
           <Button
@@ -42,7 +42,7 @@ export function DeleteUserDialog({ user, onOpenChange }: DeleteUserDialogProps) 
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             type="button"
@@ -50,7 +50,7 @@ export function DeleteUserDialog({ user, onOpenChange }: DeleteUserDialogProps) 
             disabled={isPending}
             className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {isPending ? "Deleting…" : "Delete"}
+            {isPending ? "Excluindo…" : "Excluir"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -20,7 +20,7 @@ export function AsyncChartCard({
   error,
   empty = false,
   errorPrefix,
-  emptyMessage = "No data for this period",
+  emptyMessage = "Sem dados para este período",
   skeleton,
   children,
 }: AsyncChartCardProps) {
@@ -35,7 +35,7 @@ export function AsyncChartCard({
           <CardTitle className="text-base font-semibold">{title}</CardTitle>
         </CardHeader>
         <CardContent className="py-6 text-center text-sm text-red-700">
-          {errorPrefix}: {error.message ?? "Unknown error"}
+          {errorPrefix}: {error.message ?? "Erro desconhecido"}
         </CardContent>
       </Card>
     );

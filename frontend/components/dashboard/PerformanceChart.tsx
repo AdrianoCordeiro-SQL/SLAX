@@ -20,11 +20,11 @@ export function PerformanceChart() {
 
   return (
     <AsyncChartCard
-      title="Payment volume vs latency (last 30 days)"
+      title="Volume de eventos vs latência (últimos 30 dias)"
       isLoading={isLoading}
       error={error}
       empty={empty}
-      errorPrefix="Failed to load performance data"
+      errorPrefix="Falha ao carregar dados de performance"
       skeleton={<ChartLineSkeleton />}
     >
       {data && data.length > 0 ? (
@@ -39,7 +39,7 @@ export function PerformanceChart() {
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 12, fill: "#6b7280" }}
-              tickFormatter={(v: number) => `Day ${v}`}
+              tickFormatter={(v: number) => `Dia ${v}`}
               interval={4}
             />
             <YAxis
@@ -49,7 +49,7 @@ export function PerformanceChart() {
               tick={{ fontSize: 12, fill: "#6b7280" }}
               width={48}
               label={{
-                value: "Payment volume",
+                value: "Volume de eventos",
                 angle: -90,
                 position: "insideLeft",
                 offset: 12,
@@ -64,7 +64,7 @@ export function PerformanceChart() {
               tick={{ fontSize: 12, fill: "#6b7280" }}
               width={52}
               label={{
-                value: "Latency (ms, simulated)",
+                value: "Latência (ms, simulada)",
                 angle: 90,
                 position: "insideRight",
                 offset: 16,
@@ -88,10 +88,10 @@ export function PerformanceChart() {
                         ? Number(value[0] ?? 0)
                         : Number(value ?? 0);
                 return n === "latency"
-                  ? [`${num} ms`, "Latency (simulated)"]
-                  : [num, "Payment volume"];
+                  ? [`${num} ms`, "Latência (simulada)"]
+                  : [num, "Volume de eventos"];
               }}
-              labelFormatter={(label) => `Day ${label}`}
+              labelFormatter={(label) => `Dia ${label}`}
             />
             <Legend
               verticalAlign="bottom"
@@ -99,8 +99,8 @@ export function PerformanceChart() {
               iconType="plainline"
               formatter={(value: string) =>
                 value === "requests"
-                  ? "Payment volume"
-                  : "Latency (ms, simulated)"
+                  ? "Volume de eventos"
+                  : "Latência (ms, simulada)"
               }
             />
             <Line

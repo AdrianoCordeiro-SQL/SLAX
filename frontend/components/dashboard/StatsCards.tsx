@@ -77,38 +77,47 @@ export function StatsCards() {
   if (statsError || !stats) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        Failed to load stats: {statsError?.message ?? "Unknown error"}
+        Falha ao carregar métricas: {statsError?.message ?? "Erro desconhecido"}
       </div>
     );
   }
 
   const empty: SparklinePoint[] = [];
+  const transactionCountLabel =
+    stats.api_requests === 1
+      ? "1 compra registrada"
+      : `${stats.api_requests.toLocaleString()} compras registradas`;
 
   const cards: StatCardProps[] = [
     {
-      title: "Customers",
+      title: "Clientes",
       value: stats.total_users.toLocaleString(),
       change: stats.users_change,
       icon: Users,
       sparklineData: sparklines?.users ?? empty,
     },
     {
-      title: "Payment API calls",
+      title: "Transações feitas",
       value: stats.api_requests.toLocaleString(),
-      change: stats.requests_change,
+      change: transactionCountLabel,
       icon: Activity,
       sparklineData: sparklines?.requests ?? empty,
     },
     {
-      title: "Success rate",
+      title: "Taxa de sucesso",
       value: stats.db_health,
       change: stats.db_health_change,
       icon: CheckCircle2,
       sparklineData: sparklines?.health ?? empty,
     },
     {
-      title: "Net revenue",
-      value: `$${stats.revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      title: "Receita líquida",
+      value: new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(stats.revenue),
       change: stats.revenue_change,
       icon: DollarSign,
       sparklineData: sparklines?.revenue ?? empty,

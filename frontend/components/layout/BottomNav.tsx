@@ -16,10 +16,10 @@ import { logout } from "@/lib/api/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Reports", href: "/reports", icon: FileBarChart2 },
-  { label: "Customers", href: "/users", icon: Users },
-  { label: "Events", href: "/api-logs", icon: ScrollText },
+  { label: "Visão geral", href: "/", icon: LayoutDashboard },
+  { label: "Relatórios", href: "/reports", icon: FileBarChart2 },
+  { label: "Clientes", href: "/users", icon: Users },
+  { label: "Eventos", href: "/api-logs", icon: ScrollText },
 ];
 
 export function BottomNav() {
