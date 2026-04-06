@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from freezegun import freeze_time
 
@@ -16,8 +16,8 @@ def test_parse_period_start_end_fixos_utc():
         "2024-01-01T10:00:00+00:00",
         "2024-01-11T10:00:00+00:00",
     )
-    assert start.tzinfo == timezone.utc
-    assert end.tzinfo == timezone.utc
+    assert start.tzinfo == UTC
+    assert end.tzinfo == UTC
     assert end - start == timedelta(days=10)
 
 
@@ -26,7 +26,7 @@ def test_parse_period_so_end_usa_agora_como_limite_e_retrocede_30_dias():
     """Sem start, period_end é 'agora' e period_start é 30 dias antes."""
 
     period_start, period_end = parse_period(None, "2024-06-15T18:00:00+00:00")
-    assert period_end == datetime(2024, 6, 15, 18, 0, 0, tzinfo=timezone.utc)
+    assert period_end == datetime(2024, 6, 15, 18, 0, 0, tzinfo=UTC)
     assert period_start == period_end - timedelta(days=30)
 
 
@@ -35,16 +35,16 @@ def test_parse_period_so_start_usa_agora_como_fim():
     """Sem end, period_end é o instante atual (UTC)."""
 
     period_start, period_end = parse_period("2024-05-01T00:00:00+00:00", None)
-    assert period_end == datetime(2024, 6, 15, 12, 0, 0, tzinfo=timezone.utc)
-    assert period_start == datetime(2024, 5, 1, 0, 0, 0, tzinfo=timezone.utc)
+    assert period_end == datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
+    assert period_start == datetime(2024, 5, 1, 0, 0, 0, tzinfo=UTC)
 
 
 def test_parse_period_end_date_inclui_dia_final():
     """Quando end vem como YYYY-MM-DD, inclui o dia inteiro na janela."""
 
     period_start, period_end = parse_period("2024-01-01", "2024-01-11")
-    assert period_start == datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    assert period_end == datetime(2024, 1, 12, 0, 0, 0, tzinfo=timezone.utc)
+    assert period_start == datetime(2024, 1, 1, 0, 0, 0, tzinfo=UTC)
+    assert period_end == datetime(2024, 1, 12, 0, 0, 0, tzinfo=UTC)
 
 
 def test_pct_change_previous_zero_current_positivo():

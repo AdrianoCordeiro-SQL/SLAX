@@ -1,14 +1,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-
 from sqlmodel import Session
 
 from ..auth import get_current_account
 from ..database import get_session
 from ..models import Account
 from ..schemas import UserCreate, UserOut, UserUpdate
-from ..services.users import create_user, delete_user, list_users, update_user as update_user_svc
+from ..services.users import create_user, delete_user, list_users
+from ..services.users import update_user as update_user_svc
 
 # Rotas HTTP do prefixo /users: listagem e CRUD de usuários do tenant autenticado.
 
@@ -24,12 +24,16 @@ def list_users_route(session: SessionDep, account: CurrentAccount):
 
 
 @router.post("/", status_code=201, response_model=UserOut)
-def create_user_route(payload: UserCreate, session: SessionDep, account: CurrentAccount):
+def create_user_route(
+    payload: UserCreate, session: SessionDep, account: CurrentAccount
+):
     return create_user(session, account.id, payload)
 
 
 @router.put("/{user_id}", response_model=UserOut)
-def update_user(user_id: int, payload: UserUpdate, session: SessionDep, account: CurrentAccount):
+def update_user(
+    user_id: int, payload: UserUpdate, session: SessionDep, account: CurrentAccount
+):
     return update_user_svc(session, account.id, user_id, payload)
 
 

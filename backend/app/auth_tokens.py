@@ -1,9 +1,10 @@
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 
-# Criação e decodificação de tokens JWT sem depender do FastAPI (erros propagados como exceções PyJWT).
+# Criação e decodificação de tokens JWT sem depender do FastAPI (erros propagados como
+# exceções PyJWT).
 
 SECRET_KEY = os.getenv("JWT_SECRET", "slax-dev-secret-change-in-production")
 ALGORITHM = "HS256"
@@ -11,7 +12,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
 
 def create_access_token(account_id: int, email: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {"sub": str(account_id), "email": email, "exp": expire}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 

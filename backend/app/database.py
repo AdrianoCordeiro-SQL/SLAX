@@ -6,7 +6,8 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from . import models  # noqa: F401 — registra todas as tabelas no metadata
 
-# Engine SQLModel/PostgreSQL, criação de tabelas e gerador de sessão usado pelo Depends do FastAPI.
+# Engine SQLModel/PostgreSQL, criação de tabelas e gerador de sessão usado pelo
+# Depends do FastAPI.
 
 # O host 'db' vem do nome do serviço no seu docker-compose
 DATABASE_URL = os.getenv(
@@ -37,21 +38,29 @@ def create_db_and_tables():
         if "product" not in existing_columns:
             conn.execute(text('ALTER TABLE "user" ADD COLUMN product VARCHAR'))
         if "product_value" not in existing_columns:
-            conn.execute(text('ALTER TABLE "user" ADD COLUMN product_value DOUBLE PRECISION'))
+            conn.execute(
+                text('ALTER TABLE "user" ADD COLUMN product_value DOUBLE PRECISION')
+            )
 
         tables = inspector.get_table_names()
         if "revenuemetric" in tables:
             rm_cols = {col["name"] for col in inspector.get_columns("revenuemetric")}
             if "user_id" not in rm_cols:
-                conn.execute(text('ALTER TABLE revenuemetric ADD COLUMN user_id INTEGER'))
+                conn.execute(
+                    text("ALTER TABLE revenuemetric ADD COLUMN user_id INTEGER")
+                )
                 conn.execute(
                     text(
-                        'ALTER TABLE revenuemetric ADD CONSTRAINT '
-                        "revenuemetric_user_id_fkey FOREIGN KEY (user_id) REFERENCES \"user\" (id)"
+                        "ALTER TABLE revenuemetric ADD CONSTRAINT "
+                        "revenuemetric_user_id_fkey FOREIGN KEY (user_id) "
+                        'REFERENCES "user" (id)'
                     )
                 )
                 conn.execute(
-                    text("CREATE INDEX IF NOT EXISTS ix_revenuemetric_user_id ON revenuemetric (user_id)")
+                    text(
+                        "CREATE INDEX IF NOT EXISTS ix_revenuemetric_user_id "
+                        "ON revenuemetric (user_id)"
+                    )
                 )
 
 

@@ -22,7 +22,8 @@ def test_register_duplicate_email_raises(session: Session):
     )
     with pytest.raises(EmailAlreadyRegistered):
         register_account(
-            session, RegisterRequest(name="B", email="dup@example.com", password="other")
+            session,
+            RegisterRequest(name="B", email="dup@example.com", password="other"),
         )
 
 

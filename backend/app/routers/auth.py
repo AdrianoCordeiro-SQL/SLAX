@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-
 from sqlmodel import Session
 
 from ..auth import authenticate, get_current_account
@@ -16,14 +15,15 @@ from ..schemas import (
     RegisterRequest,
 )
 from ..services.account import (
+    account_to_auth_dict,
     build_auth_response,
     change_account_password,
-    account_to_auth_dict,
     register_account,
     update_account_profile,
 )
 
-# Rotas HTTP do prefixo /auth: registro, login, leitura/atualização de perfil e troca de senha.
+# Rotas HTTP do prefixo /auth: registro, login, leitura/atualização de perfil e troca de
+# senha.
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -57,5 +57,7 @@ def update_me(payload: AccountUpdate, account: CurrentAccount, session: SessionD
 
 
 @router.post("/change-password", status_code=204)
-def change_password(payload: PasswordChange, account: CurrentAccount, session: SessionDep):
+def change_password(
+    payload: PasswordChange, account: CurrentAccount, session: SessionDep
+):
     change_account_password(session, account, payload)

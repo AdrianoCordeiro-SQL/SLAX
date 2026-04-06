@@ -7,17 +7,21 @@ from .models import Account
 # Script executável para criar uma conta administrativa inicial (uso local ou setup).
 
 
-def create_admin(email: str = "admin@slax.com", password: str = "admin", name: str = "Admin") -> None:
+def create_admin(
+    email: str = "admin@slax.com", password: str = "admin", name: str = "Admin"
+) -> None:
     with Session(engine) as session:
         existing = session.exec(select(Account).where(Account.email == email)).first()
         if existing:
             print(f"Conta '{email}' já existe. Ignorando criação.")
             return
-        session.add(Account(
-            email=email,
-            hashed_password=hash_password(password),
-            name=name,
-        ))
+        session.add(
+            Account(
+                email=email,
+                hashed_password=hash_password(password),
+                name=name,
+            )
+        )
         session.commit()
         print(f"Conta administrativa criada: {email}")
 

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlmodel import Session
 
-from app.models import APILog, Account, RevenueMetric, User
+from app.models import Account, APILog, RevenueMetric, User
 from app.services.reports import (
     build_logs_paginated,
     build_report_summary,
@@ -17,16 +17,16 @@ from app.services.reports import (
 )
 from app.utils import pct_change
 
-# Período atual 10 dias; período anterior com a mesma duração (espelha build_report_summary).
+# Período atual 10 dias; anterior com a mesma duração (como build_report_summary).
 START = "2024-01-01T00:00:00+00:00"
 END = "2024-01-11T00:00:00+00:00"
 
 # Dentro do período atual [2024-01-01, 2024-01-11)
-T0 = datetime(2024, 1, 2, 12, 0, 0, tzinfo=timezone.utc)
-T1 = datetime(2024, 1, 5, 12, 0, 0, tzinfo=timezone.utc)
+T0 = datetime(2024, 1, 2, 12, 0, 0, tzinfo=UTC)
+T1 = datetime(2024, 1, 5, 12, 0, 0, tzinfo=UTC)
 # Período anterior [2023-12-22, 2024-01-01)
-P0 = datetime(2023, 12, 25, 12, 0, 0, tzinfo=timezone.utc)
-P1 = datetime(2023, 12, 30, 12, 0, 0, tzinfo=timezone.utc)
+P0 = datetime(2023, 12, 25, 12, 0, 0, tzinfo=UTC)
+P1 = datetime(2023, 12, 30, 12, 0, 0, tzinfo=UTC)
 
 
 def _seed_account_and_users(session: Session) -> tuple[int, int, int]:
@@ -47,7 +47,7 @@ def _seed_account_and_users(session: Session) -> tuple[int, int, int]:
 
 
 def test_build_report_summary_contagens_e_variacoes(session: Session):
-    """Resumo com logs e receita no período atual vs anterior; taxa de sucesso e pct_change."""
+    """Resumo: logs e receita atual vs anterior; taxa de sucesso e pct_change."""
 
     aid, ua_id, ub_id = _seed_account_and_users(session)
     # Atual: 4 pedidos, 3 Success
@@ -56,24 +56,22 @@ def test_build_report_summary_contagens_e_variacoes(session: Session):
             APILog(account_id=aid, user_id=ua_id, action="x", status=st, timestamp=ts)
         )
     session.add(
-        APILog(account_id=aid, user_id=ub_id, action="y", status="Success", timestamp=T1)
+        APILog(
+            account_id=aid, user_id=ub_id, action="y", status="Success", timestamp=T1
+        )
     )
     # Anterior: 2 pedidos, 1 Success
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="x", status="Success", timestamp=P0)
+        APILog(
+            account_id=aid, user_id=ua_id, action="x", status="Success", timestamp=P0
+        )
     )
     session.add(
         APILog(account_id=aid, user_id=ua_id, action="x", status="Error", timestamp=P1)
     )
-    session.add(
-        RevenueMetric(account_id=aid, value=100.0, recorded_at=T0)
-    )
-    session.add(
-        RevenueMetric(account_id=aid, value=-50.0, recorded_at=T1)
-    )
-    session.add(
-        RevenueMetric(account_id=aid, value=30.0, recorded_at=P0)
-    )
+    session.add(RevenueMetric(account_id=aid, value=100.0, recorded_at=T0))
+    session.add(RevenueMetric(account_id=aid, value=-50.0, recorded_at=T1))
+    session.add(RevenueMetric(account_id=aid, value=30.0, recorded_at=P0))
     session.commit()
 
     out = build_report_summary(session, aid, START, END)
@@ -107,21 +105,35 @@ def test_build_logs_paginated_filtros_e_pagina(session: Session):
     """Filtros status/action/user_id, total, páginas e ordem por timestamp desc."""
 
     aid, ua_id, ub_id = _seed_account_and_users(session)
-    t_new = datetime(2024, 1, 10, 0, 0, 0, tzinfo=timezone.utc)
-    t_old = datetime(2024, 1, 3, 0, 0, 0, tzinfo=timezone.utc)
+    t_new = datetime(2024, 1, 10, 0, 0, 0, tzinfo=UTC)
+    t_old = datetime(2024, 1, 3, 0, 0, 0, tzinfo=UTC)
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="A", status="Success", timestamp=t_old)
+        APILog(
+            account_id=aid, user_id=ua_id, action="A", status="Success", timestamp=t_old
+        )
     )
     session.add(
-        APILog(account_id=aid, user_id=ub_id, action="B", status="Error", timestamp=t_new)
+        APILog(
+            account_id=aid, user_id=ub_id, action="B", status="Error", timestamp=t_new
+        )
     )
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="A", status="Success", timestamp=T1)
+        APILog(
+            account_id=aid, user_id=ua_id, action="A", status="Success", timestamp=T1
+        )
     )
     session.commit()
 
     out = build_logs_paginated(
-        session, aid, START, END, status="Success", action=None, user_id=None, page=1, per_page=10
+        session,
+        aid,
+        START,
+        END,
+        status="Success",
+        action=None,
+        user_id=None,
+        page=1,
+        per_page=10,
     )
     assert out["total"] == 2
     assert out["pages"] == 1
@@ -129,18 +141,42 @@ def test_build_logs_paginated_filtros_e_pagina(session: Session):
     assert out["items"][0]["timestamp"] >= out["items"][1]["timestamp"]
 
     filtered = build_logs_paginated(
-        session, aid, START, END, status=None, action="B", user_id=None, page=1, per_page=10
+        session,
+        aid,
+        START,
+        END,
+        status=None,
+        action="B",
+        user_id=None,
+        page=1,
+        per_page=10,
     )
     assert filtered["total"] == 1
     assert filtered["items"][0]["action"] == "B"
 
     partial = build_logs_paginated(
-        session, aid, START, END, status=None, action="a", user_id=None, page=1, per_page=10
+        session,
+        aid,
+        START,
+        END,
+        status=None,
+        action="a",
+        user_id=None,
+        page=1,
+        per_page=10,
     )
     assert partial["total"] == 2
 
     by_user = build_logs_paginated(
-        session, aid, START, END, status=None, action=None, user_id=ua_id, page=1, per_page=10
+        session,
+        aid,
+        START,
+        END,
+        status=None,
+        action=None,
+        user_id=ua_id,
+        page=1,
+        per_page=10,
     )
     assert by_user["total"] == 2
 
@@ -183,14 +219,18 @@ def test_build_logs_paginated_transaction_kind_completed_e_return(session: Sessi
 
 
 def test_build_top_users_nome_e_unknown(session: Session):
-    """Ranking por contagens; utilizador órfão mostra Unknown se inserção for permitida."""
+    """Ranking por contagens; órfão mostra Unknown se a inserção for permitida."""
 
     aid, ua_id, _ = _seed_account_and_users(session)
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="p", status="Success", timestamp=T1)
+        APILog(
+            account_id=aid, user_id=ua_id, action="p", status="Success", timestamp=T1
+        )
     )
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="p", status="Success", timestamp=T1)
+        APILog(
+            account_id=aid, user_id=ua_id, action="p", status="Success", timestamp=T1
+        )
     )
     log_orf = APILog(
         account_id=aid,
@@ -219,7 +259,13 @@ def test_smoke_status_breakdown_top_actions_revenue_trend(session: Session):
 
     aid, ua_id, _ = _seed_account_and_users(session)
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="Comprou iPhone 15", status="Success", timestamp=T1)
+        APILog(
+            account_id=aid,
+            user_id=ua_id,
+            action="Comprou iPhone 15",
+            status="Success",
+            timestamp=T1,
+        )
     )
     session.add(
         APILog(
@@ -230,9 +276,7 @@ def test_smoke_status_breakdown_top_actions_revenue_trend(session: Session):
             timestamp=T1,
         )
     )
-    session.add(
-        RevenueMetric(account_id=aid, value=10.0, recorded_at=T0)
-    )
+    session.add(RevenueMetric(account_id=aid, value=10.0, recorded_at=T0))
     session.commit()
 
     br = build_status_breakdown(session, aid, START, END)

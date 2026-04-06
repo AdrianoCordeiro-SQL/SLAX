@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from freezegun import freeze_time
 from sqlmodel import Session
 
-from app.models import APILog, Account, RevenueMetric, User
-from app.services.dashboard import build_activity_feed, build_stats, build_sparklines
+from app.models import Account, APILog, RevenueMetric, User
+from app.services.dashboard import build_activity_feed, build_sparklines, build_stats
 from app.utils import pct_change
 
 
@@ -29,12 +29,12 @@ def test_build_stats_janelas_e_pct_change(session: Session):
     u_old = User(
         account_id=a.id,
         name="Old",
-        created_at=datetime(2024, 5, 1, 0, 0, 0, tzinfo=timezone.utc),
+        created_at=datetime(2024, 5, 1, 0, 0, 0, tzinfo=UTC),
     )
     u_new = User(
         account_id=a.id,
         name="New",
-        created_at=datetime(2024, 6, 10, 0, 0, 0, tzinfo=timezone.utc),
+        created_at=datetime(2024, 6, 10, 0, 0, 0, tzinfo=UTC),
     )
     session.add(u_old)
     session.add(u_new)
@@ -48,7 +48,7 @@ def test_build_stats_janelas_e_pct_change(session: Session):
             user_id=u_new.id,
             action="a",
             status="Success",
-            timestamp=datetime(2024, 6, 10, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2024, 6, 10, 12, 0, 0, tzinfo=UTC),
         )
     )
     session.add(
@@ -57,21 +57,21 @@ def test_build_stats_janelas_e_pct_change(session: Session):
             user_id=u_new.id,
             action="Produto iPhone 15 devolvido pelo cliente New",
             status="Success",
-            timestamp=datetime(2024, 6, 5, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2024, 6, 5, 12, 0, 0, tzinfo=UTC),
         )
     )
     session.add(
         RevenueMetric(
             account_id=a.id,
             value=10.0,
-            recorded_at=datetime(2024, 6, 10, 12, 0, 0, tzinfo=timezone.utc),
+            recorded_at=datetime(2024, 6, 10, 12, 0, 0, tzinfo=UTC),
         )
     )
     session.add(
         RevenueMetric(
             account_id=a.id,
             value=-20.0,
-            recorded_at=datetime(2024, 6, 5, 12, 0, 0, tzinfo=timezone.utc),
+            recorded_at=datetime(2024, 6, 5, 12, 0, 0, tzinfo=UTC),
         )
     )
     session.commit()
@@ -92,7 +92,9 @@ def test_build_sparklines_sete_dias_e_valores(session: Session):
     """Sparklines: 7 pontos por série, datas YYYY-MM-DD, contagens por dia."""
 
     a = _acc(session)
-    u = User(account_id=a.id, name="U", created_at=datetime(2024, 6, 10, 0, 0, 0, tzinfo=timezone.utc))
+    u = User(
+        account_id=a.id, name="U", created_at=datetime(2024, 6, 10, 0, 0, 0, tzinfo=UTC)
+    )
     session.add(u)
     session.commit()
     session.refresh(u)
@@ -103,7 +105,7 @@ def test_build_sparklines_sete_dias_e_valores(session: Session):
             user_id=u.id,
             action="x",
             status="Success",
-            timestamp=datetime(2024, 6, 10, 15, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2024, 6, 10, 15, 0, 0, tzinfo=UTC),
         )
     )
     session.add(
@@ -112,14 +114,14 @@ def test_build_sparklines_sete_dias_e_valores(session: Session):
             user_id=u.id,
             action="x",
             status="Error",
-            timestamp=datetime(2024, 6, 10, 16, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2024, 6, 10, 16, 0, 0, tzinfo=UTC),
         )
     )
     session.add(
         RevenueMetric(
             account_id=a.id,
             value=5.0,
-            recorded_at=datetime(2024, 6, 12, 12, 0, 0, tzinfo=timezone.utc),
+            recorded_at=datetime(2024, 6, 12, 12, 0, 0, tzinfo=UTC),
         )
     )
     session.commit()
@@ -146,7 +148,7 @@ def test_build_activity_feed_smoke(session: Session):
         user_id=None,
         action="ping",
         status="Success",
-        timestamp=datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+        timestamp=datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC),
     )
     session.add(log)
     session.commit()

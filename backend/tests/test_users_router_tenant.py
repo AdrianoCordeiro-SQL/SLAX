@@ -11,7 +11,7 @@ from app.services.users import create_user
 
 
 def test_cannot_modify_other_tenant_user_via_api(session: Session, client: TestClient):
-    """Conta A não pode alterar nem apagar utilizador da conta B; B continua a gerir o seu."""
+    """Conta A não altera/apaga user da conta B; B gere o seu."""
 
     register_account(
         session, RegisterRequest(name="A", email="ca@example.com", password="pw123456")
@@ -19,7 +19,9 @@ def test_cannot_modify_other_tenant_user_via_api(session: Session, client: TestC
     b = register_account(
         session, RegisterRequest(name="B", email="cb@example.com", password="pw123456")
     )
-    u_b = create_user(session, b.id, UserCreate(first_name="OnlyB", product="Plano B", value=120))
+    u_b = create_user(
+        session, b.id, UserCreate(first_name="OnlyB", product="Plano B", value=120)
+    )
 
     login_a = client.post(
         "/auth/login",

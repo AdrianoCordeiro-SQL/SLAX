@@ -2,7 +2,8 @@ from sqlmodel import Session
 
 from ..models import APILog, User
 
-# Converte um registro APILog em dicionário para respostas da API (nome e avatar do usuário).
+# Converte um registro APILog em dicionário para respostas da API (nome e avatar do
+# usuário).
 
 
 def serialize_api_log_row(session: Session, log: APILog) -> dict:

@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import json
 import math
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional, Union
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from pydantic import BaseModel, Field
 from sqlalchemy import delete
 from sqlmodel import Session, col, func, select
 
-from ..models import APILog, AlertFiring, AlertRule, RevenueMetric
+from ..models import AlertFiring, AlertRule, APILog, RevenueMetric
 
 RULE_TYPES = frozenset({"returns_rate_above", "revenue_drop", "days_without_purchase"})
 MAX_RULES_PER_ACCOUNT = 10
@@ -53,10 +53,10 @@ def _pct_change_numeric(current: float, previous: float) -> float:
 
 
 def _now_utc() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
-def _unwrap_scalar(val: Union[datetime, tuple[Any, ...], Any, None]) -> Optional[datetime]:
+def _unwrap_scalar(val: datetime | tuple[Any, ...] | Any | None) -> datetime | None:
     """Extrai um único valor de .first()/.one() (escalar ou Row de uma coluna)."""
     if val is None:
         return None
@@ -76,7 +76,7 @@ def _scalar_int(val: Any) -> int:
 
 def _metric_returns_rate(
     session: Session, account_id: int, window_days: int, min_events: int
-) -> tuple[Optional[float], dict[str, Any]]:
+) -> tuple[float | None, dict[str, Any]]:
     end = _now_utc()
     start = end - timedelta(days=window_days)
     aid = account_id
@@ -121,7 +121,7 @@ def _metric_returns_rate(
 
 def _metric_revenue_drop(
     session: Session, account_id: int, window_days: int
-) -> tuple[Optional[float], Optional[float], dict[str, Any]]:
+) -> tuple[float | None, float | None, dict[str, Any]]:
     end = _now_utc()
     cur_start = end - timedelta(days=window_days)
     prev_end = cur_start
@@ -163,7 +163,7 @@ def _metric_revenue_drop(
     return cur_rev, pct, {**snap, "pct_change": round(pct, 2)}
 
 
-def _last_purchase_moment(session: Session, account_id: int) -> Optional[datetime]:
+def _last_purchase_moment(session: Session, account_id: int) -> datetime | None:
     aid = account_id
     log_ts = _unwrap_scalar(
         session.exec(
@@ -189,15 +189,17 @@ def _last_purchase_moment(session: Session, account_id: int) -> Optional[datetim
     return max(candidates)
 
 
-def _metric_days_without_purchase(session: Session, account_id: int) -> tuple[Optional[int], dict[str, Any]]:
+def _metric_days_without_purchase(
+    session: Session, account_id: int
+) -> tuple[int | None, dict[str, Any]]:
     last = _last_purchase_moment(session, account_id)
     if last is None:
         return None, {"last_purchase_at": None, "reason": "nunca_houve_compra"}
     now = _now_utc()
     if last.tzinfo is None:
-        last = last.replace(tzinfo=timezone.utc)
+        last = last.replace(tzinfo=UTC)
     else:
-        last = last.astimezone(timezone.utc)
+        last = last.astimezone(UTC)
     delta = now - last
     days = max(0, int(delta.total_seconds() // 86400))
     return days, {
@@ -219,13 +221,13 @@ def _cooldown_ok(session: Session, rule_id: int, cooldown_hours: int) -> bool:
         return True
     fired_at = last[0] if isinstance(last, tuple) else last
     if fired_at.tzinfo is None:
-        fired_at = fired_at.replace(tzinfo=timezone.utc)
+        fired_at = fired_at.replace(tzinfo=UTC)
     else:
-        fired_at = fired_at.astimezone(timezone.utc)
+        fired_at = fired_at.astimezone(UTC)
     return (fired_at + timedelta(hours=cooldown_hours)) <= _now_utc()
 
 
-def evaluate_rule(session: Session, rule: AlertRule) -> Optional[dict[str, Any]]:
+def evaluate_rule(session: Session, rule: AlertRule) -> dict[str, Any] | None:
     """Retorna dict com message e snapshot se a regra disparar; senão None."""
     if not rule.enabled:
         return None
@@ -300,18 +302,22 @@ def evaluate_all_enabled(session: Session, account_id: int) -> list[dict[str, An
         session.add(firing)
         session.commit()
         session.refresh(firing)
-        fired.append({
-            "rule_id": rule.id,
-            "firing_id": firing.id,
-            "message": res["message"],
-        })
+        fired.append(
+            {
+                "rule_id": rule.id,
+                "firing_id": firing.id,
+                "message": res["message"],
+            }
+        )
     return fired
 
 
 def count_rules(session: Session, account_id: int) -> int:
     return _scalar_int(
         session.exec(
-            select(func.count(col(AlertRule.id))).where(AlertRule.account_id == account_id)
+            select(func.count(col(AlertRule.id))).where(
+                AlertRule.account_id == account_id
+            )
         ).one()
     )
 
@@ -350,10 +356,10 @@ def update_rule(
     account_id: int,
     rule_id: int,
     *,
-    rule_type: Optional[str] = None,
-    params: Optional[dict[str, Any]] = None,
-    enabled: Optional[bool] = None,
-    cooldown_hours: Optional[int] = None,
+    rule_type: str | None = None,
+    params: dict[str, Any] | None = None,
+    enabled: bool | None = None,
+    cooldown_hours: int | None = None,
 ) -> AlertRule:
     rule = session.get(AlertRule, rule_id)
     if not rule or rule.account_id != account_id:
@@ -392,7 +398,9 @@ def delete_rule(session: Session, account_id: int, rule_id: int) -> None:
 
 def list_rules(session: Session, account_id: int) -> list[AlertRule]:
     return session.exec(
-        select(AlertRule).where(AlertRule.account_id == account_id).order_by(col(AlertRule.id))
+        select(AlertRule)
+        .where(AlertRule.account_id == account_id)
+        .order_by(col(AlertRule.id))
     ).all()
 
 
@@ -403,7 +411,9 @@ def list_firings(
     per_page = min(100, max(1, per_page))
     total = _scalar_int(
         session.exec(
-            select(func.count(col(AlertFiring.id))).where(AlertFiring.account_id == account_id)
+            select(func.count(col(AlertFiring.id))).where(
+                AlertFiring.account_id == account_id
+            )
         ).one()
     )
     pages = max(1, math.ceil(total / per_page))
@@ -416,12 +426,20 @@ def list_firings(
     ).all()
     items = []
     for r in rows:
-        items.append({
-            "id": r.id,
-            "rule_id": r.rule_id,
-            "fired_at": r.fired_at.isoformat(),
-            "message": r.message,
-            "snapshot_json": r.snapshot_json,
-            "notified": r.notified,
-        })
-    return {"items": items, "total": total, "page": page, "per_page": per_page, "pages": pages}
+        items.append(
+            {
+                "id": r.id,
+                "rule_id": r.rule_id,
+                "fired_at": r.fired_at.isoformat(),
+                "message": r.message,
+                "snapshot_json": r.snapshot_json,
+                "notified": r.notified,
+            }
+        )
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "pages": pages,
+    }

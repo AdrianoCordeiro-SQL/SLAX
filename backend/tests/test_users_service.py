@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlmodel import Session, select
@@ -23,7 +23,9 @@ def test_update_user_other_tenant_raises(session: Session):
     b = register_account(
         session, RegisterRequest(name="B", email="tb@example.com", password="pw123456")
     )
-    u_b = create_user(session, b.id, UserCreate(first_name="Other", product="Plano A", value=100))
+    u_b = create_user(
+        session, b.id, UserCreate(first_name="Other", product="Plano A", value=100)
+    )
     with pytest.raises(UserNotFoundForAccount):
         update_user(session, a.id, u_b.id, UserUpdate(first_name="Hack"))
 
@@ -37,7 +39,9 @@ def test_delete_user_other_tenant_raises(session: Session):
     b = register_account(
         session, RegisterRequest(name="B", email="db@example.com", password="pw123456")
     )
-    u_b = create_user(session, b.id, UserCreate(first_name="Victim", product="Plano B", value=80))
+    u_b = create_user(
+        session, b.id, UserCreate(first_name="Victim", product="Plano B", value=80)
+    )
     with pytest.raises(UserNotFoundForAccount):
         delete_user(session, a.id, u_b.id)
 
@@ -105,10 +109,11 @@ def test_create_user_persists_product_value_and_history(session: Session):
 
 
 def test_create_user_with_platform_activity_adds_extra_recent_log(session: Session):
-    """Quando solicitado, cria 5-30 atividades aleatórias distribuídas em até 365 dias."""
+    """Se solicitado, cria 5-30 atividades aleatórias em até 365 dias."""
 
     account = register_account(
-        session, RegisterRequest(name="A", email="activity@example.com", password="pw123456")
+        session,
+        RegisterRequest(name="A", email="activity@example.com", password="pw123456"),
     )
     user = create_user(
         session,
@@ -124,11 +129,11 @@ def test_create_user_with_platform_activity_adds_extra_recent_log(session: Sessi
     logs = session.exec(select(APILog).where(APILog.user_id == user.id)).all()
     assert 6 <= len(logs) <= 31  # 1 compra inicial + 5..30 simuladas
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     start = now - timedelta(days=365)
 
     def _to_aware_utc(dt: datetime) -> datetime:
-        return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+        return dt if dt.tzinfo is not None else dt.replace(tzinfo=UTC)
 
     assert all(start <= _to_aware_utc(log.timestamp) <= now for log in logs)
 
@@ -149,7 +154,7 @@ def test_create_user_with_platform_activity_adds_extra_recent_log(session: Sessi
     ).all()
     return_logs = [log for log in logs if " devolvido pelo cliente " in log.action]
     negative_metrics = [metric for metric in metrics if metric.value < 0]
-    # Cada atividade de compra gera métrica positiva e cada devolução gera métrica negativa.
+    # Compra gera métrica positiva; devolução gera métrica negativa.
     assert len(metrics) == len(purchase_logs) + len(return_logs)
     assert len(negative_metrics) == len(return_logs)
     assert all(log.action.endswith("cliente Cliente") for log in return_logs)
@@ -160,7 +165,8 @@ def test_delete_user_removes_all_revenue_metrics_for_user(session: Session):
     """Excluir cliente remove RevenueMetric ligadas a ele (compras e simulação)."""
 
     account = register_account(
-        session, RegisterRequest(name="A", email="revdel@example.com", password="pw123456")
+        session,
+        RegisterRequest(name="A", email="revdel@example.com", password="pw123456"),
     )
     user = create_user(
         session,
@@ -181,5 +187,7 @@ def test_delete_user_removes_all_revenue_metrics_for_user(session: Session):
     delete_user(session, account.id, uid)
 
     assert session.get(User, uid) is None
-    after = session.exec(select(RevenueMetric).where(RevenueMetric.user_id == uid)).all()
+    after = session.exec(
+        select(RevenueMetric).where(RevenueMetric.user_id == uid)
+    ).all()
     assert after == []

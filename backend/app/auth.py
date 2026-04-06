@@ -1,6 +1,6 @@
-import jwt
 from typing import Annotated
 
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
@@ -10,7 +10,8 @@ from .auth_tokens import decode_access_token
 from .database import get_session
 from .models import Account
 
-# Senhas com bcrypt, login por e-mail/senha e dependency que resolve a conta a partir do Bearer JWT.
+# Senhas com bcrypt, login por e-mail/senha e dependency que resolve a conta a partir do
+# Bearer JWT.
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
@@ -31,13 +32,19 @@ def get_current_account(
     try:
         payload = decode_access_token(credentials.credentials)
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired"
+        ) from None
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from None
     account_id = int(payload["sub"])
     account = session.get(Account, account_id)
     if not account:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Account not found"
+        )
     return account
 
 
