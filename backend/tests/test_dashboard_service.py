@@ -60,6 +60,16 @@ def test_build_stats_janelas_e_pct_change(session: Session):
             timestamp=datetime(2024, 6, 5, 12, 0, 0, tzinfo=UTC),
         )
     )
+    # Chamada interna do dashboard não deve influenciar métrica de API Requests.
+    session.add(
+        APILog(
+            account_id=a.id,
+            user_id=u_new.id,
+            action="GET /stats",
+            status="Success",
+            timestamp=datetime(2024, 6, 10, 12, 5, 0, tzinfo=timezone.utc),
+        )
+    )
     session.add(
         RevenueMetric(
             account_id=a.id,

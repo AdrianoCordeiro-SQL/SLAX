@@ -9,6 +9,18 @@ from .log_items import serialize_api_log_row
 # Agregações SQL e montagem de dados para o dashboard (stats, sparklines, performance,
 # atividade).
 
+DASHBOARD_INTERNAL_ACTIONS = {
+    "GET /stats",
+    "GET /stats/sparklines",
+    "GET /performance",
+    "GET /activity",
+    "GET /auth/me",
+}
+
+
+def _external_action_filter():
+    return col(APILog.action).notin_(DASHBOARD_INTERNAL_ACTIONS)
+
 
 def build_stats(session: Session, account_id: int) -> dict:
     now = datetime.now(UTC)
@@ -36,11 +48,15 @@ def build_stats(session: Session, account_id: int) -> dict:
     users_change = pct_change(new_users_this_week, prev_new_users)
 
     api_requests = session.exec(
-        select(func.count(col(APILog.id))).where(APILog.account_id == aid)
+        select(func.count(col(APILog.id))).where(
+            APILog.account_id == aid, _external_action_filter()
+        )
     ).one()
     requests_this_week = session.exec(
         select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid, APILog.timestamp >= week_start
+            APILog.account_id == aid,
+            APILog.timestamp >= week_start,
+            _external_action_filter(),
         )
     ).one()
     requests_prev_week = session.exec(
@@ -48,6 +64,7 @@ def build_stats(session: Session, account_id: int) -> dict:
             APILog.account_id == aid,
             APILog.timestamp >= prev_week_start,
             APILog.timestamp < week_start,
+            _external_action_filter(),
         )
     ).one()
     requests_change = pct_change(requests_this_week, requests_prev_week)
