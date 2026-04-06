@@ -76,6 +76,8 @@ def test_get_stats_com_bearer_estrutura_200(client: TestClient):
         "requests_change",
         "revenue",
         "revenue_change",
+        "returns_count",
+        "returns_lost_value",
     ):
         assert key in d
 
@@ -136,6 +138,8 @@ def test_reports_summary_com_bearer_e_query_start_end_200(client: TestClient):
         "revenue_change",
         "active_users",
         "active_users_change",
+        "returns_count",
+        "returns_lost_value",
     ):
         assert key in d
 

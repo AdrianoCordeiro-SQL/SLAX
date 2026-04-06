@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, DollarSign, Users } from "lucide-react";
+import { Activity, DollarSign, RotateCcw, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
 import { useReportSummary } from "@/hooks/useReports";
@@ -88,6 +88,17 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
       icon: DollarSign,
     },
     {
+      title: "Devoluções",
+      value: data.returns_count.toLocaleString(),
+      change: `Perda: ${new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(data.returns_lost_value)}`,
+      icon: RotateCcw,
+    },
+    {
       title: "Clientes ativos",
       value: data.active_users.toLocaleString(),
       change: data.active_users_change,
@@ -96,7 +107,7 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => (
         <SummaryCard key={card.title} {...card} />
       ))}

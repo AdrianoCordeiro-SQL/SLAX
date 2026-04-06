@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, DollarSign, Users } from "lucide-react";
+import { Activity, DollarSign, RotateCcw, Users } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
@@ -87,6 +87,12 @@ export function StatsCards() {
     stats.api_requests === 1
       ? "1 compra registrada"
       : `${stats.api_requests.toLocaleString()} compras registradas`;
+  const returnsLostLabel = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(stats.returns_lost_value);
 
   const cards: StatCardProps[] = [
     {
@@ -102,6 +108,13 @@ export function StatsCards() {
       change: transactionCountLabel,
       icon: Activity,
       sparklineData: sparklines?.requests ?? empty,
+    },
+    {
+      title: "Devoluções",
+      value: stats.returns_count.toLocaleString(),
+      change: `Perda: ${returnsLostLabel}`,
+      icon: RotateCcw,
+      sparklineData: empty,
     },
     {
       title: "Receita líquida",

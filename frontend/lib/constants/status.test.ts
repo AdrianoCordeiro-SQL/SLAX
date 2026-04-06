@@ -13,11 +13,12 @@ import {
 } from "./status";
 
 describe("LOG_STATUSES", () => {
-  it("lista os três estados esperados", () => {
-    expect(LOG_STATUSES).toHaveLength(3);
+  it("lista os estados esperados", () => {
+    expect(LOG_STATUSES).toHaveLength(4);
     expect(LOG_STATUSES).toContain("Success");
     expect(LOG_STATUSES).toContain("Pending");
     expect(LOG_STATUSES).toContain("Failed");
+    expect(LOG_STATUSES).toContain("Error");
   });
 });
 

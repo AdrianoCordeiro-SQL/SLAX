@@ -12,6 +12,8 @@ const validStatsPayload = {
   requests_change: "-5.0%",
   revenue: 99.5,
   revenue_change: "+0.0%",
+  returns_count: 3,
+  returns_lost_value: 1200.0,
 };
 
 describe("statsSchema", () => {

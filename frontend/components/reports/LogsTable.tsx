@@ -173,23 +173,23 @@ export function LogsTable({ start, end }: LogsTableProps) {
                             {item.avatar_url && (
                               <AvatarImage
                                 src={item.avatar_url}
-                                alt={item.user}
+                                alt={item.user || "Não informado"}
                               />
                             )}
                             <AvatarFallback>
-                              {getInitials(item.user)}
+                              {getInitials(item.user || "Não informado")}
                             </AvatarFallback>
                           </Avatar>
                           <span className="font-medium text-foreground">
-                            {item.user}
+                            {item.user || "—"}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground font-mono text-xs">
-                        {item.action}
+                        {item.action || "—"}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs">
-                        {formatTimestamp(item.timestamp)}
+                        {item.timestamp ? formatTimestamp(item.timestamp) : "—"}
                       </TableCell>
                       <TableCell>
                         <StatusBadge status={item.status} />

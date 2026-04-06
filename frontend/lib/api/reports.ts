@@ -19,6 +19,8 @@ export const reportSummarySchema = z.object({
   revenue_change: z.string(),
   active_users: z.number(),
   active_users_change: z.string(),
+  returns_count: z.number(),
+  returns_lost_value: z.number(),
 });
 
 export type ReportSummary = z.infer<typeof reportSummarySchema>;
@@ -32,7 +34,7 @@ export async function fetchReportSummary(start: string, end: string): Promise<Re
 // --- Status Breakdown ---
 
 export const statusBreakdownItemSchema = z.object({
-  status: z.enum(LOG_STATUSES),
+  status: z.string(),
   count: z.number(),
 });
 

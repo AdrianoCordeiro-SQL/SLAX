@@ -133,6 +133,8 @@ def test_create_user_with_platform_activity_adds_extra_recent_log(session: Sessi
         or log.action.startswith("Adicionou ")
         and log.action.endswith(" ao carrinho")
         or log.action.startswith("Comprou ")
+        or log.action.startswith("Produto ")
+        and " devolvido pelo cliente " in log.action
         for log in simulated_logs
     )
 
@@ -140,5 +142,9 @@ def test_create_user_with_platform_activity_adds_extra_recent_log(session: Sessi
     metrics = session.exec(
         select(RevenueMetric).where(RevenueMetric.account_id == account.id)
     ).all()
-    # Cada atividade de compra gera RevenueMetric; também inclui a compra base do cadastro.
-    assert len(metrics) == len(purchase_logs)
+    return_logs = [log for log in logs if " devolvido pelo cliente " in log.action]
+    negative_metrics = [metric for metric in metrics if metric.value < 0]
+    # Cada atividade de compra gera métrica positiva e cada devolução gera métrica negativa.
+    assert len(metrics) == len(purchase_logs) + len(return_logs)
+    assert len(negative_metrics) == len(return_logs)
+    assert all(log.action.endswith("cliente Cliente") for log in return_logs)

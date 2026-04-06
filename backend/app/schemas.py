@@ -89,6 +89,8 @@ class StatsResponse(BaseModel):
     requests_change: str
     revenue: float
     revenue_change: str
+    returns_count: int
+    returns_lost_value: float
 
 
 class SparklinePoint(BaseModel):
@@ -128,6 +130,8 @@ class ReportSummaryResponse(BaseModel):
     revenue_change: str
     active_users: int
     active_users_change: str
+    returns_count: int
+    returns_lost_value: float
 
 
 class StatusBreakdownItem(BaseModel):

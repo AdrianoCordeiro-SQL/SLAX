@@ -57,6 +57,19 @@ def build_stats(session: Session, account_id: int) -> dict:
     ).one() or 0.0
     revenue_change = pct_change(revenue_this_week, revenue_prev_week)
 
+    returns_count = session.exec(
+        select(func.count(col(APILog.id))).where(
+            APILog.account_id == aid,
+            APILog.action.ilike("Produto % devolvido pelo cliente %"),
+        )
+    ).one()
+    returns_lost_value = session.exec(
+        select(func.sum(RevenueMetric.value)).where(
+            RevenueMetric.account_id == aid,
+            RevenueMetric.value < 0,
+        )
+    ).one() or 0.0
+
     return {
         "total_users": total_users,
         "users_change": users_change,
@@ -64,6 +77,8 @@ def build_stats(session: Session, account_id: int) -> dict:
         "requests_change": requests_change,
         "revenue": round(revenue_total, 2),
         "revenue_change": revenue_change,
+        "returns_count": returns_count,
+        "returns_lost_value": round(abs(returns_lost_value), 2),
     }
 
 

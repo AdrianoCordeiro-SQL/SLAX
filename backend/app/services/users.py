@@ -2,7 +2,7 @@ import random
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import delete
-from sqlmodel import Session, col, select
+from sqlmodel import Session, col, func, select
 
 from ..exceptions import UserNotFoundForAccount
 from ..models import APILog, RevenueMetric, User
@@ -54,20 +54,47 @@ def _add_platform_activity(
     session: Session,
     account_id: int,
     user_id: int,
+    user_name: str,
 ) -> None:
     product_names = list(ELECTRONIC_PRODUCT_PRICE_RANGES.keys())
-    event_count = random.randint(5, 10)
+    event_count = random.randint(5, 15)
+    existing_totals = session.exec(
+        select(
+            func.count(col(APILog.id)),
+            func.count(col(APILog.id)).filter(
+                APILog.action.ilike("Produto % devolvido pelo cliente %")
+            ),
+        ).where(APILog.account_id == account_id)
+    ).one()
+    existing_total_events = int(existing_totals[0] or 0)
+    existing_returns = int(existing_totals[1] or 0)
 
-    for index in range(event_count):
+    target_returns = round((existing_total_events + event_count) * 0.10)
+    returns_to_generate = max(0, min(event_count, target_returns - existing_returns))
+    event_types = ["return"] * returns_to_generate + [
+        random.choice(["comment", "cart", "purchase"])
+        for _ in range(event_count - returns_to_generate)
+    ]
+    random.shuffle(event_types)
+
+    for index, event_type in enumerate(event_types):
         # Ensure at least one recent event to show up in default report windows.
         timestamp = _random_timestamp_within_days(30 if index == 0 else 365)
         product_name = random.choice(product_names)
-        event_type = random.choice(["comment", "cart", "purchase"])
 
         if event_type == "comment":
             action = f"Adicionou um comentário ao produto {product_name}"
         elif event_type == "cart":
             action = f"Adicionou {product_name} ao carrinho"
+        elif event_type == "return":
+            action = f"Produto {product_name} devolvido pelo cliente {user_name}"
+            session.add(
+                RevenueMetric(
+                    account_id=account_id,
+                    value=-_price_for_product(product_name),
+                    recorded_at=timestamp,
+                )
+            )
         else:
             action = f"Comprou {product_name}"
             session.add(
@@ -125,7 +152,7 @@ def create_user(session: Session, account_id: int, payload: UserCreate) -> User:
     )
     session.add(RevenueMetric(account_id=account_id, value=payload.value))
     if payload.generate_platform_activity:
-        _add_platform_activity(session, account_id, user.id)
+        _add_platform_activity(session, account_id, user.id, user.name)
     session.commit()
     session.refresh(user)
     return user

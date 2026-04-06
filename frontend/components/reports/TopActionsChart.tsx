@@ -24,11 +24,11 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
 
   return (
     <AsyncChartCard
-      title="Principais eventos"
+      title="Mais vendidos"
       isLoading={isLoading}
       error={error}
       empty={empty}
-      errorPrefix="Falha ao carregar principais eventos"
+      errorPrefix="Falha ao carregar mais vendidos"
       skeleton={<ChartLineSkeleton />}
     >
       {data && data.length > 0 ? (
@@ -51,7 +51,7 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 11, fill: "#6b7280" }}
-              width={120}
+              width={170}
             />
             <Tooltip
               contentStyle={{
@@ -66,7 +66,7 @@ export function TopActionsChart({ start, end }: TopActionsChartProps) {
                     : typeof value === "string"
                       ? Number(value)
                       : Number(value ?? 0);
-                return [num, "Eventos"];
+                return [num, "Vendas"];
               }}
             />
             <Bar dataKey="count" fill="#1e2d5a" radius={[0, 4, 4, 0]} barSize={20} />
