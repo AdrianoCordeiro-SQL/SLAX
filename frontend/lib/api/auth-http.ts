@@ -76,27 +76,6 @@ export async function loginRequest(email: string, password: string): Promise<Log
   return loginResponseSchema.parse(data);
 }
 
-export async function demoLoginRequest(): Promise<LoginResponse> {
-  const res = await fetch(`${API_BASE}/auth/demo`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
-
-  if (res.status === 503) {
-    throw new Error("Demonstração indisponível no momento.");
-  }
-  if (res.status === 401) {
-    throw new Error("Conta de demonstração inválida ou indisponível.");
-  }
-  if (!res.ok) {
-    throw new Error(`Login de demonstração falhou: HTTP ${res.status}`);
-  }
-
-  const data = await res.json();
-  return loginResponseSchema.parse(data);
-}
-
 export async function fetchMe(token: string): Promise<Account> {
   const res = await fetch(`${API_BASE}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },

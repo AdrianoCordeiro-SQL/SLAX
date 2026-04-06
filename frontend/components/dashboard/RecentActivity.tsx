@@ -63,7 +63,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
         {formatTimestamp(item.timestamp)}
       </TableCell>
       <TableCell>
-        <StatusBadge status={item.status} />
+        <StatusBadge status={item.status} action={item.action} />
       </TableCell>
     </TableRow>
   );
@@ -105,7 +105,7 @@ export function RecentActivity() {
                 <TableHead className="pl-6">Cliente</TableHead>
                 <TableHead>Ação</TableHead>
                 <TableHead>Horário</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Transações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

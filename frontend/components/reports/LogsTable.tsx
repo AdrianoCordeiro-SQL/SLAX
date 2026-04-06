@@ -24,7 +24,12 @@ import {
 import { useReportLogs } from "@/hooks/useReports";
 import type { LogItem, LogFilters } from "@/lib/api/reports";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { LOG_STATUSES, type LogStatus } from "@/lib/constants/status";
+import {
+  LOG_STATUSES,
+  LOG_STATUS_LABELS,
+  getTransactionDisplayLabel,
+  type LogStatus,
+} from "@/lib/constants/status";
 import { getInitials } from "@/lib/format";
 
 function formatTimestamp(iso: string): string {
@@ -54,10 +59,10 @@ function SkeletonRow() {
 }
 
 function exportCSV(items: LogItem[]) {
-  const header = "ID,User,Action,Timestamp,Status";
+  const header = "ID,User,Action,Timestamp,Transações";
   const rows = items.map(
     (i) =>
-      `${i.id},"${i.user}","${i.action}","${i.timestamp}","${i.status}"`,
+      `${i.id},"${i.user}","${i.action}","${i.timestamp}","${getTransactionDisplayLabel(i.status, i.action)}"`,
   );
   const blob = new Blob([header + "\n" + rows.join("\n")], {
     type: "text/csv;charset=utf-8;",
@@ -104,14 +109,14 @@ export function LogsTable({ start, end }: LogsTableProps) {
               }))
             }
           >
-            <SelectTrigger className="h-8 w-[130px] text-xs">
-              <SelectValue placeholder="Status" />
+            <SelectTrigger className="h-8 w-[150px] text-xs">
+              <SelectValue placeholder="Transação" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="all">Todas as transações</SelectItem>
               {LOG_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
-                  {s}
+                  {LOG_STATUS_LABELS[s]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -154,7 +159,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
                 <TableHead className="pl-6">Cliente</TableHead>
                 <TableHead>Evento</TableHead>
                 <TableHead>Horário</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Transações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -192,7 +197,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
                         {item.timestamp ? formatTimestamp(item.timestamp) : "—"}
                       </TableCell>
                       <TableCell>
-                        <StatusBadge status={item.status} />
+                        <StatusBadge status={item.status} action={item.action} />
                       </TableCell>
                     </TableRow>
                   ))}

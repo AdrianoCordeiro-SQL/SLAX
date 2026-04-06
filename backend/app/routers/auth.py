@@ -1,4 +1,3 @@
-import os
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -41,18 +40,6 @@ def register(payload: RegisterRequest, session: SessionDep):
 @router.post("/login", response_model=AuthResponse)
 def login(payload: LoginRequest, session: SessionDep):
     account = authenticate(payload.email, payload.password, session)
-    if not account:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    return build_auth_response(account)
-
-
-@router.post("/demo", response_model=AuthResponse)
-def demo_login(session: SessionDep):
-    email = os.getenv("DEMO_LOGIN_EMAIL", "").strip()
-    password = os.getenv("DEMO_LOGIN_PASSWORD", "")
-    if not email or not password:
-        raise HTTPException(status_code=503, detail="Demo login is not configured")
-    account = authenticate(email, password, session)
     if not account:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return build_auth_response(account)
