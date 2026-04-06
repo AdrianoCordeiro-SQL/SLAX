@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
@@ -16,7 +16,7 @@ from app.services.account import register_account
 
 
 def test_hash_and_verify_round_trip():
-    """hash_password e verify_password devem aceitar a senha correta e rejeitar a errada."""
+    """hash_password e verify_password: aceitam a correta e rejeitam a errada."""
 
     h = hash_password("correct-password")
     assert verify_password("correct-password", h) is True
@@ -64,7 +64,7 @@ def test_get_me_expired_token_401(client: TestClient):
     """GET /auth/me com JWT expirado deve responder 401."""
 
     token = jwt.encode(
-        {"sub": "1", "email": "a@b.c", "exp": datetime.now(timezone.utc) - timedelta(minutes=1)},
+        {"sub": "1", "email": "a@b.c", "exp": datetime.now(UTC) - timedelta(minutes=1)},
         SECRET_KEY,
         algorithm=ALGORITHM,
     )
@@ -81,7 +81,7 @@ def test_get_me_unknown_account_id_401(session: Session, client: TestClient):
         {
             "sub": "99999",
             "email": "ghost@example.com",
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
         },
         SECRET_KEY,
         algorithm=ALGORITHM,
@@ -96,13 +96,14 @@ def test_get_me_deleted_account_401(session: Session, client: TestClient):
     """GET /auth/me após eliminar a conta na BD deve responder 401."""
 
     acc = register_account(
-        session, RegisterRequest(name="Del", email="del@example.com", password="pw123456")
+        session,
+        RegisterRequest(name="Del", email="del@example.com", password="pw123456"),
     )
     token = jwt.encode(
         {
             "sub": str(acc.id),
             "email": acc.email,
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
         },
         SECRET_KEY,
         algorithm=ALGORITHM,
@@ -119,13 +120,14 @@ def test_get_me_valid_token_200(session: Session, client: TestClient):
     """GET /auth/me com JWT válido e conta existente deve responder 200."""
 
     acc = register_account(
-        session, RegisterRequest(name="Ok", email="valid@example.com", password="pw123456")
+        session,
+        RegisterRequest(name="Ok", email="valid@example.com", password="pw123456"),
     )
     token = jwt.encode(
         {
             "sub": str(acc.id),
             "email": acc.email,
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
         },
         SECRET_KEY,
         algorithm=ALGORITHM,

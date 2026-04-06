@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
@@ -23,7 +23,8 @@ from ..services.reports import (
     build_top_users,
 )
 
-# Rotas HTTP do prefixo /reports: resumos, gráficos agregados e listagem paginada de logs.
+# Rotas HTTP do prefixo /reports: resumos, gráficos agregados e listagem paginada de
+# logs.
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -35,8 +36,8 @@ CurrentAccount = Annotated[Account, Depends(get_current_account)]
 def report_summary(
     session: SessionDep,
     account: CurrentAccount,
-    start: Optional[str] = Query(None),
-    end: Optional[str] = Query(None),
+    start: str | None = Query(None),
+    end: str | None = Query(None),
 ):
     return build_report_summary(session, account.id, start, end)
 
@@ -45,8 +46,8 @@ def report_summary(
 def report_status_breakdown(
     session: SessionDep,
     account: CurrentAccount,
-    start: Optional[str] = Query(None),
-    end: Optional[str] = Query(None),
+    start: str | None = Query(None),
+    end: str | None = Query(None),
 ):
     return build_status_breakdown(session, account.id, start, end)
 
@@ -55,8 +56,8 @@ def report_status_breakdown(
 def report_top_actions(
     session: SessionDep,
     account: CurrentAccount,
-    start: Optional[str] = Query(None),
-    end: Optional[str] = Query(None),
+    start: str | None = Query(None),
+    end: str | None = Query(None),
 ):
     return build_top_actions(session, account.id, start, end)
 
@@ -65,8 +66,8 @@ def report_top_actions(
 def report_top_users(
     session: SessionDep,
     account: CurrentAccount,
-    start: Optional[str] = Query(None),
-    end: Optional[str] = Query(None),
+    start: str | None = Query(None),
+    end: str | None = Query(None),
 ):
     return build_top_users(session, account.id, start, end)
 
@@ -75,8 +76,8 @@ def report_top_users(
 def report_revenue_trend(
     session: SessionDep,
     account: CurrentAccount,
-    start: Optional[str] = Query(None),
-    end: Optional[str] = Query(None),
+    start: str | None = Query(None),
+    end: str | None = Query(None),
 ):
     return build_revenue_trend(session, account.id, start, end)
 
@@ -85,20 +86,22 @@ def report_revenue_trend(
 def report_logs(
     session: SessionDep,
     account: CurrentAccount,
-    start: Optional[str] = Query(None),
-    end: Optional[str] = Query(None),
-    status: Optional[str] = Query(None),
-    action: Optional[str] = Query(None),
-    user_id: Optional[int] = Query(None),
+    start: str | None = Query(None),
+    end: str | None = Query(None),
+    status: str | None = Query(None),
+    action: str | None = Query(None),
+    user_id: int | None = Query(None),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    transaction_kind: Optional[str] = Query(
+    transaction_kind: str | None = Query(
         None,
         description="completed=Compras (Comprou …); return=Devoluções",
     ),
 ):
     if transaction_kind is not None and transaction_kind not in ("completed", "return"):
-        raise HTTPException(status_code=422, detail="transaction_kind must be 'completed' or 'return'")
+        raise HTTPException(
+            status_code=422, detail="transaction_kind must be 'completed' or 'return'"
+        )
     return build_logs_paginated(
         session,
         account.id,

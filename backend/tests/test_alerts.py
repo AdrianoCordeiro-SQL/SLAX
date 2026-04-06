@@ -2,21 +2,21 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.models import APILog, AlertFiring, AlertRule, RevenueMetric, User
+from app.models import AlertFiring, APILog, RevenueMetric, User
 from app.schemas import RegisterRequest
-from app.services.account import register_account
 from app.services import alerts as alerts_service
+from app.services.account import register_account
 
 
 def _seed_account(session: Session) -> int:
     acc = register_account(
-        session, RegisterRequest(name="A", email="alerts@example.com", password="pw123456")
+        session,
+        RegisterRequest(name="A", email="alerts@example.com", password="pw123456"),
     )
     return acc.id
 
@@ -29,7 +29,7 @@ def test_returns_rate_fires_when_above_threshold(session: Session):
     session.add(u)
     session.commit()
     session.refresh(u)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for i in range(6):
         session.add(
             APILog(
@@ -73,7 +73,7 @@ def test_cooldown_blocks_second_firing(session: Session):
     session.add(u)
     session.commit()
     session.refresh(u)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for i in range(6):
         session.add(
             APILog(
@@ -120,7 +120,9 @@ def test_cooldown_blocks_second_firing(session: Session):
 def test_evaluate_http_200(session: Session, client: TestClient):
     """POST /alerts/evaluate com JWT devolve 200 e lista fired."""
 
-    register_account(session, RegisterRequest(name="E", email="ev@example.com", password="pw123456"))
+    register_account(
+        session, RegisterRequest(name="E", email="ev@example.com", password="pw123456")
+    )
     login = client.post(
         "/auth/login",
         json={"email": "ev@example.com", "password": "pw123456"},
@@ -138,14 +140,18 @@ def test_revenue_drop_fires(session: Session):
     """Queda de receita acima do limite dispara."""
 
     aid = _seed_account(session)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     cur_start = now - timedelta(days=3)
     prev_start = cur_start - timedelta(days=7)
     session.add(
-        RevenueMetric(account_id=aid, value=100.0, recorded_at=cur_start + timedelta(days=1))
+        RevenueMetric(
+            account_id=aid, value=100.0, recorded_at=cur_start + timedelta(days=1)
+        )
     )
     session.add(
-        RevenueMetric(account_id=aid, value=500.0, recorded_at=prev_start + timedelta(days=1))
+        RevenueMetric(
+            account_id=aid, value=500.0, recorded_at=prev_start + timedelta(days=1)
+        )
     )
     session.commit()
 

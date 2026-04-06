@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -55,7 +54,8 @@ def test_patch_me_and_change_password(session: Session, client: TestClient):
     """PATCH /auth/me, troca de senha com atual errada (400) e correta (204)."""
 
     register_account(
-        session, RegisterRequest(name="M", email="patch@example.com", password="oldpass123")
+        session,
+        RegisterRequest(name="M", email="patch@example.com", password="oldpass123"),
     )
     login = client.post(
         "/auth/login",

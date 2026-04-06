@@ -1,7 +1,6 @@
 import math
 import re
 from collections import Counter
-from typing import Optional
 
 from sqlmodel import Session, col, func, select
 
@@ -9,12 +8,15 @@ from ..models import APILog, RevenueMetric, User
 from ..utils import parse_period, pct_change
 from .log_items import serialize_api_log_row
 
-# Consultas e agregações para relatórios (resumo, breakdowns, tendências e logs paginados).
+# Consultas e agregações para relatórios (resumo, breakdowns, tendências e logs
+# paginados).
 
-_LEGACY_PURCHASE_RE = re.compile(r"^POST /users \(purchase: (?P<product>.+?) - \$\d+(?:\.\d{1,2})?\)$")
+_LEGACY_PURCHASE_RE = re.compile(
+    r"^POST /users \(purchase: (?P<product>.+?) - \$\d+(?:\.\d{1,2})?\)$"
+)
 
 
-def _extract_purchased_product(action: str) -> Optional[str]:
+def _extract_purchased_product(action: str) -> str | None:
     if action.startswith("Comprou "):
         product = action.removeprefix("Comprou ").strip()
         return product or None
@@ -30,8 +32,8 @@ def _extract_purchased_product(action: str) -> Optional[str]:
 def build_report_summary(
     session: Session,
     account_id: int,
-    start: Optional[str],
-    end: Optional[str],
+    start: str | None,
+    end: str | None,
 ) -> dict:
     period_start, period_end = parse_period(start, end)
     period_len = period_end - period_start
@@ -41,12 +43,16 @@ def build_report_summary(
 
     total_requests = session.exec(
         select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
+            APILog.account_id == aid,
+            APILog.timestamp >= period_start,
+            APILog.timestamp < period_end,
         )
     ).one()
     prev_requests = session.exec(
         select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid, APILog.timestamp >= prev_start, APILog.timestamp < prev_end
+            APILog.account_id == aid,
+            APILog.timestamp >= prev_start,
+            APILog.timestamp < prev_end,
         )
     ).one()
 
@@ -66,32 +72,46 @@ def build_report_summary(
             APILog.status == "Success",
         )
     ).one()
-    success_rate = round(success_count / total_requests * 100, 1) if total_requests else 0.0
-    prev_success_rate = round(prev_success / prev_requests * 100, 1) if prev_requests else 0.0
+    success_rate = (
+        round(success_count / total_requests * 100, 1) if total_requests else 0.0
+    )
+    prev_success_rate = (
+        round(prev_success / prev_requests * 100, 1) if prev_requests else 0.0
+    )
 
-    total_revenue = session.exec(
-        select(func.sum(RevenueMetric.value)).where(
-            RevenueMetric.account_id == aid,
-            RevenueMetric.recorded_at >= period_start,
-            RevenueMetric.recorded_at < period_end,
-        )
-    ).one() or 0.0
-    prev_revenue = session.exec(
-        select(func.sum(RevenueMetric.value)).where(
-            RevenueMetric.account_id == aid,
-            RevenueMetric.recorded_at >= prev_start,
-            RevenueMetric.recorded_at < prev_end,
-        )
-    ).one() or 0.0
+    total_revenue = (
+        session.exec(
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.recorded_at >= period_start,
+                RevenueMetric.recorded_at < period_end,
+            )
+        ).one()
+        or 0.0
+    )
+    prev_revenue = (
+        session.exec(
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.recorded_at >= prev_start,
+                RevenueMetric.recorded_at < prev_end,
+            )
+        ).one()
+        or 0.0
+    )
 
     active_users = session.exec(
         select(func.count(func.distinct(APILog.user_id))).where(
-            APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
+            APILog.account_id == aid,
+            APILog.timestamp >= period_start,
+            APILog.timestamp < period_end,
         )
     ).one()
     prev_active = session.exec(
         select(func.count(func.distinct(APILog.user_id))).where(
-            APILog.account_id == aid, APILog.timestamp >= prev_start, APILog.timestamp < prev_end
+            APILog.account_id == aid,
+            APILog.timestamp >= prev_start,
+            APILog.timestamp < prev_end,
         )
     ).one()
     returns_count = session.exec(
@@ -102,14 +122,17 @@ def build_report_summary(
             APILog.action.ilike("Produto % devolvido pelo cliente %"),
         )
     ).one()
-    returns_lost_value = session.exec(
-        select(func.sum(RevenueMetric.value)).where(
-            RevenueMetric.account_id == aid,
-            RevenueMetric.recorded_at >= period_start,
-            RevenueMetric.recorded_at < period_end,
-            RevenueMetric.value < 0,
-        )
-    ).one() or 0.0
+    returns_lost_value = (
+        session.exec(
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.recorded_at >= period_start,
+                RevenueMetric.recorded_at < period_end,
+                RevenueMetric.value < 0,
+            )
+        ).one()
+        or 0.0
+    )
 
     return {
         "total_requests": total_requests,
@@ -128,8 +151,8 @@ def build_report_summary(
 def build_status_breakdown(
     session: Session,
     account_id: int,
-    start: Optional[str],
-    end: Optional[str],
+    start: str | None,
+    end: str | None,
 ) -> list[dict]:
     period_start, period_end = parse_period(start, end)
     sales_count = session.exec(
@@ -157,8 +180,8 @@ def build_status_breakdown(
 def build_top_actions(
     session: Session,
     account_id: int,
-    start: Optional[str],
-    end: Optional[str],
+    start: str | None,
+    end: str | None,
 ) -> list[dict]:
     period_start, period_end = parse_period(start, end)
     logs = session.exec(
@@ -170,7 +193,9 @@ def build_top_actions(
     ).all()
 
     sold_products = [
-        product for log in logs if (product := _extract_purchased_product(log.action)) is not None
+        product
+        for log in logs
+        if (product := _extract_purchased_product(log.action)) is not None
     ]
     counts = Counter(sold_products)
     top_products = sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:10]
@@ -180,8 +205,8 @@ def build_top_actions(
 def build_top_users(
     session: Session,
     account_id: int,
-    start: Optional[str],
-    end: Optional[str],
+    start: str | None,
+    end: str | None,
 ) -> list[dict]:
     period_start, period_end = parse_period(start, end)
     rows = session.exec(
@@ -200,20 +225,22 @@ def build_top_users(
     result = []
     for user_id, count in rows:
         user = session.get(User, user_id)
-        result.append({
-            "user_id": user_id,
-            "name": user.name if user else "Unknown",
-            "avatar_url": user.avatar_url if user else None,
-            "count": count,
-        })
+        result.append(
+            {
+                "user_id": user_id,
+                "name": user.name if user else "Unknown",
+                "avatar_url": user.avatar_url if user else None,
+                "count": count,
+            }
+        )
     return result
 
 
 def build_revenue_trend(
     session: Session,
     account_id: int,
-    start: Optional[str],
-    end: Optional[str],
+    start: str | None,
+    end: str | None,
 ) -> list[dict]:
     period_start, period_end = parse_period(start, end)
     metrics = session.exec(
@@ -240,22 +267,26 @@ _RETURN_ACTION_PATTERN = "Produto % devolvido pelo cliente %"
 def build_logs_paginated(
     session: Session,
     account_id: int,
-    start: Optional[str],
-    end: Optional[str],
-    status: Optional[str],
-    action: Optional[str],
-    user_id: Optional[int],
+    start: str | None,
+    end: str | None,
+    status: str | None,
+    action: str | None,
+    user_id: int | None,
     page: int,
     per_page: int,
-    transaction_kind: Optional[str] = None,
+    transaction_kind: str | None = None,
 ) -> dict:
     period_start, period_end = parse_period(start, end)
     aid = account_id
     base = select(APILog).where(
-        APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
+        APILog.account_id == aid,
+        APILog.timestamp >= period_start,
+        APILog.timestamp < period_end,
     )
     count_q = select(func.count(col(APILog.id))).where(
-        APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
+        APILog.account_id == aid,
+        APILog.timestamp >= period_start,
+        APILog.timestamp < period_end,
     )
 
     if transaction_kind == "completed":

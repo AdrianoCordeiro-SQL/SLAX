@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-from app.models import APILog
 from fastapi.testclient import TestClient
 from sqlmodel import Session
+
+from app.models import APILog
 
 PROTECTED_PATHS = [
     "/stats",
@@ -197,7 +198,7 @@ def test_reports_logs_paginacao_com_seed(
     session: Session,
     client: TestClient,
 ):
-    """Com dois logs no período, page=2 e per_page=1 devolve total=2 e uma página extra."""
+    """Com dois logs no período, page=2 e per_page=1: total=2 e uma página extra."""
 
     reg = client.post(
         "/auth/register",
@@ -210,8 +211,8 @@ def test_reports_logs_paginacao_com_seed(
 
     start_s = "2024-01-01T00:00:00+00:00"
     end_s = "2024-02-01T00:00:00+00:00"
-    t1 = datetime(2024, 1, 10, 10, 0, 0, tzinfo=timezone.utc)
-    t2 = datetime(2024, 1, 20, 10, 0, 0, tzinfo=timezone.utc)
+    t1 = datetime(2024, 1, 10, 10, 0, 0, tzinfo=UTC)
+    t2 = datetime(2024, 1, 20, 10, 0, 0, tzinfo=UTC)
     session.add(
         APILog(account_id=aid, user_id=None, action="A", status="Success", timestamp=t1)
     )

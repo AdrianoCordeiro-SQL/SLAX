@@ -7,7 +7,6 @@ from sqlmodel import Session
 
 from app.schemas import RegisterRequest
 from app.services.account import register_account
-from app.services.users import create_user
 
 
 def test_handler_email_ja_registado_409(session: Session, client: TestClient):
@@ -29,7 +28,8 @@ def test_handler_user_nao_encontrado_404(session: Session, client: TestClient):
     """UserNotFoundForAccount deve responder 404."""
 
     register_account(
-        session, RegisterRequest(name="A", email="n404@example.com", password="pw123456")
+        session,
+        RegisterRequest(name="A", email="n404@example.com", password="pw123456"),
     )
     login = client.post(
         "/auth/login",
@@ -49,7 +49,8 @@ def test_handler_senha_atual_incorreta_400(session: Session, client: TestClient)
     """WrongCurrentPassword deve responder 400."""
 
     register_account(
-        session, RegisterRequest(name="A", email="bad400@example.com", password="correct123")
+        session,
+        RegisterRequest(name="A", email="bad400@example.com", password="correct123"),
     )
     login = client.post(
         "/auth/login",

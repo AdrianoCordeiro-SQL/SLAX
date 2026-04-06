@@ -13,7 +13,8 @@ from .exceptions import (
 )
 from .routers import alerts, auth, dashboard, reports, users
 
-# Aplicação FastAPI: CORS, lifespan, tratamento de exceções de domínio e registro dos routers da API.
+# Aplicação FastAPI: CORS, lifespan, tratamento de exceções de domínio e registro dos
+# routers da API.
 
 
 @asynccontextmanager

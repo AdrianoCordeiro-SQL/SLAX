@@ -8,7 +8,9 @@ from .models import Account
 
 # Garante uma conta administrativa inicial (sem massa de dados sintéticos).
 
-SEED_ADMIN_EMAIL = os.getenv("SEED_ADMIN_EMAIL", "admin@slax.com").strip() or "admin@slax.com"
+SEED_ADMIN_EMAIL = (
+    os.getenv("SEED_ADMIN_EMAIL", "admin@slax.com").strip() or "admin@slax.com"
+)
 SEED_ADMIN_PASSWORD = os.getenv("SEED_ADMIN_PASSWORD", "admin123")
 
 

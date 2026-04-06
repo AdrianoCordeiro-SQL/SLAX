@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete
 from sqlmodel import Session, col, func, select
@@ -39,7 +39,7 @@ ELECTRONIC_PRODUCT_PRICE_RANGES = {
 
 
 def _random_timestamp_within_days(days: int) -> datetime:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     start = now - timedelta(days=days)
     total_seconds = int((now - start).total_seconds())
     return start + timedelta(seconds=random.randint(0, total_seconds))
@@ -152,7 +152,9 @@ def create_user(session: Session, account_id: int, payload: UserCreate) -> User:
             status="Success",
         )
     )
-    session.add(RevenueMetric(account_id=account_id, user_id=user.id, value=payload.value))
+    session.add(
+        RevenueMetric(account_id=account_id, user_id=user.id, value=payload.value)
+    )
     if payload.generate_platform_activity:
         _add_platform_activity(session, account_id, user.id, user.name)
     session.commit()

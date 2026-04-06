@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
 
-from app.auth_tokens import ALGORITHM, SECRET_KEY, create_access_token, decode_access_token
+from app.auth_tokens import (
+    ALGORITHM,
+    SECRET_KEY,
+    create_access_token,
+    decode_access_token,
+)
 
 
 def test_create_and_decode_round_trip():
@@ -21,10 +26,10 @@ def test_create_and_decode_round_trip():
 
 
 def test_decode_rejects_wrong_secret():
-    """decode_access_token deve falhar quando a assinatura não corresponde à chave da app."""
+    """decode_access_token falha se a assinatura não corresponde à chave da app."""
 
     token = jwt.encode(
-        {"sub": "1", "email": "a@b.c", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
+        {"sub": "1", "email": "a@b.c", "exp": datetime.now(UTC) + timedelta(hours=1)},
         "wrong-secret-key-not-the-same-as-app-secret-32b",
         algorithm=ALGORITHM,
     )
@@ -36,7 +41,7 @@ def test_decode_rejects_expired_token():
     """decode_access_token deve levantar ExpiredSignatureError para token expirado."""
 
     token = jwt.encode(
-        {"sub": "1", "email": "a@b.c", "exp": datetime.now(timezone.utc) - timedelta(minutes=1)},
+        {"sub": "1", "email": "a@b.c", "exp": datetime.now(UTC) - timedelta(minutes=1)},
         SECRET_KEY,
         algorithm=ALGORITHM,
     )

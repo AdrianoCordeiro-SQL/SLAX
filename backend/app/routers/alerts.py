@@ -14,8 +14,8 @@ from ..models import Account, AlertRule
 from ..schemas import (
     AlertEvaluateItem,
     AlertEvaluateResponse,
-    AlertFiringsResponse,
     AlertFiringOut,
+    AlertFiringsResponse,
     AlertRuleCreate,
     AlertRuleOut,
     AlertRuleUpdate,
@@ -108,9 +108,7 @@ def delete_alert_rule(
 @router.post("/evaluate", response_model=AlertEvaluateResponse)
 def post_evaluate_alerts(session: SessionDep, account: CurrentAccount):
     fired = alerts_service.evaluate_all_enabled(session, account.id)
-    return AlertEvaluateResponse(
-        fired=[AlertEvaluateItem(**x) for x in fired]
-    )
+    return AlertEvaluateResponse(fired=[AlertEvaluateItem(**x) for x in fired])
 
 
 @router.get("/firings", response_model=AlertFiringsResponse)

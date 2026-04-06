@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,16 +14,16 @@ class UserCreate(BaseModel):
     product: str
     value: float = Field(gt=0)
     generate_platform_activity: bool = False
-    last_name: Optional[str] = None
-    email: Optional[str] = None
-    avatar_url: Optional[str] = None
+    last_name: str | None = None
+    email: str | None = None
+    avatar_url: str | None = None
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[str] = None
-    avatar_url: Optional[str] = None
+    first_name: str | None = None
+    last_name: str | None = None
+    email: str | None = None
+    avatar_url: str | None = None
 
 
 class LoginRequest(BaseModel):
@@ -38,8 +38,8 @@ class RegisterRequest(BaseModel):
 
 
 class AccountUpdate(BaseModel):
-    name: Optional[str] = None
-    avatar_url: Optional[str] = None
+    name: str | None = None
+    avatar_url: str | None = None
 
 
 class PasswordChange(BaseModel):
@@ -54,7 +54,7 @@ class AccountOut(BaseModel):
     id: int
     email: str
     name: str
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
 
 
 class AuthResponse(BaseModel):
@@ -69,11 +69,11 @@ class UserOut(BaseModel):
     id: int
     account_id: int
     name: str
-    last_name: Optional[str] = None
-    email: Optional[str] = None
-    avatar_url: Optional[str] = None
-    product: Optional[str] = None
-    product_value: Optional[float] = None
+    last_name: str | None = None
+    email: str | None = None
+    avatar_url: str | None = None
+    product: str | None = None
+    product_value: float | None = None
     created_at: datetime
 
 
@@ -115,7 +115,7 @@ class PerformancePoint(BaseModel):
 class ActivityItem(BaseModel):
     id: int
     user: str
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
     action: str
     timestamp: str
     status: str
@@ -147,7 +147,7 @@ class TopActionItem(BaseModel):
 class TopUserItem(BaseModel):
     user_id: int
     name: str
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
     count: int
 
 
@@ -159,7 +159,7 @@ class RevenueTrendPoint(BaseModel):
 class LogItem(BaseModel):
     id: int
     user: str
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
     action: str
     timestamp: str
     status: str
@@ -184,10 +184,10 @@ class AlertRuleCreate(BaseModel):
 
 
 class AlertRuleUpdate(BaseModel):
-    rule_type: Optional[str] = None
-    params: Optional[dict[str, Any]] = None
-    enabled: Optional[bool] = None
-    cooldown_hours: Optional[int] = Field(default=None, ge=1, le=168)
+    rule_type: str | None = None
+    params: dict[str, Any] | None = None
+    enabled: bool | None = None
+    cooldown_hours: int | None = Field(default=None, ge=1, le=168)
 
 
 class AlertRuleOut(BaseModel):
