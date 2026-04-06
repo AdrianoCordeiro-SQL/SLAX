@@ -1,20 +1,20 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
 from ..auth import get_current_account
 from ..database import get_session
 from ..models import Account
 from ..schemas import (
-    ActivityItem,
     HealthResponse,
+    LogsResponse,
     PerformancePoint,
     SparklineResponse,
     StatsResponse,
 )
 from ..services.dashboard import (
-    build_activity_feed,
+    build_activity_feed_paginated,
     build_performance_series,
     build_sparklines,
     build_stats,
@@ -48,6 +48,11 @@ def get_performance(session: SessionDep, account: CurrentAccount):
     return build_performance_series(session, account.id)
 
 
-@router.get("/activity", response_model=list[ActivityItem])
-def get_activity(session: SessionDep, account: CurrentAccount):
-    return build_activity_feed(session, account.id)
+@router.get("/activity", response_model=LogsResponse)
+def get_activity(
+    session: SessionDep,
+    account: CurrentAccount,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+):
+    return build_activity_feed_paginated(session, account.id, page, per_page)

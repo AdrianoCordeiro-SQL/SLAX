@@ -47,7 +47,7 @@ export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) 
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: number, name: string) => [value, name]}
+              formatter={(value, name) => [value ?? 0, name ?? ""]}
               contentStyle={{
                 borderRadius: "8px",
                 border: "1px solid #e5e7eb",

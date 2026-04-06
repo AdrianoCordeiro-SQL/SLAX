@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -79,7 +82,8 @@ function SkeletonRow() {
 }
 
 export function RecentActivity() {
-  const { data: activity, isLoading, error } = useActivity();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, error, isFetching } = useActivity(page, 20);
 
   return (
     <Card>
@@ -107,12 +111,39 @@ export function RecentActivity() {
             <TableBody>
               {isLoading
                 ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-                : activity?.map((item) => (
+                : data?.items.map((item) => (
                     <ActivityRow key={item.id} item={item} />
                   ))}
             </TableBody>
           </Table>
         </div>
+        {data && data.pages > 1 && (
+          <div className="flex items-center justify-between border-t px-6 py-3">
+            <span className="text-xs text-muted-foreground">
+              Página {data.page} de {data.pages} ({data.total} no total)
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={isFetching || data.page <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+              >
+                <ChevronLeft size={14} />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={isFetching || data.page >= data.pages}
+                onClick={() => setPage((current) => current + 1)}
+              >
+                <ChevronRight size={14} />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

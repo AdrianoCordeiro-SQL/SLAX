@@ -172,3 +172,32 @@ def build_activity_feed(session: Session, account_id: int, limit: int = 20) -> l
     ).all()
 
     return [serialize_api_log_row(session, log) for log in logs]
+
+
+def build_activity_feed_paginated(
+    session: Session,
+    account_id: int,
+    page: int = 1,
+    per_page: int = 20,
+) -> dict:
+    total = session.exec(
+        select(func.count(col(APILog.id))).where(APILog.account_id == account_id)
+    ).one()
+    pages = max(1, (total + per_page - 1) // per_page)
+    page = min(page, pages)
+
+    logs = session.exec(
+        select(APILog)
+        .where(APILog.account_id == account_id)
+        .order_by(col(APILog.timestamp).desc())
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+    ).all()
+
+    return {
+        "items": [serialize_api_log_row(session, log) for log in logs],
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "pages": pages,
+    }

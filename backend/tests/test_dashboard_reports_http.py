@@ -107,12 +107,14 @@ def test_get_performance_com_bearer_lista_200(client: TestClient):
 
 
 def test_get_activity_com_bearer_lista_200(client: TestClient):
-    """GET /activity devolve lista (pode estar vazia)."""
+    """GET /activity devolve objeto paginado (itens podem estar vazios)."""
 
     headers, _ = _register_and_token(client)
     r = client.get("/activity", headers=headers)
     assert r.status_code == 200
-    assert isinstance(r.json(), list)
+    d = r.json()
+    for key in ("items", "total", "page", "per_page", "pages"):
+        assert key in d
 
 
 def test_reports_summary_com_bearer_e_query_start_end_200(client: TestClient):

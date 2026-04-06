@@ -17,8 +17,6 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      - DEMO_LOGIN_EMAIL=${DEMO_LOGIN_EMAIL:-admin@slax.com}
-      - DEMO_LOGIN_PASSWORD=${DEMO_LOGIN_PASSWORD:-admin123}
     depends_on:
       - db
     restart: unless-stopped

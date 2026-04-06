@@ -1,12 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchActivity, type Activity } from "@/lib/api/activity";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { fetchActivity, type ActivityResponse } from "@/lib/api/activity";
 
-export type { Activity };
+export type { ActivityResponse };
 
-export function useActivity() {
-  return useQuery<Activity, Error>({
-    queryKey: ["activity"],
-    queryFn: fetchActivity,
+export function useActivity(page = 1, perPage = 20) {
+  return useQuery<ActivityResponse, Error>({
+    queryKey: ["activity", page, perPage],
+    queryFn: () => fetchActivity(page, perPage),
     staleTime: 15 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
