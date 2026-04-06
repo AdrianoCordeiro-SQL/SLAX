@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LOG_STATUSES, type LogStatus } from "@/lib/constants/status";
+import { LOG_STATUSES } from "@/lib/constants/status";
 import { apiFetch } from "./client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -123,8 +123,11 @@ export const logsResponseSchema = z.object({
 export type LogItem = z.infer<typeof logItemSchema>;
 export type LogsResponse = z.infer<typeof logsResponseSchema>;
 
+/** Filtro da tabela de eventos: compras concluídas (`Comprou …`) vs devoluções. */
+export type LogTransactionKind = "completed" | "return";
+
 export interface LogFilters {
-  status?: LogStatus;
+  transactionKind?: LogTransactionKind;
   action?: string;
   user_id?: number;
   page?: number;
@@ -139,7 +142,9 @@ export async function fetchReportLogs(
   const params = new URLSearchParams();
   params.set("start", start);
   params.set("end", end);
-  if (filters.status) params.set("status", filters.status);
+  if (filters.transactionKind) {
+    params.set("transaction_kind", filters.transactionKind);
+  }
   if (filters.action) params.set("action", filters.action);
   if (filters.user_id !== undefined) params.set("user_id", String(filters.user_id));
   params.set("page", String(filters.page ?? 1));

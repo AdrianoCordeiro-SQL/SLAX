@@ -5,15 +5,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
 import { useReportSummary } from "@/hooks/useReports";
 import { getChangeBadgeClasses } from "@/lib/change-variant";
+import { cn } from "@/lib/utils";
 
 interface SummaryCardProps {
   title: string;
   value: string;
   change: string;
   icon: React.ElementType;
+  valueClassName?: string;
+  changeNode?: React.ReactNode;
 }
 
-function SummaryCard({ title, value, change, icon: Icon }: SummaryCardProps) {
+function formatLossCurrencyPtBr(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function SummaryCard({
+  title,
+  value,
+  change,
+  icon: Icon,
+  valueClassName,
+  changeNode,
+}: SummaryCardProps) {
   return (
     <Card className="flex flex-col gap-2">
       <CardHeader className="flex flex-row items-center justify-between pb-1">
@@ -25,13 +44,17 @@ function SummaryCard({ title, value, change, icon: Icon }: SummaryCardProps) {
         </div>
       </CardHeader>
       <CardContent className="flex items-end justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-2xl font-bold tracking-tight">{value}</span>
-          <span
-            className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-semibold ${getChangeBadgeClasses(change)}`}
-          >
-            {change}
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <span className={cn("text-2xl font-bold tracking-tight", valueClassName)}>
+            {value}
           </span>
+          {changeNode ?? (
+            <span
+              className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-semibold ${getChangeBadgeClasses(change)}`}
+            >
+              {change}
+            </span>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -88,14 +111,15 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
       icon: DollarSign,
     },
     {
-      title: "Devoluções",
-      value: data.returns_count.toLocaleString(),
-      change: `Perda: ${new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(data.returns_lost_value)}`,
+      title: "Perda",
+      value: `-${formatLossCurrencyPtBr(data.returns_lost_value)}`,
+      change: "",
+      valueClassName: "text-2xl font-bold leading-tight text-red-600 tabular-nums",
+      changeNode: (
+        <span className="text-xs font-semibold text-muted-foreground">
+          Devoluções: {data.returns_count.toLocaleString()}
+        </span>
+      ),
       icon: RotateCcw,
     },
     {
