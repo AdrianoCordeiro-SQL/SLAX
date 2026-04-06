@@ -1,9 +1,9 @@
+from sqlalchemy import delete
 from sqlmodel import Session, col, select
 
 from ..exceptions import UserNotFoundForAccount
-from ..models import User
+from ..models import APILog, RevenueMetric, User
 from ..schemas import UserCreate, UserUpdate
-from .demo_user_activity import insert_demo_activity
 
 # Operações de CRUD em User restritas ao account_id do tenant autenticado.
 
@@ -23,13 +23,22 @@ def create_user(session: Session, account_id: int, payload: UserCreate) -> User:
         last_name=payload.last_name,
         email=payload.email,
         avatar_url=payload.avatar_url,
+        product=payload.product,
+        product_value=payload.value,
         account_id=account_id,
     )
     session.add(user)
     session.flush()
     session.refresh(user)
-    if payload.seed_demo_activity:
-        insert_demo_activity(session, account_id, user.id, payload.demo_volume)
+    session.add(
+        APILog(
+            account_id=account_id,
+            user_id=user.id,
+            action=f"POST /users (purchase: {payload.product} - ${payload.value:.2f})",
+            status="Success",
+        )
+    )
+    session.add(RevenueMetric(account_id=account_id, value=payload.value))
     session.commit()
     session.refresh(user)
     return user
@@ -61,5 +70,7 @@ def delete_user(session: Session, account_id: int, user_id: int) -> None:
     user = session.get(User, user_id)
     if not user or user.account_id != account_id:
         raise UserNotFoundForAccount
+    # Remove dependent API logs first to satisfy FK constraint in existing databases.
+    session.exec(delete(APILog).where(APILog.user_id == user.id))
     session.delete(user)
     session.commit()

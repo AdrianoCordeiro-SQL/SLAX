@@ -9,6 +9,8 @@ export const userSchema = z.object({
   last_name: z.string().nullable(),
   email: z.string().nullable(),
   avatar_url: z.string().nullable(),
+  product: z.string().nullable(),
+  product_value: z.number().nullable(),
   created_at: z.string(),
 });
 
@@ -21,9 +23,9 @@ export const createUserSchema = z.object({
   first_name: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
   last_name: z.string().optional(),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
+  product: z.string().min(2, "Produto deve ter ao menos 2 caracteres"),
+  value: z.coerce.number().positive("Valor deve ser maior que zero"),
   avatar_url: z.string().optional(),
-  seed_demo_activity: z.boolean().default(false),
-  demo_volume: z.enum(["light", "medium", "heavy"]).default("medium"),
 });
 
 export const editUserSchema = z.object({
@@ -31,7 +33,7 @@ export const editUserSchema = z.object({
   avatar_url: z.string().url("URL inválida").optional().or(z.literal("")),
 });
 
-export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type CreateUserInput = z.input<typeof createUserSchema>;
 export type EditUserInput = z.infer<typeof editUserSchema>;
 
 export async function fetchUsers(): Promise<Users> {
@@ -47,11 +49,11 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       first_name: input.first_name,
+      product: input.product,
+      value: input.value,
       last_name: input.last_name || null,
       email: input.email || null,
       avatar_url: input.avatar_url || null,
-      seed_demo_activity: input.seed_demo_activity,
-      demo_volume: input.demo_volume,
     }),
   });
   if (!res.ok) throw new Error(`Failed to create user: HTTP ${res.status}`);

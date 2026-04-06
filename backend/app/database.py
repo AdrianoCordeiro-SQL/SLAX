@@ -1,5 +1,6 @@
 import os
 
+from sqlalchemy import inspect, text
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -23,6 +24,18 @@ else:
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
+    # Lightweight migration for existing databases without alembic.
+    if DATABASE_URL.startswith("sqlite"):
+        return
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        if "user" not in inspector.get_table_names():
+            return
+        existing_columns = {col["name"] for col in inspector.get_columns("user")}
+        if "product" not in existing_columns:
+            conn.execute(text('ALTER TABLE "user" ADD COLUMN product VARCHAR'))
+        if "product_value" not in existing_columns:
+            conn.execute(text('ALTER TABLE "user" ADD COLUMN product_value DOUBLE PRECISION'))
 
 
 def get_session():

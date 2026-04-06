@@ -25,6 +25,19 @@ function formatTimestamp(iso: string): string {
   });
 }
 
+function formatAction(action: string): string {
+  const purchaseMatch = action.match(/^POST \/users \(purchase: (.+) - \$(\d+(?:\.\d{1,2})?)\)$/);
+  if (purchaseMatch) {
+    const [, product, rawValue] = purchaseMatch;
+    const value = Number(rawValue);
+    return `Compra registrada: ${product} (${new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value)})`;
+  }
+  return action;
+}
+
 function ActivityRow({ item }: { item: ActivityItem }) {
   return (
     <TableRow>
@@ -40,7 +53,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
         </div>
       </TableCell>
       <TableCell className="text-muted-foreground font-mono text-xs">
-        {item.action}
+        {formatAction(item.action)}
       </TableCell>
       <TableCell className="text-muted-foreground text-xs">
         {formatTimestamp(item.timestamp)}

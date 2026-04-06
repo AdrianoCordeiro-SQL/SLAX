@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # Modelos Pydantic de entrada e saída (corpos de requisição e respostas JSON da API).
 
@@ -11,11 +11,11 @@ from pydantic import BaseModel, ConfigDict
 
 class UserCreate(BaseModel):
     first_name: str
+    product: str
+    value: float = Field(gt=0)
     last_name: Optional[str] = None
     email: Optional[str] = None
     avatar_url: Optional[str] = None
-    seed_demo_activity: bool = False
-    demo_volume: Literal["light", "medium", "heavy"] = "medium"
 
 
 class UserUpdate(BaseModel):
@@ -71,6 +71,8 @@ class UserOut(BaseModel):
     last_name: Optional[str] = None
     email: Optional[str] = None
     avatar_url: Optional[str] = None
+    product: Optional[str] = None
+    product_value: Optional[float] = None
     created_at: datetime
 
 
