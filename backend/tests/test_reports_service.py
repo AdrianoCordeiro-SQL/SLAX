@@ -145,6 +145,43 @@ def test_build_logs_paginated_filtros_e_pagina(session: Session):
     assert by_user["total"] == 2
 
 
+def test_build_logs_paginated_transaction_kind_completed_e_return(session: Session):
+    """Filtro transaction_kind: compras (Comprou …) vs devoluções."""
+
+    aid, ua_id, _ = _seed_account_and_users(session)
+    session.add(
+        APILog(
+            account_id=aid,
+            user_id=ua_id,
+            action="Comprou Mouse",
+            status="Success",
+            timestamp=T1,
+        )
+    )
+    session.add(
+        APILog(
+            account_id=aid,
+            user_id=ua_id,
+            action="Produto Teclado devolvido pelo cliente Alice",
+            status="Success",
+            timestamp=T1,
+        )
+    )
+    session.commit()
+
+    completed = build_logs_paginated(
+        session, aid, START, END, None, None, None, 1, 10, "completed"
+    )
+    assert completed["total"] == 1
+    assert completed["items"][0]["action"] == "Comprou Mouse"
+
+    returns = build_logs_paginated(
+        session, aid, START, END, None, None, None, 1, 10, "return"
+    )
+    assert returns["total"] == 1
+    assert "devolvido" in returns["items"][0]["action"]
+
+
 def test_build_top_users_nome_e_unknown(session: Session):
     """Ranking por contagens; utilizador órfão mostra Unknown se inserção for permitida."""
 

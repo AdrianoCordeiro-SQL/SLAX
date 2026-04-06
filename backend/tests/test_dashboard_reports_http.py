@@ -172,6 +172,22 @@ def test_reports_logs_com_bearer_estrutura_200(client: TestClient):
         assert key in d
 
 
+def test_reports_logs_transaction_kind_invalid_422(client: TestClient):
+    """GET /reports/logs com transaction_kind inválido responde 422."""
+
+    headers, _ = _register_and_token(client)
+    r = client.get("/reports/logs", headers=headers, params={"transaction_kind": "invalid"})
+    assert r.status_code == 422
+
+
+def test_reports_logs_transaction_kind_completed_200(client: TestClient):
+    """GET /reports/logs com transaction_kind=completed responde 200."""
+
+    headers, _ = _register_and_token(client)
+    r = client.get("/reports/logs", headers=headers, params={"transaction_kind": "completed"})
+    assert r.status_code == 200
+
+
 def test_reports_logs_paginacao_com_seed(
     session: Session,
     client: TestClient,

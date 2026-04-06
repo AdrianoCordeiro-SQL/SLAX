@@ -7,7 +7,20 @@ import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCar
 import { useStats } from "@/hooks/useStats";
 import { useSparklines } from "@/hooks/useSparklines";
 import type { SparklinePoint } from "@/lib/api/sparklines";
-import { getChangeBadgeClasses, getChangeSparklineColor } from "@/lib/change-variant";
+import {
+  getChangeBadgeClasses,
+  getChangeSparklineColor,
+} from "@/lib/change-variant";
+import { cn } from "@/lib/utils";
+
+function formatLossPtBr(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
 
 interface StatCardProps {
   title: string;
@@ -15,9 +28,19 @@ interface StatCardProps {
   change: string;
   icon: React.ElementType;
   sparklineData: SparklinePoint[];
+  valueClassName?: string;
+  changeNode?: React.ReactNode;
 }
 
-function StatCard({ title, value, change, icon: Icon, sparklineData }: StatCardProps) {
+function StatCard({
+  title,
+  value,
+  change,
+  icon: Icon,
+  sparklineData,
+  valueClassName,
+  changeNode,
+}: StatCardProps) {
   const badgeClass = getChangeBadgeClasses(change);
   const lineColor = getChangeSparklineColor(change);
 
@@ -32,13 +55,22 @@ function StatCard({ title, value, change, icon: Icon, sparklineData }: StatCardP
         </div>
       </CardHeader>
       <CardContent className="flex items-end justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-2xl font-bold tracking-tight">{value}</span>
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <span
-            className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClass}`}
+            className={cn(
+              "text-2xl font-bold tracking-tight",
+              valueClassName,
+            )}
           >
-            {change}
+            {value}
           </span>
+          {changeNode ?? (
+            <span
+              className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClass}`}
+            >
+              {change}
+            </span>
+          )}
         </div>
         <div className="h-12 w-24 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
@@ -59,7 +91,11 @@ function StatCard({ title, value, change, icon: Icon, sparklineData }: StatCardP
 }
 
 export function StatsCards() {
-  const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useStats();
   const { data: sparklines, isLoading: sparklinesLoading } = useSparklines();
 
   const isLoading = statsLoading || sparklinesLoading;
@@ -87,12 +123,7 @@ export function StatsCards() {
     stats.api_requests === 1
       ? "1 compra registrada"
       : `${stats.api_requests.toLocaleString()} compras registradas`;
-  const returnsLostLabel = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(stats.returns_lost_value);
+  const lossAmountFormatted = formatLossPtBr(stats.returns_lost_value);
 
   const cards: StatCardProps[] = [
     {
@@ -110,14 +141,20 @@ export function StatsCards() {
       sparklineData: sparklines?.requests ?? empty,
     },
     {
-      title: "Devoluções",
-      value: stats.returns_count.toLocaleString(),
-      change: `Perda: ${returnsLostLabel}`,
+      title: "Perda",
+      value: `-${lossAmountFormatted}`,
+      change: "",
+      valueClassName: "text-2xl font-bold leading-tight text-red-600 tabular-nums",
+      changeNode: (
+        <span className="text-xs font-semibold text-muted-foreground">
+          Devoluções: {stats.returns_count.toLocaleString()}
+        </span>
+      ),
       icon: RotateCcw,
       sparklineData: empty,
     },
     {
-      title: "Receita líquida",
+      title: "Receita",
       value: new Intl.NumberFormat("pt-BR", {
         style: "currency",
         currency: "BRL",

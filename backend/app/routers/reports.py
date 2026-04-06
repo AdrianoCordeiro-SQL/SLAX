@@ -1,6 +1,6 @@
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
 from ..auth import get_current_account
@@ -92,7 +92,13 @@ def report_logs(
     user_id: Optional[int] = Query(None),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
+    transaction_kind: Optional[str] = Query(
+        None,
+        description="completed=Compras (Comprou …); return=Devoluções",
+    ),
 ):
+    if transaction_kind is not None and transaction_kind not in ("completed", "return"):
+        raise HTTPException(status_code=422, detail="transaction_kind must be 'completed' or 'return'")
     return build_logs_paginated(
         session,
         account.id,
@@ -103,4 +109,5 @@ def report_logs(
         user_id,
         page,
         per_page,
+        transaction_kind,
     )

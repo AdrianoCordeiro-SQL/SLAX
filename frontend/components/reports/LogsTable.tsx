@@ -22,15 +22,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useReportLogs } from "@/hooks/useReports";
-import type { LogItem, LogFilters } from "@/lib/api/reports";
+import type { LogItem, LogFilters, LogTransactionKind } from "@/lib/api/reports";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import {
-  LOG_STATUSES,
-  LOG_STATUS_LABELS,
-  getTransactionDisplayLabel,
-  type LogStatus,
-} from "@/lib/constants/status";
+import { getTransactionDisplayLabel } from "@/lib/constants/status";
 import { getInitials } from "@/lib/format";
+
+type TransactionFilterValue = "all" | LogTransactionKind;
+
+const TRANSACTION_FILTER: { value: TransactionFilterValue; label: string }[] = [
+  { value: "all", label: "Sem filtro" },
+  { value: "completed", label: "Concluída" },
+  { value: "return", label: "Devolução" },
+];
 
 function formatTimestamp(iso: string): string {
   const d = new Date(iso);
@@ -100,23 +103,23 @@ export function LogsTable({ start, end }: LogsTableProps) {
 
         <div className="flex flex-wrap items-center gap-2">
           <Select
-            value={filters.status ?? "all"}
+            value={filters.transactionKind ?? "all"}
             onValueChange={(v) =>
               setFilters((f) => ({
                 ...f,
-                status: v === "all" ? undefined : (v as LogStatus),
+                transactionKind:
+                  v === "all" ? undefined : (v as LogTransactionKind),
                 page: 1,
               }))
             }
           >
-            <SelectTrigger className="h-8 w-[150px] text-xs">
+            <SelectTrigger className="h-8 min-w-[140px] max-w-[200px] text-xs">
               <SelectValue placeholder="Transação" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas as transações</SelectItem>
-              {LOG_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {LOG_STATUS_LABELS[s]}
+              {TRANSACTION_FILTER.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {label}
                 </SelectItem>
               ))}
             </SelectContent>

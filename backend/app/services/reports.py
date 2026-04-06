@@ -234,6 +234,9 @@ def build_revenue_trend(
     return [{"date": d, "value": round(v, 2)} for d, v in buckets.items()]
 
 
+_RETURN_ACTION_PATTERN = "Produto % devolvido pelo cliente %"
+
+
 def build_logs_paginated(
     session: Session,
     account_id: int,
@@ -244,6 +247,7 @@ def build_logs_paginated(
     user_id: Optional[int],
     page: int,
     per_page: int,
+    transaction_kind: Optional[str] = None,
 ) -> dict:
     period_start, period_end = parse_period(start, end)
     aid = account_id
@@ -254,7 +258,15 @@ def build_logs_paginated(
         APILog.account_id == aid, APILog.timestamp >= period_start, APILog.timestamp < period_end
     )
 
-    if status:
+    if transaction_kind == "completed":
+        purchase = APILog.action.startswith("Comprou ")
+        base = base.where(purchase)
+        count_q = count_q.where(purchase)
+    elif transaction_kind == "return":
+        ret = APILog.action.ilike(_RETURN_ACTION_PATTERN)
+        base = base.where(ret)
+        count_q = count_q.where(ret)
+    elif status:
         base = base.where(APILog.status == status)
         count_q = count_q.where(APILog.status == status)
     if action:
