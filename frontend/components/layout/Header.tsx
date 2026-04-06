@@ -1,7 +1,6 @@
 "use client";
 
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertsNotificationBell } from "@/components/layout/AlertsNotificationBell";
 
 function getFormattedDate() {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -22,14 +21,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative text-white hover:bg-white/10 hover:text-white"
-        >
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-500" />
-        </Button>
+        <AlertsNotificationBell />
       </div>
     </header>
   );

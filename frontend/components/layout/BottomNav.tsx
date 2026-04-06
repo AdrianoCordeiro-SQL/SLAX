@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   FileBarChart2,
   Users,
-  ScrollText,
+  Bell,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ const navItems = [
   { label: "Visão geral", href: "/", icon: LayoutDashboard },
   { label: "Relatórios", href: "/reports", icon: FileBarChart2 },
   { label: "Clientes", href: "/users", icon: Users },
-  { label: "Eventos", href: "/api-logs", icon: ScrollText },
+  { label: "Alertas", href: "/alerts", icon: Bell },
 ];
 
 export function BottomNav() {
@@ -56,12 +56,17 @@ export function BottomNav() {
         href="/profile"
         className={cn(
           "flex flex-col items-center justify-center gap-1 flex-1 h-full text-xs font-medium transition-colors",
-          pathname === "/profile" ? "text-white" : "text-blue-200 hover:text-white",
+          pathname === "/profile"
+            ? "text-white"
+            : "text-blue-200 hover:text-white",
         )}
         aria-label="Perfil"
       >
         <Avatar className="h-6 w-6">
-          <AvatarImage src={account?.avatar_url ?? ""} alt={account?.name ?? ""} />
+          <AvatarImage
+            src={account?.avatar_url ?? ""}
+            alt={account?.name ?? ""}
+          />
           <AvatarFallback className="bg-white/15 text-white text-[9px] font-bold">
             {account ? getInitials(account.name) : "…"}
           </AvatarFallback>

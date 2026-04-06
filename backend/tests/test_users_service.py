@@ -67,8 +67,12 @@ def test_delete_user_removes_dependent_api_logs(session: Session):
 
     user_after = session.get(User, user.id)
     logs_after = session.exec(select(APILog).where(APILog.user_id == user.id)).all()
+    metrics_after = session.exec(
+        select(RevenueMetric).where(RevenueMetric.user_id == user.id)
+    ).all()
     assert user_after is None
     assert logs_after == []
+    assert metrics_after == []
 
 
 def test_create_user_persists_product_value_and_history(session: Session):
@@ -97,6 +101,7 @@ def test_create_user_persists_product_value_and_history(session: Session):
     ).all()
     assert len(metrics) == 1
     assert metrics[0].value == pytest.approx(1999.9)
+    assert metrics[0].user_id == user.id
 
 
 def test_create_user_with_platform_activity_adds_extra_recent_log(session: Session):
@@ -148,3 +153,33 @@ def test_create_user_with_platform_activity_adds_extra_recent_log(session: Sessi
     assert len(metrics) == len(purchase_logs) + len(return_logs)
     assert len(negative_metrics) == len(return_logs)
     assert all(log.action.endswith("cliente Cliente") for log in return_logs)
+    assert all(m.user_id == user.id for m in metrics)
+
+
+def test_delete_user_removes_all_revenue_metrics_for_user(session: Session):
+    """Excluir cliente remove RevenueMetric ligadas a ele (compras e simulação)."""
+
+    account = register_account(
+        session, RegisterRequest(name="A", email="revdel@example.com", password="pw123456")
+    )
+    user = create_user(
+        session,
+        account.id,
+        UserCreate(
+            first_name="Karine",
+            product="Plano X",
+            value=100,
+            generate_platform_activity=True,
+        ),
+    )
+    uid = user.id
+    before = session.exec(
+        select(RevenueMetric).where(RevenueMetric.user_id == uid)
+    ).all()
+    assert len(before) >= 1
+
+    delete_user(session, account.id, uid)
+
+    assert session.get(User, uid) is None
+    after = session.exec(select(RevenueMetric).where(RevenueMetric.user_id == uid)).all()
+    assert after == []
