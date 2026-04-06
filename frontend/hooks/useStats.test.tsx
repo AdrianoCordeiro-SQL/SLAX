@@ -14,6 +14,8 @@ const statsJson = {
   requests_change: "0%",
   revenue: 0,
   revenue_change: "0%",
+  returns_count: 0,
+  returns_lost_value: 0,
 };
 
 describe("useStats", () => {

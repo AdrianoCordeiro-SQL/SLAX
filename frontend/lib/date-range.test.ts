@@ -11,6 +11,8 @@ describe("toISODate", () => {
   });
 });
 
+const DAY_MS = 86_400_000;
+
 describe("getDefaultReportDateRange", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -21,9 +23,10 @@ describe("getDefaultReportDateRange", () => {
     vi.useRealTimers();
   });
 
-  it("usa hoje como fim e 30 dias antes como início (datas ISO)", () => {
+  it("usa hoje como fim e 365 dias antes como início (datas ISO, UTC)", () => {
+    const now = new Date("2024-06-15T12:00:00.000Z");
     const { start, end } = getDefaultReportDateRange();
-    expect(end).toBe("2024-06-15");
-    expect(start).toBe("2024-05-16");
+    expect(end).toBe(toISODate(now));
+    expect(start).toBe(toISODate(new Date(now.getTime() - 365 * DAY_MS)));
   });
 });

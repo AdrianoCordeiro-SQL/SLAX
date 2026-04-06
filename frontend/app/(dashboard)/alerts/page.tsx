@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Bell,
   CircleHelp,
@@ -145,42 +145,27 @@ function ParamsFields({
   );
 }
 
-function RuleDialog({
-  open,
-  onOpenChange,
+function RuleDialogForm({
   editing,
+  onOpenChange,
 }: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
   editing: AlertRule | null;
+  onOpenChange: (o: boolean) => void;
 }) {
   const createMut = useCreateAlertRule();
   const updateMut = useUpdateAlertRule();
-  const [ruleType, setRuleType] = useState<AlertRuleType>("returns_rate_above");
-  const [params, setParams] = useState<Record<string, number>>(() =>
-    defaultParamsForType("returns_rate_above"),
+  const [ruleType, setRuleType] = useState<AlertRuleType>(
+    () => editing?.rule_type ?? "returns_rate_above",
   );
-  const [enabled, setEnabled] = useState(true);
-  const [cooldownHours, setCooldownHours] = useState(24);
-
-  useEffect(() => {
-    if (!open) return;
-    if (editing) {
-      setRuleType(editing.rule_type);
-      const p = editing.params as Record<string, number>;
-      setParams({
-        ...defaultParamsForType(editing.rule_type),
-        ...p,
-      });
-      setEnabled(editing.enabled);
-      setCooldownHours(editing.cooldown_hours);
-    } else {
-      setRuleType("returns_rate_above");
-      setParams(defaultParamsForType("returns_rate_above"));
-      setEnabled(true);
-      setCooldownHours(24);
-    }
-  }, [open, editing]);
+  const [params, setParams] = useState<Record<string, number>>(() => {
+    if (!editing) return defaultParamsForType("returns_rate_above");
+    const p = editing.params as Record<string, number>;
+    return { ...defaultParamsForType(editing.rule_type), ...p };
+  });
+  const [enabled, setEnabled] = useState(() => editing?.enabled ?? true);
+  const [cooldownHours, setCooldownHours] = useState(
+    () => editing?.cooldown_hours ?? 24,
+  );
 
   function handleRuleTypeChange(t: AlertRuleType) {
     setRuleType(t);
@@ -213,12 +198,11 @@ function RuleDialog({
   const err = createMut.error ?? updateMut.error;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{editing ? "Editar regra" : "Nova regra"}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
+    <>
+      <DialogHeader>
+        <DialogTitle>{editing ? "Editar regra" : "Nova regra"}</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
           <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="rule-type">
               Tipo
@@ -270,15 +254,38 @@ function RuleDialog({
           </div>
           {err && <p className="text-sm text-red-600">{err.message}</p>}
         </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button type="button" onClick={submit} disabled={pending}>
-            {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Salvar
-          </Button>
-        </DialogFooter>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          Cancelar
+        </Button>
+        <Button type="button" onClick={submit} disabled={pending}>
+          {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Salvar
+        </Button>
+      </DialogFooter>
+    </>
+  );
+}
+
+function RuleDialog({
+  open,
+  onOpenChange,
+  editing,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  editing: AlertRule | null;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        {open && (
+          <RuleDialogForm
+            key={editing ? `e-${editing.id}` : "new"}
+            editing={editing}
+            onOpenChange={onOpenChange}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
