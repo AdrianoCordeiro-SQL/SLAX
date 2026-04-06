@@ -3,6 +3,7 @@ from sqlmodel import Session, col, select
 from ..exceptions import UserNotFoundForAccount
 from ..models import User
 from ..schemas import UserCreate, UserUpdate
+from .demo_user_activity import insert_demo_activity
 
 # Operações de CRUD em User restritas ao account_id do tenant autenticado.
 
@@ -25,6 +26,10 @@ def create_user(session: Session, account_id: int, payload: UserCreate) -> User:
         account_id=account_id,
     )
     session.add(user)
+    session.flush()
+    session.refresh(user)
+    if payload.seed_demo_activity:
+        insert_demo_activity(session, account_id, user.id, payload.demo_volume)
     session.commit()
     session.refresh(user)
     return user

@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Database, DollarSign, Users } from "lucide-react";
+import { Activity, CheckCircle2, DollarSign, Users } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
@@ -86,28 +86,28 @@ export function StatsCards() {
 
   const cards: StatCardProps[] = [
     {
-      title: "Total Users",
+      title: "Customers",
       value: stats.total_users.toLocaleString(),
       change: stats.users_change,
       icon: Users,
       sparklineData: sparklines?.users ?? empty,
     },
     {
-      title: "API Requests",
+      title: "Payment API calls",
       value: stats.api_requests.toLocaleString(),
       change: stats.requests_change,
       icon: Activity,
       sparklineData: sparklines?.requests ?? empty,
     },
     {
-      title: "Database Health",
+      title: "Success rate",
       value: stats.db_health,
       change: stats.db_health_change,
-      icon: Database,
+      icon: CheckCircle2,
       sparklineData: sparklines?.health ?? empty,
     },
     {
-      title: "Revenue",
+      title: "Net revenue",
       value: `$${stats.revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: stats.revenue_change,
       icon: DollarSign,

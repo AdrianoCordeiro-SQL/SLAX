@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SLAX Analytics",
-  description: "SLAX Analytics Dashboard",
+  title: "SLAX Pay",
+  description: "SLAX Pay merchant dashboard (demo)",
 };
 
 export default function RootLayout({

@@ -34,10 +34,17 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
     handleSubmit,
     reset: resetForm,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<CreateUserInput>({
     resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      seed_demo_activity: false,
+      demo_volume: "medium",
+    },
   });
+
+  const seedDemo = watch("seed_demo_activity");
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -149,6 +156,41 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
             {errors.email && (
               <p className="text-xs text-red-600">{errors.email.message}</p>
             )}
+          </div>
+
+          <div className="space-y-3 rounded-md border border-border bg-muted/30 px-3 py-3">
+            <label className="flex cursor-pointer items-start gap-2.5">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-input"
+                checked={!!seedDemo}
+                onChange={(e) => setValue("seed_demo_activity", e.target.checked)}
+              />
+              <span className="text-sm leading-snug">
+                <span className="font-medium text-foreground">Gerar atividade de demonstração</span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  Cria eventos de pagamento e receita{" "}
+                  <span className="font-medium text-foreground">fictícios</span> nos últimos 30 dias só
+                  para preencher gráficos e métricas do dashboard (portfólio / demo).
+                </span>
+              </span>
+            </label>
+
+            <div className="space-y-1.5 pl-7">
+              <label className="text-sm font-medium text-foreground" htmlFor="add-demo-volume">
+                Perfil de volume
+              </label>
+              <select
+                id="add-demo-volume"
+                disabled={!seedDemo}
+                className={inputClass + (seedDemo ? "" : " opacity-60 cursor-not-allowed")}
+                {...register("demo_volume")}
+              >
+                <option value="light">Leve</option>
+                <option value="medium">Médio</option>
+                <option value="heavy">Pesado</option>
+              </select>
+            </div>
           </div>
 
           <DialogFooter className="pt-2">

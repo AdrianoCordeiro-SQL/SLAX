@@ -90,7 +90,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
   return (
     <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="text-base font-semibold">API Logs</CardTitle>
+        <CardTitle className="text-base font-semibold">Payment events</CardTitle>
 
         <div className="flex flex-wrap items-center gap-2">
           <Select
@@ -117,7 +117,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
           </Select>
 
           <Input
-            placeholder="Filter action..."
+            placeholder="Filter event..."
             value={actionSearch}
             onChange={(e) => {
               setActionSearch(e.target.value);
@@ -142,7 +142,7 @@ export function LogsTable({ start, end }: LogsTableProps) {
       <CardContent className="p-0">
         {error && (
           <div className="px-6 py-3 text-sm text-red-700">
-            Failed to load logs: {error.message}
+            Failed to load payment events: {error.message}
           </div>
         )}
 
@@ -150,8 +150,8 @@ export function LogsTable({ start, end }: LogsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">User</TableHead>
-                <TableHead>Action</TableHead>
+                <TableHead className="pl-6">Customer</TableHead>
+                <TableHead>Event</TableHead>
                 <TableHead>Timestamp</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>

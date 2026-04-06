@@ -23,7 +23,7 @@ export default function ReportsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Reports</h1>
           <p className="text-sm text-muted-foreground">
-            Analyze metrics and activity for any time period.
+            Payment volume, success rate, revenue, and customer activity by period.
           </p>
         </div>
         <DateRangeFilter start={start} end={end} onChange={handleRangeChange} />

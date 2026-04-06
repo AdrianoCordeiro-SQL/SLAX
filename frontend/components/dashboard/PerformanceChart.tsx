@@ -20,7 +20,7 @@ export function PerformanceChart() {
 
   return (
     <AsyncChartCard
-      title="Performance Over Time (Last 30 Days)"
+      title="Payment volume vs latency (last 30 days)"
       isLoading={isLoading}
       error={error}
       empty={empty}
@@ -49,7 +49,7 @@ export function PerformanceChart() {
               tick={{ fontSize: 12, fill: "#6b7280" }}
               width={48}
               label={{
-                value: "Requests",
+                value: "Payment volume",
                 angle: -90,
                 position: "insideLeft",
                 offset: 12,
@@ -64,7 +64,7 @@ export function PerformanceChart() {
               tick={{ fontSize: 12, fill: "#6b7280" }}
               width={52}
               label={{
-                value: "Latency (ms)",
+                value: "Latency (ms, simulated)",
                 angle: 90,
                 position: "insideRight",
                 offset: 16,
@@ -88,8 +88,8 @@ export function PerformanceChart() {
                         ? Number(value[0] ?? 0)
                         : Number(value ?? 0);
                 return n === "latency"
-                  ? [`${num} ms`, "Latency"]
-                  : [num, "Requests"];
+                  ? [`${num} ms`, "Latency (simulated)"]
+                  : [num, "Payment volume"];
               }}
               labelFormatter={(label) => `Day ${label}`}
             />
@@ -98,7 +98,9 @@ export function PerformanceChart() {
               height={36}
               iconType="plainline"
               formatter={(value: string) =>
-                value === "requests" ? "Requests" : "Latency (ms)"
+                value === "requests"
+                  ? "Payment volume"
+                  : "Latency (ms, simulated)"
               }
             />
             <Line

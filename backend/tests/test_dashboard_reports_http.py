@@ -51,7 +51,7 @@ def test_get_raiz_health_sem_auth_200(client: TestClient):
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "Online"
-    assert "SLAX Analytics backend" in body["message"]
+    assert "SLAX Pay API (demo)" in body["message"]
 
 
 @pytest.mark.parametrize("path", PROTECTED_PATHS)

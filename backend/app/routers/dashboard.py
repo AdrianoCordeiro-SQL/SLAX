@@ -30,7 +30,7 @@ CurrentAccount = Annotated[Account, Depends(get_current_account)]
 
 @router.get("/", response_model=HealthResponse, tags=["health"])
 def read_root():
-    return {"status": "Online", "message": "SLAX Analytics backend running."}
+    return {"status": "Online", "message": "SLAX Pay API (demo) running."}
 
 
 @router.get("/stats", response_model=StatsResponse)

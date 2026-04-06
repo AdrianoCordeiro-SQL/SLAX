@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -14,6 +14,8 @@ class UserCreate(BaseModel):
     last_name: Optional[str] = None
     email: Optional[str] = None
     avatar_url: Optional[str] = None
+    seed_demo_activity: bool = False
+    demo_volume: Literal["light", "medium", "heavy"] = "medium"
 
 
 class UserUpdate(BaseModel):

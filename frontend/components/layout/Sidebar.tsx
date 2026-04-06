@@ -19,8 +19,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Reports", href: "/reports", icon: FileBarChart2 },
-  { label: "Users", href: "/users", icon: Users },
-  { label: "API Logs", href: "/api-logs", icon: ScrollText },
+  { label: "Customers", href: "/users", icon: Users },
+  { label: "Payment events", href: "/api-logs", icon: ScrollText },
 ];
 
 export function Sidebar() {
@@ -48,7 +48,7 @@ export function Sidebar() {
             <div className="flex flex-col leading-tight opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
               <span className="text-sm font-bold tracking-wide">SLAX</span>
               <span className="text-xs text-white font-medium uppercase tracking-widest">
-                Analytics
+                Pay
               </span>
             </div>
           </div>

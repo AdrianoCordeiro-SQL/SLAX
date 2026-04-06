@@ -30,14 +30,14 @@ export function TopUsersRanking({ start, end }: TopUsersRankingProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Top Users</CardTitle>
+        <CardTitle className="text-base font-semibold">Top customers</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading && <SkeletonRows />}
 
         {error && (
           <p className="text-sm text-red-700">
-            Failed to load top users: {error.message}
+            Failed to load top customers: {error.message}
           </p>
         )}
 
@@ -64,7 +64,7 @@ export function TopUsersRanking({ start, end }: TopUsersRankingProps) {
                   {user.name}
                 </span>
                 <span className="text-xs font-semibold text-muted-foreground">
-                  {user.count.toLocaleString()} req
+                  {user.count.toLocaleString()} events
                 </span>
               </div>
             ))}

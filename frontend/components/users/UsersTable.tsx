@@ -107,7 +107,7 @@ export function UsersTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">User</TableHead>
+                <TableHead className="pl-6">Customer</TableHead>
                 <TableHead>ID</TableHead>
                 <TableHead>Joined</TableHead>
                 <TableHead className="pr-6">Actions</TableHead>

@@ -22,6 +22,8 @@ export const createUserSchema = z.object({
   last_name: z.string().optional(),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   avatar_url: z.string().optional(),
+  seed_demo_activity: z.boolean().default(false),
+  demo_volume: z.enum(["light", "medium", "heavy"]).default("medium"),
 });
 
 export const editUserSchema = z.object({
@@ -48,6 +50,8 @@ export async function createUser(input: CreateUserInput): Promise<User> {
       last_name: input.last_name || null,
       email: input.email || null,
       avatar_url: input.avatar_url || null,
+      seed_demo_activity: input.seed_demo_activity,
+      demo_volume: input.demo_volume,
     }),
   });
   if (!res.ok) throw new Error(`Failed to create user: HTTP ${res.status}`);

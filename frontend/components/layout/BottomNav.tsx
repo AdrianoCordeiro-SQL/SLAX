@@ -18,8 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Reports", href: "/reports", icon: FileBarChart2 },
-  { label: "Users", href: "/users", icon: Users },
-  { label: "API Logs", href: "/api-logs", icon: ScrollText },
+  { label: "Customers", href: "/users", icon: Users },
+  { label: "Events", href: "/api-logs", icon: ScrollText },
 ];
 
 export function BottomNav() {

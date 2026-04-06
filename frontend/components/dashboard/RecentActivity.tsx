@@ -71,7 +71,7 @@ export function RecentActivity() {
     <Card>
       <CardHeader>
         <CardTitle className="text-base font-semibold">
-          Recent Activity
+          Recent payment activity
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -84,7 +84,7 @@ export function RecentActivity() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">User</TableHead>
+                <TableHead className="pl-6">Customer</TableHead>
                 <TableHead>Action</TableHead>
                 <TableHead>Timestamp</TableHead>
                 <TableHead>Status</TableHead>

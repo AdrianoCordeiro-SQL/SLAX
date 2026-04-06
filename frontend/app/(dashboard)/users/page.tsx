@@ -34,9 +34,9 @@ export default function UsersPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Users</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Customers</h1>
             <p className="text-sm text-muted-foreground">
-              Manage all registered users in the system.
+              Manage customers linked to your SLAX Pay account.
             </p>
           </div>
           <button

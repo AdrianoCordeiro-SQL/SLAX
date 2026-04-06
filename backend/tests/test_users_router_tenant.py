@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, col, func, select
 
+from app.models import APILog
 from app.schemas import RegisterRequest, UserCreate
 from app.services.account import register_account
 from app.services.users import create_user
@@ -56,3 +57,33 @@ def test_cannot_modify_other_tenant_user_via_api(session: Session, client: TestC
     )
     assert rename.status_code == 200
     assert rename.json()["name"] == "StillB"
+
+
+def test_post_users_with_demo_activity_creates_logs(client: TestClient, session: Session):
+    """POST /users/ com seed_demo_activity persiste APILog para o novo utilizador."""
+
+    register_account(
+        session, RegisterRequest(name="DemoHttp", email="demopost@example.com", password="pw123456")
+    )
+    login = client.post(
+        "/auth/login",
+        json={"email": "demopost@example.com", "password": "pw123456"},
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    r = client.post(
+        "/users/",
+        headers=headers,
+        json={
+            "first_name": "HttpDemo",
+            "seed_demo_activity": True,
+            "demo_volume": "light",
+        },
+    )
+    assert r.status_code == 201
+    uid = r.json()["id"]
+
+    n = session.exec(select(func.count(col(APILog.id))).where(APILog.user_id == uid)).one()
+    assert 15 <= n <= 30

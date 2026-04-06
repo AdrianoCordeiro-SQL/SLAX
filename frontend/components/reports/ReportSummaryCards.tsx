@@ -66,7 +66,7 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
 
   const cards: SummaryCardProps[] = [
     {
-      title: "Total Requests",
+      title: "Payment API calls",
       value: data.total_requests.toLocaleString(),
       change: data.requests_change,
       icon: Activity,
@@ -84,7 +84,7 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
       icon: DollarSign,
     },
     {
-      title: "Active Users",
+      title: "Active customers",
       value: data.active_users.toLocaleString(),
       change: data.active_users_change,
       icon: Users,
