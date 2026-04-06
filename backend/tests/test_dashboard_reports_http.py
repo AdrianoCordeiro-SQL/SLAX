@@ -6,10 +6,9 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
+from app.models import APILog
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-
-from app.models import APILog
 
 PROTECTED_PATHS = [
     "/stats",
@@ -103,7 +102,9 @@ def test_get_performance_com_bearer_lista_200(client: TestClient):
     lst = r.json()
     assert isinstance(lst, list)
     assert len(lst) == 30
-    assert all("day" in p and "date" in p and "requests" in p and "latency" in p for p in lst)
+    assert all(
+        "day" in p and "date" in p and "requests" in p and "latency" in p for p in lst
+    )
 
 
 def test_get_activity_com_bearer_lista_200(client: TestClient):
@@ -176,7 +177,9 @@ def test_reports_logs_transaction_kind_invalid_422(client: TestClient):
     """GET /reports/logs com transaction_kind inválido responde 422."""
 
     headers, _ = _register_and_token(client)
-    r = client.get("/reports/logs", headers=headers, params={"transaction_kind": "invalid"})
+    r = client.get(
+        "/reports/logs", headers=headers, params={"transaction_kind": "invalid"}
+    )
     assert r.status_code == 422
 
 
@@ -184,7 +187,9 @@ def test_reports_logs_transaction_kind_completed_200(client: TestClient):
     """GET /reports/logs com transaction_kind=completed responde 200."""
 
     headers, _ = _register_and_token(client)
-    r = client.get("/reports/logs", headers=headers, params={"transaction_kind": "completed"})
+    r = client.get(
+        "/reports/logs", headers=headers, params={"transaction_kind": "completed"}
+    )
     assert r.status_code == 200
 
 

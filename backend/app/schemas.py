@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -167,6 +167,63 @@ class LogItem(BaseModel):
 
 class LogsResponse(BaseModel):
     items: list[LogItem]
+    total: int
+    page: int
+    per_page: int
+    pages: int
+
+
+# --- Alertas operacionais ---
+
+
+class AlertRuleCreate(BaseModel):
+    rule_type: str
+    params: dict[str, Any] = Field(default_factory=dict)
+    enabled: bool = True
+    cooldown_hours: int = Field(default=24, ge=1, le=168)
+
+
+class AlertRuleUpdate(BaseModel):
+    rule_type: Optional[str] = None
+    params: Optional[dict[str, Any]] = None
+    enabled: Optional[bool] = None
+    cooldown_hours: Optional[int] = Field(default=None, ge=1, le=168)
+
+
+class AlertRuleOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    account_id: int
+    rule_type: str
+    params: dict[str, Any]
+    enabled: bool
+    cooldown_hours: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class AlertEvaluateItem(BaseModel):
+    rule_id: int
+    firing_id: int
+    message: str
+
+
+class AlertEvaluateResponse(BaseModel):
+    fired: list[AlertEvaluateItem]
+
+
+class AlertFiringOut(BaseModel):
+    id: int
+    rule_id: int
+    fired_at: str
+    message: str
+    snapshot: dict[str, Any]
+    notified: bool
+
+
+class AlertFiringsResponse(BaseModel):
+    items: list[AlertFiringOut]
     total: int
     page: int
     per_page: int

@@ -91,6 +91,7 @@ def _add_platform_activity(
             session.add(
                 RevenueMetric(
                     account_id=account_id,
+                    user_id=user_id,
                     value=-_price_for_product(product_name),
                     recorded_at=timestamp,
                 )
@@ -100,6 +101,7 @@ def _add_platform_activity(
             session.add(
                 RevenueMetric(
                     account_id=account_id,
+                    user_id=user_id,
                     value=_price_for_product(product_name),
                     recorded_at=timestamp,
                 )
@@ -150,7 +152,7 @@ def create_user(session: Session, account_id: int, payload: UserCreate) -> User:
             status="Success",
         )
     )
-    session.add(RevenueMetric(account_id=account_id, value=payload.value))
+    session.add(RevenueMetric(account_id=account_id, user_id=user.id, value=payload.value))
     if payload.generate_platform_activity:
         _add_platform_activity(session, account_id, user.id, user.name)
     session.commit()
@@ -188,5 +190,11 @@ def delete_user(session: Session, account_id: int, user_id: int) -> None:
         raise UserNotFoundForAccount
     # Remove dependent API logs first to satisfy FK constraint in existing databases.
     session.exec(delete(APILog).where(APILog.user_id == user.id))
+    session.exec(
+        delete(RevenueMetric).where(
+            RevenueMetric.account_id == account_id,
+            RevenueMetric.user_id == user.id,
+        )
+    )
     session.delete(user)
     session.commit()

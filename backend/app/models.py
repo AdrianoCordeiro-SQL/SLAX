@@ -39,5 +39,27 @@ class APILog(SQLModel, table=True):
 class RevenueMetric(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     account_id: int = Field(foreign_key="account.id", index=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
     value: float
     recorded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class AlertRule(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    account_id: int = Field(foreign_key="account.id", index=True)
+    rule_type: str = Field(index=True)
+    params_json: str = Field(default="{}")
+    enabled: bool = Field(default=True)
+    cooldown_hours: int = Field(default=24)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class AlertFiring(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    account_id: int = Field(foreign_key="account.id", index=True)
+    rule_id: int = Field(foreign_key="alertrule.id", index=True)
+    fired_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    message: str
+    snapshot_json: str = Field(default="{}")
+    notified: bool = Field(default=False)
