@@ -1,4 +1,6 @@
 import math
+import re
+from collections import Counter
 from typing import Optional
 
 from sqlmodel import Session, col, func, select
@@ -8,6 +10,21 @@ from ..utils import parse_period, pct_change
 from .log_items import serialize_api_log_row
 
 # Consultas e agregações para relatórios (resumo, breakdowns, tendências e logs paginados).
+
+_LEGACY_PURCHASE_RE = re.compile(r"^POST /users \(purchase: (?P<product>.+?) - \$\d+(?:\.\d{1,2})?\)$")
+
+
+def _extract_purchased_product(action: str) -> Optional[str]:
+    if action.startswith("Comprou "):
+        product = action.removeprefix("Comprou ").strip()
+        return product or None
+
+    legacy_match = _LEGACY_PURCHASE_RE.match(action)
+    if legacy_match:
+        product = legacy_match.group("product").strip()
+        return product or None
+
+    return None
 
 
 def build_report_summary(
@@ -77,6 +94,22 @@ def build_report_summary(
             APILog.account_id == aid, APILog.timestamp >= prev_start, APILog.timestamp < prev_end
         )
     ).one()
+    returns_count = session.exec(
+        select(func.count(col(APILog.id))).where(
+            APILog.account_id == aid,
+            APILog.timestamp >= period_start,
+            APILog.timestamp < period_end,
+            APILog.action.ilike("Produto % devolvido pelo cliente %"),
+        )
+    ).one()
+    returns_lost_value = session.exec(
+        select(func.sum(RevenueMetric.value)).where(
+            RevenueMetric.account_id == aid,
+            RevenueMetric.recorded_at >= period_start,
+            RevenueMetric.recorded_at < period_end,
+            RevenueMetric.value < 0,
+        )
+    ).one() or 0.0
 
     return {
         "total_requests": total_requests,
@@ -87,6 +120,8 @@ def build_report_summary(
         "revenue_change": pct_change(total_revenue, prev_revenue),
         "active_users": active_users,
         "active_users_change": pct_change(active_users, prev_active),
+        "returns_count": returns_count,
+        "returns_lost_value": round(abs(returns_lost_value), 2),
     }
 
 
@@ -97,12 +132,26 @@ def build_status_breakdown(
     end: Optional[str],
 ) -> list[dict]:
     period_start, period_end = parse_period(start, end)
-    rows = session.exec(
-        select(APILog.status, func.count(col(APILog.id)))
-        .where(APILog.account_id == account_id, APILog.timestamp >= period_start, APILog.timestamp < period_end)
-        .group_by(APILog.status)
-    ).all()
-    return [{"status": status, "count": count} for status, count in rows]
+    sales_count = session.exec(
+        select(func.count(col(APILog.id))).where(
+            APILog.account_id == account_id,
+            APILog.timestamp >= period_start,
+            APILog.timestamp < period_end,
+            APILog.action.startswith("Comprou "),
+        )
+    ).one()
+    returns_count = session.exec(
+        select(func.count(col(APILog.id))).where(
+            APILog.account_id == account_id,
+            APILog.timestamp >= period_start,
+            APILog.timestamp < period_end,
+            APILog.action.ilike("Produto % devolvido pelo cliente %"),
+        )
+    ).one()
+    return [
+        {"status": "Vendas Realizadas", "count": sales_count},
+        {"status": "Devoluções", "count": returns_count},
+    ]
 
 
 def build_top_actions(
@@ -112,14 +161,20 @@ def build_top_actions(
     end: Optional[str],
 ) -> list[dict]:
     period_start, period_end = parse_period(start, end)
-    rows = session.exec(
-        select(APILog.action, func.count(col(APILog.id)))
-        .where(APILog.account_id == account_id, APILog.timestamp >= period_start, APILog.timestamp < period_end)
-        .group_by(APILog.action)
-        .order_by(func.count(col(APILog.id)).desc())
-        .limit(10)
+    logs = session.exec(
+        select(APILog).where(
+            APILog.account_id == account_id,
+            APILog.timestamp >= period_start,
+            APILog.timestamp < period_end,
+        )
     ).all()
-    return [{"action": action, "count": count} for action, count in rows]
+
+    sold_products = [
+        product for log in logs if (product := _extract_purchased_product(log.action)) is not None
+    ]
+    counts = Counter(sold_products)
+    top_products = sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:10]
+    return [{"action": product, "count": count} for product, count in top_products]
 
 
 def build_top_users(
@@ -203,8 +258,9 @@ def build_logs_paginated(
         base = base.where(APILog.status == status)
         count_q = count_q.where(APILog.status == status)
     if action:
-        base = base.where(APILog.action == action)
-        count_q = count_q.where(APILog.action == action)
+        like_expr = f"%{action}%"
+        base = base.where(APILog.action.ilike(like_expr))
+        count_q = count_q.where(APILog.action.ilike(like_expr))
     if user_id is not None:
         base = base.where(APILog.user_id == user_id)
         count_q = count_q.where(APILog.user_id == user_id)

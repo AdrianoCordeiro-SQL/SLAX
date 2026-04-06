@@ -21,14 +21,15 @@ interface RevenueTrendChartProps {
 export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
   const { data, isLoading, error } = useRevenueTrend(start, end);
   const empty = !data?.length;
+  const longRange = (data?.length ?? 0) > 120;
 
   return (
     <AsyncChartCard
-      title="Revenue Trend"
+      title="Tendência de receita"
       isLoading={isLoading}
       error={error}
       empty={empty}
-      errorPrefix="Failed to load revenue trend"
+      errorPrefix="Falha ao carregar tendência de receita"
       skeleton={<ChartLineSkeleton />}
     >
       {data && data.length > 0 ? (
@@ -50,14 +51,20 @@ export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
                 const d = new Date(v);
                 return `${d.getMonth() + 1}/${d.getDate()}`;
               }}
-              interval="preserveStartEnd"
+              interval={longRange ? Math.ceil((data?.length ?? 0) / 12) : "preserveStartEnd"}
             />
             <YAxis
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 12, fill: "#6b7280" }}
               width={56}
-              tickFormatter={(v: number) => `$${v}`}
+              tickFormatter={(v: number) =>
+                new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                  maximumFractionDigits: 0,
+                }).format(v)
+              }
             />
             <Tooltip
               contentStyle={{
@@ -72,12 +79,18 @@ export function RevenueTrendChart({ start, end }: RevenueTrendChartProps) {
                     : typeof value === "string"
                       ? Number(value)
                       : Number(value ?? 0);
-                return [`$${num.toFixed(2)}`, "Revenue"];
+                return [
+                  new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(num),
+                  "Receita",
+                ];
               }}
               labelFormatter={(label) => {
                 const s = typeof label === "string" ? label : String(label);
                 const d = new Date(s);
-                return d.toLocaleDateString("en-US", {
+                return d.toLocaleDateString("pt-BR", {
                   month: "short",
                   day: "numeric",
                 });

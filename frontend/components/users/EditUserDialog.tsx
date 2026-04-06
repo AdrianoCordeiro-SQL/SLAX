@@ -45,16 +45,16 @@ export function EditUserDialog({ user, onOpenChange }: EditUserDialogProps) {
     <Dialog open={!!user} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
+          <DialogTitle>Editar cliente</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-4">
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground" htmlFor="edit-name">
-              Name
+              Nome
             </label>
             <input
               id="edit-name"
-              placeholder="Jane Doe"
+              placeholder="Jane"
               {...register("name")}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
             />
@@ -64,7 +64,7 @@ export function EditUserDialog({ user, onOpenChange }: EditUserDialogProps) {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground" htmlFor="edit-avatar">
-              Avatar URL <span className="text-muted-foreground font-normal">(optional)</span>
+              URL do avatar <span className="text-muted-foreground font-normal">(opcional)</span>
             </label>
             <input
               id="edit-avatar"
@@ -84,14 +84,14 @@ export function EditUserDialog({ user, onOpenChange }: EditUserDialogProps) {
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
               className="bg-[#1e2d5a] hover:bg-[#1e2d5a]/90"
             >
-              {isPending ? "Saving…" : "Save Changes"}
+              {isPending ? "Salvando…" : "Salvar alterações"}
             </Button>
           </DialogFooter>
         </form>

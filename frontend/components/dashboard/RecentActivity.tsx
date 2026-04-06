@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -17,12 +20,26 @@ import { getInitials } from "@/lib/format";
 
 function formatTimestamp(iso: string): string {
   const date = new Date(iso);
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("pt-BR", {
+    year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatAction(action: string): string {
+  const purchaseMatch = action.match(/^POST \/users \(purchase: (.+) - \$(\d+(?:\.\d{1,2})?)\)$/);
+  if (purchaseMatch) {
+    const [, product, rawValue] = purchaseMatch;
+    const value = Number(rawValue);
+    return `Compra registrada: ${product} (${new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value)})`;
+  }
+  return action;
 }
 
 function ActivityRow({ item }: { item: ActivityItem }) {
@@ -40,7 +57,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
         </div>
       </TableCell>
       <TableCell className="text-muted-foreground font-mono text-xs">
-        {item.action}
+        {formatAction(item.action)}
       </TableCell>
       <TableCell className="text-muted-foreground text-xs">
         {formatTimestamp(item.timestamp)}
@@ -65,40 +82,68 @@ function SkeletonRow() {
 }
 
 export function RecentActivity() {
-  const { data: activity, isLoading, error } = useActivity();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, error, isFetching } = useActivity(page, 20);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base font-semibold">
-          Recent Activity
+          Atividade recente da plataforma
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {error && (
           <div className="px-6 py-3 text-sm text-red-700">
-            Failed to load activity: {error.message}
+            Falha ao carregar atividade: {error.message}
           </div>
         )}
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">User</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Timestamp</TableHead>
+                <TableHead className="pl-6">Cliente</TableHead>
+                <TableHead>Ação</TableHead>
+                <TableHead>Horário</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading
                 ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-                : activity?.map((item) => (
+                : data?.items.map((item) => (
                     <ActivityRow key={item.id} item={item} />
                   ))}
             </TableBody>
           </Table>
         </div>
+        {data && data.pages > 1 && (
+          <div className="flex items-center justify-between border-t px-6 py-3">
+            <span className="text-xs text-muted-foreground">
+              Página {data.page} de {data.pages} ({data.total} no total)
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={isFetching || data.page <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+              >
+                <ChevronLeft size={14} />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={isFetching || data.page >= data.pages}
+                onClick={() => setPage((current) => current + 1)}
+              >
+                <ChevronRight size={14} />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

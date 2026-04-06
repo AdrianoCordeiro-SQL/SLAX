@@ -14,13 +14,24 @@ export const activityItemSchema = z.object({
 });
 
 export const activitySchema = z.array(activityItemSchema);
+export const activityResponseSchema = z.object({
+  items: activitySchema,
+  total: z.number(),
+  page: z.number(),
+  per_page: z.number(),
+  pages: z.number(),
+});
 
 export type ActivityItem = z.infer<typeof activityItemSchema>;
 export type Activity = z.infer<typeof activitySchema>;
+export type ActivityResponse = z.infer<typeof activityResponseSchema>;
 
-export async function fetchActivity(): Promise<Activity> {
-  const res = await apiFetch(`${API_BASE}/activity`);
+export async function fetchActivity(page = 1, perPage = 20): Promise<ActivityResponse> {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("per_page", String(perPage));
+  const res = await apiFetch(`${API_BASE}/activity?${params.toString()}`);
   if (!res.ok) throw new Error(`Failed to fetch activity: HTTP ${res.status}`);
   const data = await res.json();
-  return activitySchema.parse(data);
+  return activityResponseSchema.parse(data);
 }

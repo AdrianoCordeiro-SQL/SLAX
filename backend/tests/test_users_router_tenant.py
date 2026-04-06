@@ -19,7 +19,7 @@ def test_cannot_modify_other_tenant_user_via_api(session: Session, client: TestC
     b = register_account(
         session, RegisterRequest(name="B", email="cb@example.com", password="pw123456")
     )
-    u_b = create_user(session, b.id, UserCreate(first_name="OnlyB"))
+    u_b = create_user(session, b.id, UserCreate(first_name="OnlyB", product="Plano B", value=120))
 
     login_a = client.post(
         "/auth/login",

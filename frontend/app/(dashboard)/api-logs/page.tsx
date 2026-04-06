@@ -12,9 +12,11 @@ export default function ApiLogsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">API Logs</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Eventos da plataforma
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Browse and filter all API activity logs.
+            Navegue e filtre eventos da sua operação de e-commerce.
           </p>
         </div>
         <DateRangeFilter

@@ -26,6 +26,9 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/portfolio_db
+      # Acesso visitante (POST /auth/demo). A conta precisa existir (ex.: após seed com admin@slax.com).
+      - DEMO_LOGIN_EMAIL=admin@slax.com
+      - DEMO_LOGIN_PASSWORD=admin123
     depends_on:
       db:
         condition: service_healthy
@@ -42,6 +45,7 @@ services:
     environment:
       - WATCHPACK_POLLING=true
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_ENABLE_DEMO_LOGIN=true
     stdin_open: true
     tty: true
 

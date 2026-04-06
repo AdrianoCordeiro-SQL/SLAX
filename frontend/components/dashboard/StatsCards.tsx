@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Database, DollarSign, Users } from "lucide-react";
+import { Activity, DollarSign, RotateCcw, Users } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
@@ -77,38 +77,53 @@ export function StatsCards() {
   if (statsError || !stats) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        Failed to load stats: {statsError?.message ?? "Unknown error"}
+        Falha ao carregar métricas: {statsError?.message ?? "Erro desconhecido"}
       </div>
     );
   }
 
   const empty: SparklinePoint[] = [];
+  const transactionCountLabel =
+    stats.api_requests === 1
+      ? "1 compra registrada"
+      : `${stats.api_requests.toLocaleString()} compras registradas`;
+  const returnsLostLabel = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(stats.returns_lost_value);
 
   const cards: StatCardProps[] = [
     {
-      title: "Total Users",
+      title: "Clientes",
       value: stats.total_users.toLocaleString(),
       change: stats.users_change,
       icon: Users,
       sparklineData: sparklines?.users ?? empty,
     },
     {
-      title: "API Requests",
+      title: "Atividades recentes",
       value: stats.api_requests.toLocaleString(),
-      change: stats.requests_change,
+      change: transactionCountLabel,
       icon: Activity,
       sparklineData: sparklines?.requests ?? empty,
     },
     {
-      title: "Database Health",
-      value: stats.db_health,
-      change: stats.db_health_change,
-      icon: Database,
-      sparklineData: sparklines?.health ?? empty,
+      title: "Devoluções",
+      value: stats.returns_count.toLocaleString(),
+      change: `Perda: ${returnsLostLabel}`,
+      icon: RotateCcw,
+      sparklineData: empty,
     },
     {
-      title: "Revenue",
-      value: `$${stats.revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      title: "Receita líquida",
+      value: new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(stats.revenue),
       change: stats.revenue_change,
       icon: DollarSign,
       sparklineData: sparklines?.revenue ?? empty,

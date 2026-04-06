@@ -17,10 +17,10 @@ import { logout } from "@/lib/api/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Reports", href: "/reports", icon: FileBarChart2 },
-  { label: "Users", href: "/users", icon: Users },
-  { label: "API Logs", href: "/api-logs", icon: ScrollText },
+  { label: "Visão geral", href: "/", icon: LayoutDashboard },
+  { label: "Relatórios", href: "/reports", icon: FileBarChart2 },
+  { label: "Clientes", href: "/users", icon: Users },
+  { label: "Eventos", href: "/api-logs", icon: ScrollText },
 ];
 
 export function Sidebar() {
@@ -46,9 +46,9 @@ export function Sidebar() {
           <div className="flex items-center gap-3 px-4 py-4 shrink-0">
             <TrendingUp size={26} className="shrink-0 text-white" />
             <div className="flex flex-col leading-tight opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
-              <span className="text-sm font-bold tracking-wide">SLAX</span>
+              <span className="text-sm font-bold tracking-wide">LogSlax</span>
               <span className="text-xs text-white font-medium uppercase tracking-widest">
-                Analytics
+                Commerce Monitor
               </span>
             </div>
           </div>

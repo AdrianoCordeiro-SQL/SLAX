@@ -1,5 +1,5 @@
 ---
-description: 
+description:
 alwaysApply: true
 ---
 
@@ -14,6 +14,8 @@ alwaysApply: true
 - Não substitui comentários pontuais: evite repetir o que cada função faz linha a linha; o foco é o **papel do módulo/arquivo**.
 - Omitir apenas em reexports triviais ou arquivos gerados (especificar na PR se for o caso).
 - Todos os comentários devem ser em português-BR.
+
+- Faça perguntas adicionais SEMPRE que algum comando não estiver detalhado e você julgar importante informações adicionais.
 
 ## 2. Frontend (Next.js 16 + Tailwind + shadcn/ui)
 

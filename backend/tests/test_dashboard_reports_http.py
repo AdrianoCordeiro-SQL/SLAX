@@ -51,7 +51,7 @@ def test_get_raiz_health_sem_auth_200(client: TestClient):
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "Online"
-    assert "SLAX Analytics backend" in body["message"]
+    assert "LogSlax Commerce Monitor" in body["message"]
 
 
 @pytest.mark.parametrize("path", PROTECTED_PATHS)
@@ -74,10 +74,10 @@ def test_get_stats_com_bearer_estrutura_200(client: TestClient):
         "users_change",
         "api_requests",
         "requests_change",
-        "db_health",
-        "db_health_change",
         "revenue",
         "revenue_change",
+        "returns_count",
+        "returns_lost_value",
     ):
         assert key in d
 
@@ -107,12 +107,14 @@ def test_get_performance_com_bearer_lista_200(client: TestClient):
 
 
 def test_get_activity_com_bearer_lista_200(client: TestClient):
-    """GET /activity devolve lista (pode estar vazia)."""
+    """GET /activity devolve objeto paginado (itens podem estar vazios)."""
 
     headers, _ = _register_and_token(client)
     r = client.get("/activity", headers=headers)
     assert r.status_code == 200
-    assert isinstance(r.json(), list)
+    d = r.json()
+    for key in ("items", "total", "page", "per_page", "pages"):
+        assert key in d
 
 
 def test_reports_summary_com_bearer_e_query_start_end_200(client: TestClient):
@@ -138,6 +140,8 @@ def test_reports_summary_com_bearer_e_query_start_end_200(client: TestClient):
         "revenue_change",
         "active_users",
         "active_users_change",
+        "returns_count",
+        "returns_lost_value",
     ):
         assert key in d
 

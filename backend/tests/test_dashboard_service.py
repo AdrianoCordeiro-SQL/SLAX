@@ -55,7 +55,7 @@ def test_build_stats_janelas_e_pct_change(session: Session):
         APILog(
             account_id=a.id,
             user_id=u_new.id,
-            action="a",
+            action="Produto iPhone 15 devolvido pelo cliente New",
             status="Success",
             timestamp=datetime(2024, 6, 5, 12, 0, 0, tzinfo=timezone.utc),
         )
@@ -80,7 +80,7 @@ def test_build_stats_janelas_e_pct_change(session: Session):
     session.add(
         RevenueMetric(
             account_id=a.id,
-            value=20.0,
+            value=-20.0,
             recorded_at=datetime(2024, 6, 5, 12, 0, 0, tzinfo=timezone.utc),
         )
     )
@@ -90,9 +90,10 @@ def test_build_stats_janelas_e_pct_change(session: Session):
     assert out["total_users"] == 2
     assert out["api_requests"] == 2
     assert out["requests_change"] == pct_change(1, 1)
-    assert out["revenue"] == 30.0
-    assert out["revenue_change"] == pct_change(10.0, 20.0)
-    assert out["db_health"] == "Healthy"
+    assert out["revenue"] == -10.0
+    assert out["revenue_change"] == pct_change(10.0, -20.0)
+    assert out["returns_count"] == 1
+    assert out["returns_lost_value"] == 20.0
     assert out["users_change"] == pct_change(1, 0)
 
 

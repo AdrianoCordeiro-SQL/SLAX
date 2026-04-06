@@ -13,15 +13,16 @@ interface StatusBreakdownChartProps {
 
 export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) {
   const { data, isLoading, error } = useStatusBreakdown(start, end);
-  const empty = !data?.length;
+  const total = (data ?? []).reduce((acc, item) => acc + item.count, 0);
+  const empty = !data?.length || total === 0;
 
   return (
     <AsyncChartCard
-      title="Status Breakdown"
+      title="Distribuição por status"
       isLoading={isLoading}
       error={error}
       empty={empty}
-      errorPrefix="Failed to load status breakdown"
+      errorPrefix="Falha ao carregar distribuição por status"
       skeleton={<ChartPieSkeleton />}
     >
       {data && data.length > 0 ? (
@@ -46,6 +47,7 @@ export function StatusBreakdownChart({ start, end }: StatusBreakdownChartProps) 
               ))}
             </Pie>
             <Tooltip
+              formatter={(value, name) => [value ?? 0, name ?? ""]}
               contentStyle={{
                 borderRadius: "8px",
                 border: "1px solid #e5e7eb",

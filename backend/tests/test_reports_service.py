@@ -69,7 +69,7 @@ def test_build_report_summary_contagens_e_variacoes(session: Session):
         RevenueMetric(account_id=aid, value=100.0, recorded_at=T0)
     )
     session.add(
-        RevenueMetric(account_id=aid, value=50.0, recorded_at=T1)
+        RevenueMetric(account_id=aid, value=-50.0, recorded_at=T1)
     )
     session.add(
         RevenueMetric(account_id=aid, value=30.0, recorded_at=P0)
@@ -79,11 +79,13 @@ def test_build_report_summary_contagens_e_variacoes(session: Session):
     out = build_report_summary(session, aid, START, END)
     assert out["total_requests"] == 5
     assert out["success_rate"] == 80.0  # 4/5
-    assert out["total_revenue"] == 150.0
+    assert out["total_revenue"] == 50.0
     # Distinct user_id no período: 2
     assert out["active_users"] == 2
     assert out["requests_change"] == pct_change(5, 2)
-    assert out["revenue_change"] == pct_change(150.0, 30.0)
+    assert out["revenue_change"] == pct_change(50.0, 30.0)
+    assert out["returns_count"] == 0
+    assert out["returns_lost_value"] == 50.0
     assert out["active_users_change"] == pct_change(2, 1)
 
 
@@ -97,6 +99,8 @@ def test_build_report_summary_sem_pedidos_taxa_zero(session: Session):
     out = build_report_summary(session, acc.id, START, END)
     assert out["total_requests"] == 0
     assert out["success_rate"] == 0.0
+    assert out["returns_count"] == 0
+    assert out["returns_lost_value"] == 0.0
 
 
 def test_build_logs_paginated_filtros_e_pagina(session: Session):
@@ -129,6 +133,11 @@ def test_build_logs_paginated_filtros_e_pagina(session: Session):
     )
     assert filtered["total"] == 1
     assert filtered["items"][0]["action"] == "B"
+
+    partial = build_logs_paginated(
+        session, aid, START, END, status=None, action="a", user_id=None, page=1, per_page=10
+    )
+    assert partial["total"] == 2
 
     by_user = build_logs_paginated(
         session, aid, START, END, status=None, action=None, user_id=ua_id, page=1, per_page=10
@@ -173,7 +182,16 @@ def test_smoke_status_breakdown_top_actions_revenue_trend(session: Session):
 
     aid, ua_id, _ = _seed_account_and_users(session)
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="act", status="ok", timestamp=T1)
+        APILog(account_id=aid, user_id=ua_id, action="Comprou iPhone 15", status="Success", timestamp=T1)
+    )
+    session.add(
+        APILog(
+            account_id=aid,
+            user_id=ua_id,
+            action="Produto iPhone 15 devolvido pelo cliente Alice",
+            status="Success",
+            timestamp=T1,
+        )
     )
     session.add(
         RevenueMetric(account_id=aid, value=10.0, recorded_at=T0)
@@ -181,10 +199,13 @@ def test_smoke_status_breakdown_top_actions_revenue_trend(session: Session):
     session.commit()
 
     br = build_status_breakdown(session, aid, START, END)
-    assert isinstance(br, list) and len(br) >= 1
+    assert br == [
+        {"status": "Vendas Realizadas", "count": 1},
+        {"status": "Devoluções", "count": 1},
+    ]
 
     ta = build_top_actions(session, aid, START, END)
-    assert any(x["action"] == "act" for x in ta)
+    assert any(x["action"] == "iPhone 15" for x in ta)
 
     rt = build_revenue_trend(session, aid, START, END)
     assert isinstance(rt, list)

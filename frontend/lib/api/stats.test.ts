@@ -10,10 +10,10 @@ const validStatsPayload = {
   users_change: "+10.0%",
   api_requests: 100,
   requests_change: "-5.0%",
-  db_health: "Healthy",
-  db_health_change: "Stable",
   revenue: 99.5,
   revenue_change: "+0.0%",
+  returns_count: 3,
+  returns_lost_value: 1200.0,
 };
 
 describe("statsSchema", () => {

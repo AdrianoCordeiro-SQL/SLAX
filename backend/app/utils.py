@@ -8,12 +8,24 @@ def parse_period(
     start: Optional[str], end: Optional[str]
 ) -> tuple[datetime, datetime]:
     now = datetime.now(timezone.utc)
+
+    def _parse_iso(value: str) -> datetime:
+        parsed = datetime.fromisoformat(value)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        else:
+            parsed = parsed.astimezone(timezone.utc)
+        return parsed
+
     if end:
-        period_end = datetime.fromisoformat(end).replace(tzinfo=timezone.utc)
+        period_end = _parse_iso(end)
+        if len(end) == 10:
+            # Date-only filter should include the whole day while keeping "< period_end" queries.
+            period_end = period_end + timedelta(days=1)
     else:
         period_end = now
     if start:
-        period_start = datetime.fromisoformat(start).replace(tzinfo=timezone.utc)
+        period_start = _parse_iso(start)
     else:
         period_start = period_end - timedelta(days=30)
     return period_start, period_end

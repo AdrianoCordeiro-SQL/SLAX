@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # Modelos Pydantic de entrada e saída (corpos de requisição e respostas JSON da API).
 
@@ -11,6 +11,9 @@ from pydantic import BaseModel, ConfigDict
 
 class UserCreate(BaseModel):
     first_name: str
+    product: str
+    value: float = Field(gt=0)
+    generate_platform_activity: bool = False
     last_name: Optional[str] = None
     email: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -69,6 +72,8 @@ class UserOut(BaseModel):
     last_name: Optional[str] = None
     email: Optional[str] = None
     avatar_url: Optional[str] = None
+    product: Optional[str] = None
+    product_value: Optional[float] = None
     created_at: datetime
 
 
@@ -82,10 +87,10 @@ class StatsResponse(BaseModel):
     users_change: str
     api_requests: int
     requests_change: str
-    db_health: str
-    db_health_change: str
     revenue: float
     revenue_change: str
+    returns_count: int
+    returns_lost_value: float
 
 
 class SparklinePoint(BaseModel):
@@ -125,6 +130,8 @@ class ReportSummaryResponse(BaseModel):
     revenue_change: str
     active_users: int
     active_users_change: str
+    returns_count: int
+    returns_lost_value: float
 
 
 class StatusBreakdownItem(BaseModel):

@@ -6,6 +6,7 @@ const PRESETS = [
   { label: "7d", days: 7 },
   { label: "30d", days: 30 },
   { label: "90d", days: 90 },
+  { label: "365d", days: 365 },
 ] as const;
 
 function toISODate(d: Date): string {
@@ -52,7 +53,7 @@ export function DateRangeFilter({ start, end, onChange }: DateRangeFilterProps) 
           onChange={(e) => onChange(e.target.value, end)}
           className="rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
         />
-        <span>to</span>
+        <span>até</span>
         <input
           type="date"
           value={end}

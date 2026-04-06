@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="SLAX Analytics", lifespan=lifespan)
+app = FastAPI(title="LogSlax Commerce Monitor", lifespan=lifespan)
 
 
 @app.exception_handler(EmailAlreadyRegistered)

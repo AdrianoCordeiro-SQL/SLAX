@@ -22,6 +22,8 @@ class User(SQLModel, table=True):
     last_name: Optional[str] = None
     email: Optional[str] = None
     avatar_url: Optional[str] = None
+    product: Optional[str] = None
+    product_value: Optional[float] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

@@ -6,9 +6,10 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard / Overview</h1>
+        <h1 className="text-2xl font-bold text-gray-800">LogSlax Commerce Monitor / Visão geral</h1>
         <p className="text-sm text-muted-foreground">
-          Welcome back, Admin. Here&apos;s what&apos;s happening today.
+          Bem-vindo de volta. Acompanhe eventos e receita da sua operação de e-commerce nos
+          últimos 30 dias.
         </p>
       </div>
       <StatsCards />

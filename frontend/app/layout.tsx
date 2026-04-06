@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SLAX Analytics",
-  description: "SLAX Analytics Dashboard",
+  title: "LogSlax Commerce Monitor",
+  description: "Monitoramento de atividade para plataformas de e-commerce",
 };
 
 export default function RootLayout({
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
       className={`${inter.variable} h-full antialiased`}
     >
       <body className="h-full bg-[#f4f6fb]">

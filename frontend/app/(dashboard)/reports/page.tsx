@@ -21,9 +21,9 @@ export default function ReportsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Reports</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Relatórios</h1>
           <p className="text-sm text-muted-foreground">
-            Analyze metrics and activity for any time period.
+            Acompanhe volume de eventos, receita e atividade dos clientes por período.
           </p>
         </div>
         <DateRangeFilter start={start} end={end} onChange={handleRangeChange} />

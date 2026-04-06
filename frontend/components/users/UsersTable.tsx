@@ -18,11 +18,11 @@ import { formatShortDate, getInitials } from "@/lib/format";
 function SkeletonRow() {
   return (
     <TableRow>
-      {Array.from({ length: 4 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <TableCell key={i}>
           <div
             className="h-4 rounded bg-gray-200 animate-pulse"
-            style={{ width: i === 0 ? "10rem" : i === 1 ? "6rem" : "8rem" }}
+            style={{ width: i === 0 ? "10rem" : i === 1 ? "12rem" : i === 2 ? "6rem" : "8rem" }}
           />
         </TableCell>
       ))}
@@ -51,6 +51,19 @@ function UserRow({ user, onEdit, onDelete }: UserRowProps) {
         </div>
       </TableCell>
       <TableCell>
+        <div className="text-sm">
+          <p className="font-medium text-foreground">{user.product ?? "—"}</p>
+          <p className="text-xs text-muted-foreground">
+            {user.product_value != null
+              ? new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(user.product_value)
+              : "Sem valor"}
+          </p>
+        </div>
+      </TableCell>
+      <TableCell>
         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
           #{user.id}
         </Badge>
@@ -63,14 +76,14 @@ function UserRow({ user, onEdit, onDelete }: UserRowProps) {
           <button
             onClick={() => onEdit(user)}
             className="cursor-pointer rounded p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Edit user"
+            aria-label="Editar cliente"
           >
             <Pencil size={14} />
           </button>
           <button
             onClick={() => onDelete(user)}
             className="cursor-pointer rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-600"
-            aria-label="Delete user"
+            aria-label="Excluir cliente"
           >
             <Trash2 size={14} />
           </button>
@@ -100,17 +113,18 @@ export function UsersTable({
       <CardContent className="p-0">
         {error && (
           <div className="px-6 py-3 text-sm text-red-700">
-            Failed to load users: {error.message}
+            Falha ao carregar clientes: {error.message}
           </div>
         )}
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">User</TableHead>
+                <TableHead className="pl-6">Cliente</TableHead>
+                <TableHead>Compra</TableHead>
                 <TableHead>ID</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="pr-6">Actions</TableHead>
+                <TableHead>Cadastro</TableHead>
+                <TableHead className="pr-6">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -119,8 +133,8 @@ export function UsersTable({
                 : users?.length === 0
                   ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
-                        No users yet. Add your first user above.
+                      <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                        Ainda não há clientes cadastrados. Adicione o primeiro cliente acima.
                       </TableCell>
                     </TableRow>
                   )

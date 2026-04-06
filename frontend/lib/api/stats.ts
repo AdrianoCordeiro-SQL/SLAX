@@ -8,10 +8,10 @@ export const statsSchema = z.object({
   users_change: z.string(),
   api_requests: z.number(),
   requests_change: z.string(),
-  db_health: z.string(),
-  db_health_change: z.string(),
   revenue: z.number(),
   revenue_change: z.string(),
+  returns_count: z.number(),
+  returns_lost_value: z.number(),
 });
 
 export type Stats = z.infer<typeof statsSchema>;

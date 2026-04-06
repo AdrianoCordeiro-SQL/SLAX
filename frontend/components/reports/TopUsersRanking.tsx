@@ -30,20 +30,20 @@ export function TopUsersRanking({ start, end }: TopUsersRankingProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Top Users</CardTitle>
+        <CardTitle className="text-base font-semibold">Clientes mais ativos</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading && <SkeletonRows />}
 
         {error && (
           <p className="text-sm text-red-700">
-            Failed to load top users: {error.message}
+            Falha ao carregar clientes mais ativos: {error.message}
           </p>
         )}
 
         {data && data.length === 0 && (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            No data for this period
+            Sem dados para este período
           </p>
         )}
 
@@ -64,7 +64,7 @@ export function TopUsersRanking({ start, end }: TopUsersRankingProps) {
                   {user.name}
                 </span>
                 <span className="text-xs font-semibold text-muted-foreground">
-                  {user.count.toLocaleString()} req
+                  {user.count.toLocaleString()} eventos
                 </span>
               </div>
             ))}

@@ -78,15 +78,28 @@ def build_stats(session: Session, account_id: int) -> dict:
     ).one() or 0.0
     revenue_change = pct_change(revenue_this_week, revenue_prev_week)
 
+    returns_count = session.exec(
+        select(func.count(col(APILog.id))).where(
+            APILog.account_id == aid,
+            APILog.action.ilike("Produto % devolvido pelo cliente %"),
+        )
+    ).one()
+    returns_lost_value = session.exec(
+        select(func.sum(RevenueMetric.value)).where(
+            RevenueMetric.account_id == aid,
+            RevenueMetric.value < 0,
+        )
+    ).one() or 0.0
+
     return {
         "total_users": total_users,
         "users_change": users_change,
         "api_requests": api_requests,
         "requests_change": requests_change,
-        "db_health": "Healthy",
-        "db_health_change": "Stable",
         "revenue": round(revenue_total, 2),
         "revenue_change": revenue_change,
+        "returns_count": returns_count,
+        "returns_lost_value": round(abs(returns_lost_value), 2),
     }
 
 
@@ -180,3 +193,32 @@ def build_activity_feed(session: Session, account_id: int, limit: int = 20) -> l
     ).all()
 
     return [serialize_api_log_row(session, log) for log in logs]
+
+
+def build_activity_feed_paginated(
+    session: Session,
+    account_id: int,
+    page: int = 1,
+    per_page: int = 20,
+) -> dict:
+    total = session.exec(
+        select(func.count(col(APILog.id))).where(APILog.account_id == account_id)
+    ).one()
+    pages = max(1, (total + per_page - 1) // per_page)
+    page = min(page, pages)
+
+    logs = session.exec(
+        select(APILog)
+        .where(APILog.account_id == account_id)
+        .order_by(col(APILog.timestamp).desc())
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+    ).all()
+
+    return {
+        "items": [serialize_api_log_row(session, log) for log in logs],
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "pages": pages,
+    }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, CheckCircle2, DollarSign, Users } from "lucide-react";
+import { Activity, DollarSign, RotateCcw, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
 import { useReportSummary } from "@/hooks/useReports";
@@ -59,32 +59,47 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
   if (error || !data) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        Failed to load report summary: {error?.message ?? "Unknown error"}
+        Falha ao carregar resumo dos relatórios: {error?.message ?? "Erro desconhecido"}
       </div>
     );
   }
 
+  const transactionCountLabel =
+    data.total_requests === 1
+      ? "1 transação no período"
+      : `${data.total_requests.toLocaleString()} transações no período`;
+
   const cards: SummaryCardProps[] = [
     {
-      title: "Total Requests",
+      title: "Atividades recentes",
       value: data.total_requests.toLocaleString(),
-      change: data.requests_change,
+      change: transactionCountLabel,
       icon: Activity,
     },
     {
-      title: "Success Rate",
-      value: `${data.success_rate}%`,
-      change: data.success_rate_change,
-      icon: CheckCircle2,
-    },
-    {
-      title: "Revenue",
-      value: `$${data.total_revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      title: "Receita",
+      value: new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(data.total_revenue),
       change: data.revenue_change,
       icon: DollarSign,
     },
     {
-      title: "Active Users",
+      title: "Devoluções",
+      value: data.returns_count.toLocaleString(),
+      change: `Perda: ${new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(data.returns_lost_value)}`,
+      icon: RotateCcw,
+    },
+    {
+      title: "Clientes ativos",
       value: data.active_users.toLocaleString(),
       change: data.active_users_change,
       icon: Users,
