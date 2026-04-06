@@ -10,9 +10,7 @@ import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { AuthPageLoading } from "@/components/auth/AuthPageLoading";
 import { AuthScreenShell } from "@/components/auth/AuthScreenShell";
 import { PasswordField } from "@/components/auth/PasswordField";
-import { login, loginAsDemo } from "@/lib/api/auth";
-
-const ENABLE_DEMO_LOGIN = process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN !== "false";
+import { login } from "@/lib/api/auth";
 
 function LoginForm() {
   const router = useRouter();
@@ -23,10 +21,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const busy = isLoading || isDemoLoading;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,19 +35,6 @@ function LoginForm() {
       setError(err instanceof Error ? err.message : "Login falhou");
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  async function handleDemoLogin() {
-    setError("");
-    setIsDemoLoading(true);
-    try {
-      await loginAsDemo();
-      router.push(from);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível entrar como visitante.");
-    } finally {
-      setIsDemoLoading(false);
     }
   }
 
@@ -103,7 +85,7 @@ function LoginForm() {
 
         <Button
           type="submit"
-          disabled={busy}
+          disabled={isLoading}
           className="w-full h-10 bg-[#313235] hover:bg-[#3d3f42] text-white border-0 mt-2"
         >
           {isLoading ? (
@@ -116,34 +98,6 @@ function LoginForm() {
           )}
         </Button>
       </form>
-
-      {ENABLE_DEMO_LOGIN ? (
-        <div className="space-y-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={handleDemoLogin}
-            className="w-full h-10 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
-          >
-            {isDemoLoading ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Abrindo demonstração…
-              </>
-            ) : (
-              "Entrar como visitante"
-            )}
-          </Button>
-          <p className="text-center text-xs text-white/45 leading-relaxed px-1">
-            Conta compartilhada para explorar a plataforma com dados de exemplo. Quer uma
-            experiência própria?{" "}
-            <Link href="/register" className="text-white/65 hover:text-white font-medium">
-              Cadastre-se
-            </Link>
-          </p>
-        </div>
-      ) : null}
 
       <p className="text-center text-sm text-white/40">
         Ainda não tem uma conta?{" "}

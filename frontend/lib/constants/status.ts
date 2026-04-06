@@ -8,6 +8,32 @@ export const STATUS_BADGE_STYLES: Record<LogStatus, string> = {
   Error: "bg-red-100 text-red-700 border-red-200",
 };
 
+/** Devoluções (match com `backend` ilike `Produto % devolvido pelo cliente %`). */
+const RETURN_ACTION_RE = /^Produto .+ devolvido pelo cliente .+$/i;
+
+export function isReturnAction(action: string): boolean {
+  return RETURN_ACTION_RE.test(action.trim());
+}
+
+export const LOG_STATUS_LABELS: Record<LogStatus, string> = {
+  Success: "Concluída",
+  Pending: "Pendente",
+  Failed: "Falhou",
+  Error: "Erro",
+};
+
+export const RETURN_BADGE_CLASS = STATUS_BADGE_STYLES.Failed;
+
+export function getTransactionDisplayLabel(
+  status: string,
+  action?: string | null,
+): string {
+  if (action && isReturnAction(action)) return "Devolução";
+  const key = status as LogStatus;
+  if (key in LOG_STATUS_LABELS) return LOG_STATUS_LABELS[key];
+  return status;
+}
+
 export const STATUS_CHART_COLORS: Record<string, string> = {
   "Vendas Realizadas": "#16a34a",
   "Devoluções": "#dc2626",
