@@ -27,7 +27,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/portfolio_db
       # Credenciais para `python -m app.seed` (conta admin inicial).
-      - SEED_ADMIN_EMAIL=admin@slax.com
+      - SEED_ADMIN_EMAIL=admin@email.com
       - SEED_ADMIN_PASSWORD=admin123
     depends_on:
       db:
