@@ -35,6 +35,21 @@ ELECTRONIC_PRODUCT_PRICE_RANGES = {
     "Webcam 4K Professional": (600.0, 1800.0),
     "Cadeira Gamer Ergonômica": (900.0, 4500.0),
     "E-reader": (450.0, 2800.0),
+    "Ar Condicionado Split Inverter": (2200.0, 5500.0),
+    "Aspirador de Pó Robô": (800.0, 6000.0),
+    "Drone 4K com GPS": (2500.0, 15000.0),
+    "Gimbal para Smartphone": (500.0, 1800.0),
+    "Headset Gamer Wireless": (450.0, 2500.0),
+    "Home Theater Soundbar": (900.0, 8000.0),
+    "Impressora Tanque de Tinta": (800.0, 2400.0),
+    "Kindle Paperwhite": (700.0, 1500.0),
+    "Lente Fotográfica 50mm": (800.0, 4500.0),
+    "Memória RAM DDR5 32GB": (800.0, 2200.0),
+    "Monitor Ultrawide 34": (2200.0, 7500.0),
+    "Nobreak Senoidal": (900.0, 3500.0),
+    "Placa-Mãe High-End": (1800.0, 6000.0),
+    "Processador i9 / Ryzen 9": (3000.0, 6500.0),
+    "SSD NVMe 4TB Gen4": (1500.0, 4800.0),
 }
 
 
