@@ -154,40 +154,6 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground" htmlFor="add-product">
-                Produto
-              </label>
-              <input
-                id="add-product"
-                placeholder="Notebook"
-                {...register("product")}
-                className={inputClass}
-              />
-              {errors.product && (
-                <p className="text-xs text-red-600">{errors.product.message}</p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground" htmlFor="add-value">
-                Valor
-              </label>
-              <input
-                id="add-value"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="1999.90"
-                {...register("value", { valueAsNumber: true })}
-                className={inputClass}
-              />
-              {errors.value && (
-                <p className="text-xs text-red-600">{errors.value.message}</p>
-              )}
-            </div>
-          </div>
-
           <div className="space-y-1.5 rounded-md border border-border bg-muted/30 px-3 py-2.5">
             <label className="flex items-start gap-2.5 cursor-pointer">
               <input

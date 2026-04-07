@@ -40,18 +40,20 @@ def create_user(session: Session, account_id: int, payload: UserCreate) -> User:
     if user.id is None:
         raise RuntimeError("Falha ao persistir usuário")
     user_id = user.id
-    UserActivityGenerator.add_initial_purchase_log(
-        session,
-        account_id=account_id,
-        user_id=user_id,
-        product=payload.product,
-    )
-    RevenueRecorder.record_purchase(
-        session,
-        account_id=account_id,
-        user_id=user_id,
-        amount=payload.value,
-    )
+    if payload.product:
+        UserActivityGenerator.add_initial_purchase_log(
+            session,
+            account_id=account_id,
+            user_id=user_id,
+            product=payload.product,
+        )
+    if payload.value is not None:
+        RevenueRecorder.record_purchase(
+            session,
+            account_id=account_id,
+            user_id=user_id,
+            amount=payload.value,
+        )
     if payload.generate_platform_activity:
         UserActivityGenerator.add_platform_activity(
             session,
