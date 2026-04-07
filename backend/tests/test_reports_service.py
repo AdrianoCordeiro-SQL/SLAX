@@ -50,24 +50,44 @@ def test_build_report_summary_contagens_e_variacoes(session: Session):
     """Resumo: logs e receita atual vs anterior; taxa de sucesso e pct_change."""
 
     aid, ua_id, ub_id = _seed_account_and_users(session)
-    # Atual: 4 pedidos, 3 Success
+    # Atual: 5 transações (4 compras + 1 devolução), 4 Success
     for ts, st in [(T0, "Success"), (T1, "Success"), (T1, "Success"), (T1, "Error")]:
         session.add(
-            APILog(account_id=aid, user_id=ua_id, action="x", status=st, timestamp=ts)
+            APILog(
+                account_id=aid,
+                user_id=ua_id,
+                action="Comprou Produto X",
+                status=st,
+                timestamp=ts,
+            )
         )
     session.add(
         APILog(
-            account_id=aid, user_id=ub_id, action="y", status="Success", timestamp=T1
+            account_id=aid,
+            user_id=ub_id,
+            action="Produto Produto X devolvido pelo cliente Bob",
+            status="Success",
+            timestamp=T1,
         )
     )
-    # Anterior: 2 pedidos, 1 Success
+    # Anterior: 2 compras, 1 Success
     session.add(
         APILog(
-            account_id=aid, user_id=ua_id, action="x", status="Success", timestamp=P0
+            account_id=aid,
+            user_id=ua_id,
+            action="Comprou Produto X",
+            status="Success",
+            timestamp=P0,
         )
     )
     session.add(
-        APILog(account_id=aid, user_id=ua_id, action="x", status="Error", timestamp=P1)
+        APILog(
+            account_id=aid,
+            user_id=ua_id,
+            action="Comprou Produto X",
+            status="Error",
+            timestamp=P1,
+        )
     )
     session.add(RevenueMetric(account_id=aid, value=100.0, recorded_at=T0))
     session.add(RevenueMetric(account_id=aid, value=-50.0, recorded_at=T1))
@@ -82,7 +102,7 @@ def test_build_report_summary_contagens_e_variacoes(session: Session):
     assert out["active_users"] == 2
     assert out["requests_change"] == pct_change(5, 2)
     assert out["revenue_change"] == pct_change(100.0, 30.0)
-    assert out["returns_count"] == 0
+    assert out["returns_count"] == 1
     assert out["returns_lost_value"] == 50.0
     assert out["profit"] == 50.0
     assert out["monthly_avg_profit"] == 6.67

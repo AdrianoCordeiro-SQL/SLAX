@@ -16,10 +16,17 @@ DASHBOARD_INTERNAL_ACTIONS = {
     "GET /activity",
     "GET /auth/me",
 }
+RETURN_ACTION_PATTERN = "Produto % devolvido pelo cliente %"
 
 
 def _external_action_filter():
     return col(APILog.action).notin_(DASHBOARD_INTERNAL_ACTIONS)
+
+
+def _purchase_or_return_filter():
+    purchase = APILog.action.startswith("Comprou ")
+    returns = APILog.action.ilike(RETURN_ACTION_PATTERN)
+    return purchase | returns
 
 
 def _as_day_key(value: object) -> str:
@@ -55,14 +62,15 @@ def build_stats(session: Session, account_id: int) -> dict:
 
     api_requests = session.exec(
         select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid, _external_action_filter()
+            APILog.account_id == aid,
+            _purchase_or_return_filter(),
         )
     ).one()
     requests_this_week = session.exec(
         select(func.count(col(APILog.id))).where(
             APILog.account_id == aid,
             APILog.timestamp >= week_start,
-            _external_action_filter(),
+            _purchase_or_return_filter(),
         )
     ).one()
     requests_prev_week = session.exec(
@@ -70,7 +78,7 @@ def build_stats(session: Session, account_id: int) -> dict:
             APILog.account_id == aid,
             APILog.timestamp >= prev_week_start,
             APILog.timestamp < week_start,
-            _external_action_filter(),
+            _purchase_or_return_filter(),
         )
     ).one()
     requests_change = pct_change(requests_this_week, requests_prev_week)
