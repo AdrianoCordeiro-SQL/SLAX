@@ -206,14 +206,10 @@ def build_sparklines(session: Session, account_id: int) -> dict:
         day_key = day_start.strftime("%Y-%m-%d")
 
         new_users = users_by_day.get(day_key, 0)
-        users_series.append(
-            {"date": day_key, "value": new_users}
-        )
+        users_series.append({"date": day_key, "value": new_users})
 
         total_logs = requests_by_day.get(day_key, 0)
-        requests_series.append(
-            {"date": day_key, "value": total_logs}
-        )
+        requests_series.append({"date": day_key, "value": total_logs})
 
         revenue_series.append(
             {"date": day_key, "value": revenue_by_day.get(day_key, 0.0)}
@@ -221,9 +217,7 @@ def build_sparklines(session: Session, account_id: int) -> dict:
 
         success_logs = success_by_day.get(day_key, 0)
         health_pct = round(success_logs / total_logs * 100, 1) if total_logs else 100.0
-        health_series.append(
-            {"date": day_key, "value": health_pct}
-        )
+        health_series.append({"date": day_key, "value": health_pct})
 
     return {
         "users": users_series,
