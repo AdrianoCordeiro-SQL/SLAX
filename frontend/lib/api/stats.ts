@@ -12,6 +12,8 @@ export const statsSchema = z.object({
   revenue_change: z.string(),
   returns_count: z.number(),
   returns_lost_value: z.number(),
+  profit: z.number(),
+  monthly_avg_profit: z.number(),
 });
 
 export type Stats = z.infer<typeof statsSchema>;

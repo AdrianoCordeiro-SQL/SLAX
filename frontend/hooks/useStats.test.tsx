@@ -16,6 +16,8 @@ const statsJson = {
   revenue_change: "0%",
   returns_count: 0,
   returns_lost_value: 0,
+  profit: 0,
+  monthly_avg_profit: 0,
 };
 
 describe("useStats", () => {
