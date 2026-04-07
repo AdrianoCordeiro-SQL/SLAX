@@ -118,5 +118,9 @@ export async function changePassword(
     const data = await res.json();
     throw new Error(data.detail ?? "Senha atual incorreta");
   }
+  if (res.status === 403) {
+    const data = await res.json();
+    throw new Error(data.detail ?? "Função bloqueada temporariamente");
+  }
   if (!res.ok) throw new Error(`Failed to change password: HTTP ${res.status}`);
 }

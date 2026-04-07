@@ -5,31 +5,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useChangePassword } from "@/hooks/useAccount";
 import { passwordChangeSchema, type PasswordChangeInput } from "@/lib/api/auth";
 
 export function PasswordChangeForm() {
-  const { mutate: changePwd, isPending, isSuccess, isError, error, reset: resetMutation } =
-    useChangePassword();
-
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors },
   } = useForm<PasswordChangeInput>({
     resolver: zodResolver(passwordChangeSchema),
   });
 
-  function onSubmit(data: PasswordChangeInput) {
-    changePwd(
-      { current_password: data.current_password, new_password: data.new_password },
-      {
-        onSuccess: () => {
-          reset();
-        },
-      },
-    );
+  function onSubmit(_data: PasswordChangeInput) {
+    return;
   }
 
   return (
@@ -40,6 +28,7 @@ export function PasswordChangeForm() {
           id="current_password"
           type="password"
           autoComplete="current-password"
+          disabled
           {...register("current_password")}
         />
         {errors.current_password && (
@@ -53,6 +42,7 @@ export function PasswordChangeForm() {
           id="new_password"
           type="password"
           autoComplete="new-password"
+          disabled
           {...register("new_password")}
         />
         {errors.new_password && (
@@ -66,6 +56,7 @@ export function PasswordChangeForm() {
           id="confirm_password"
           type="password"
           autoComplete="new-password"
+          disabled
           {...register("confirm_password")}
         />
         {errors.confirm_password && (
@@ -73,15 +64,10 @@ export function PasswordChangeForm() {
         )}
       </div>
 
-      {isSuccess && (
-        <p className="text-sm text-green-600">Senha alterada com sucesso.</p>
-      )}
-      {isError && (
-        <p className="text-sm text-red-600">{error.message}</p>
-      )}
+      <p className="text-sm text-muted-foreground">Funcao bloqueada temporariamente.</p>
 
-      <Button type="submit" disabled={isPending} onClick={() => resetMutation()}>
-        {isPending ? "Alterando..." : "Alterar senha"}
+      <Button type="submit" disabled>
+        Funcao bloqueada temporariamente
       </Button>
     </form>
   );

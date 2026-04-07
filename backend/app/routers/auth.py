@@ -17,7 +17,6 @@ from ..schemas import (
 from ..services.account import (
     account_to_auth_dict,
     build_auth_response,
-    change_account_password,
     register_account,
     update_account_profile,
 )
@@ -60,4 +59,4 @@ def update_me(payload: AccountUpdate, account: CurrentAccount, session: SessionD
 def change_password(
     payload: PasswordChange, account: CurrentAccount, session: SessionDep
 ):
-    change_account_password(session, account, payload)
+    raise HTTPException(status_code=403, detail="Função bloqueada temporariamente")

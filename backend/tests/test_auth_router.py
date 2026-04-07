@@ -50,8 +50,8 @@ def test_me_with_bearer_200(session: Session, client: TestClient):
     assert r.json()["email"] == "me@example.com"
 
 
-def test_patch_me_and_change_password(session: Session, client: TestClient):
-    """PATCH /auth/me, troca de senha com atual errada (400) e correta (204)."""
+def test_patch_me_and_change_password_bloqueado(session: Session, client: TestClient):
+    """PATCH /auth/me funciona e troca de senha bloqueada responde 403."""
 
     register_account(
         session,
@@ -67,16 +67,16 @@ def test_patch_me_and_change_password(session: Session, client: TestClient):
     assert r.status_code == 200
     assert r.json()["name"] == "Patched"
 
-    bad = client.post(
+    blocked = client.post(
         "/auth/change-password",
         headers=headers,
         json={"current_password": "wrong", "new_password": "newpass123"},
     )
-    assert bad.status_code == 400
+    assert blocked.status_code == 403
 
-    ok = client.post(
+    blocked_again = client.post(
         "/auth/change-password",
         headers=headers,
         json={"current_password": "oldpass123", "new_password": "newpass123"},
     )
-    assert ok.status_code == 204
+    assert blocked_again.status_code == 403
