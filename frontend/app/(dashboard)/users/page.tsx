@@ -5,15 +5,19 @@ import { UserPlus } from "lucide-react";
 import { AddUserDialog } from "@/components/users/AddUserDialog";
 import { DeleteUserDialog } from "@/components/users/DeleteUserDialog";
 import { EditUserDialog } from "@/components/users/EditUserDialog";
+import { UserHistoryDialog } from "@/components/users/UserHistoryDialog";
 import { UsersTable } from "@/components/users/UsersTable";
 import { useUsers } from "@/hooks/useUsers";
 import type { User } from "@/lib/api/users";
+
+// Página de clientes com CRUD e acesso ao histórico individual em modal.
 
 export default function UsersPage() {
   const { data: users, isLoading, error } = useUsers();
   const [addOpen, setAddOpen] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [historyUser, setHistoryUser] = useState<User | null>(null);
 
   return (
     <>
@@ -28,6 +32,12 @@ export default function UsersPage() {
         user={deleteUser}
         onOpenChange={(open) => {
           if (!open) setDeleteUser(null);
+        }}
+      />
+      <UserHistoryDialog
+        user={historyUser}
+        onOpenChange={(open) => {
+          if (!open) setHistoryUser(null);
         }}
       />
 
@@ -53,6 +63,7 @@ export default function UsersPage() {
           users={users}
           isLoading={isLoading}
           error={error}
+          onViewHistory={setHistoryUser}
           onEdit={setEditUser}
           onDelete={setDeleteUser}
         />

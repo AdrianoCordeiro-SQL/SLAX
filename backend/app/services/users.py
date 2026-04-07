@@ -4,6 +4,7 @@ from sqlmodel import Session, col, select
 from ..exceptions import UserNotFoundForAccount
 from ..models import APILog, RevenueMetric, User
 from ..schemas import UserCreate, UserUpdate
+from .log_items import serialize_api_log_row
 from .user_activity import RevenueRecorder, UserActivityGenerator
 
 # Operações de CRUD em User restritas ao account_id do tenant autenticado.
@@ -107,3 +108,15 @@ def delete_user(session: Session, account_id: int, user_id: int) -> None:
     )
     session.delete(user)
     session.commit()
+
+
+def list_user_activity(session: Session, account_id: int, user_id: int) -> list[dict]:
+    user = session.get(User, user_id)
+    if not user or user.account_id != account_id:
+        raise UserNotFoundForAccount
+    logs = session.exec(
+        select(APILog)
+        .where(APILog.account_id == account_id, APILog.user_id == user_id)
+        .order_by(col(APILog.timestamp).desc())
+    ).all()
+    return [serialize_api_log_row(session, log, {user_id: user}) for log in logs]

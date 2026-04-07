@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { apiFetch } from "./client";
 
+// Contratos e chamadas HTTP de usuários, incluindo CRUD e histórico de atividade.
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export const userSchema = z.object({
@@ -18,6 +20,16 @@ export const usersSchema = z.array(userSchema);
 
 export type User = z.infer<typeof userSchema>;
 export type Users = z.infer<typeof usersSchema>;
+export const userActivityItemSchema = z.object({
+  id: z.number(),
+  user: z.string(),
+  avatar_url: z.string().nullable(),
+  action: z.string(),
+  timestamp: z.string(),
+  status: z.string(),
+});
+export const userActivitySchema = z.array(userActivityItemSchema);
+export type UserActivityItem = z.infer<typeof userActivityItemSchema>;
 
 export const createUserSchema = z.object({
   first_name: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
@@ -76,4 +88,11 @@ export async function updateUser(userId: number, input: EditUserInput): Promise<
 export async function deleteUser(userId: number): Promise<void> {
   const res = await apiFetch(`${API_BASE}/users/${userId}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`Failed to delete user: HTTP ${res.status}`);
+}
+
+export async function fetchUserActivity(userId: number): Promise<UserActivityItem[]> {
+  const res = await apiFetch(`${API_BASE}/users/${userId}/activity`);
+  if (!res.ok) throw new Error(`Failed to fetch user activity: HTTP ${res.status}`);
+  const data = await res.json();
+  return userActivitySchema.parse(data);
 }
