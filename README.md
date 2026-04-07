@@ -4,7 +4,7 @@ Monorepo com API (FastAPI) em `backend/` e app web (Next.js) em `frontend/`.
 
 ## CI (GitHub Actions)
 
-O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em push e pull requests para `main`:
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em push e pull requests para `main` e `all`:
 
 | Job       | Comandos (equivalente local) |
 |-----------|------------------------------|

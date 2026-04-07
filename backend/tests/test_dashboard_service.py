@@ -67,7 +67,7 @@ def test_build_stats_janelas_e_pct_change(session: Session):
             user_id=u_new.id,
             action="GET /stats",
             status="Success",
-            timestamp=datetime(2024, 6, 10, 12, 5, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2024, 6, 10, 12, 5, 0, tzinfo=UTC),
         )
     )
     session.add(
