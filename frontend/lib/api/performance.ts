@@ -16,7 +16,8 @@ export type Performance = z.infer<typeof performanceSchema>;
 
 export async function fetchPerformance(): Promise<Performance> {
   const res = await apiFetch(`${API_BASE}/performance`);
-  if (!res.ok) throw new Error(`Failed to fetch performance: HTTP ${res.status}`);
+  if (!res.ok)
+    throw new Error(`Failed to fetch performance: HTTP ${res.status}`);
   const data = await res.json();
   return performanceSchema.parse(data);
 }

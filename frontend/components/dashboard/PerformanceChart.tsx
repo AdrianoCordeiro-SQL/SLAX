@@ -98,9 +98,7 @@ export function PerformanceChart() {
               height={36}
               iconType="plainline"
               formatter={(value: string) =>
-                value === "requests"
-                  ? "Volume de eventos"
-                  : "Engajamento"
+                value === "requests" ? "Volume de eventos" : "Engajamento"
               }
             />
             <Line

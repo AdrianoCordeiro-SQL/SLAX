@@ -29,6 +29,20 @@ Essa massa e gerada em janelas temporais realistas, distribuindo eventos de ate 
 - **CRUD de clientes** com opcao de geracao automatica de atividade sintetica.
 - **Autenticacao JWT** com isolamento por conta (multitenancy por `account_id`).
 
+## Prints do Projeto
+
+### Dashboard
+
+![Dashboard - Visao geral](docs/screenshots/dashboard-overview.png)
+
+### Relatorios
+
+![Relatorios - Filtros e tabela](docs/screenshots/reports-filters-table.png)
+
+### Alertas
+
+![Alertas - Regras operacionais](docs/screenshots/alerts-rules.png)
+
 ## Stack Tecnologica
 
 ### Frontend
@@ -211,6 +225,20 @@ This data is generated with realistic timestamps, spanning from up to **365 days
 - **Operational alerts** with configurable rules (e.g., return rate, revenue drop, days without purchase).
 - **Client CRUD** with optional synthetic activity generation.
 - **JWT authentication** with account-based multitenancy (`account_id`).
+
+## Project Screenshots
+
+### Dashboard
+
+![Dashboard - Overview](docs/screenshots/dashboard-overview.png)
+
+### Reports
+
+![Reports - Filters and table](docs/screenshots/reports-filters-table.png)
+
+### Alerts
+
+![Alerts - Operational rules](docs/screenshots/alerts-rules.png)
 
 ## Tech Stack
 
