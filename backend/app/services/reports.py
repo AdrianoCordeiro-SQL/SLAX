@@ -15,6 +15,13 @@ from .log_items import serialize_api_log_row
 _LEGACY_PURCHASE_RE = re.compile(
     r"^POST /users \(purchase: (?P<product>.+?) - \$\d+(?:\.\d{1,2})?\)$"
 )
+_RETURN_ACTION_PATTERN = "Produto % devolvido pelo cliente %"
+
+
+def _purchase_or_return_filter():
+    purchase = APILog.action.startswith("Comprou ")
+    returns = APILog.action.ilike(_RETURN_ACTION_PATTERN)
+    return purchase | returns
 
 
 def _extract_purchased_product(action: str) -> str | None:
@@ -47,6 +54,7 @@ def build_report_summary(
             APILog.account_id == aid,
             APILog.timestamp >= period_start,
             APILog.timestamp < period_end,
+            _purchase_or_return_filter(),
         )
     ).one()
     prev_requests = session.exec(
@@ -54,6 +62,7 @@ def build_report_summary(
             APILog.account_id == aid,
             APILog.timestamp >= prev_start,
             APILog.timestamp < prev_end,
+            _purchase_or_return_filter(),
         )
     ).one()
 
@@ -63,6 +72,7 @@ def build_report_summary(
             APILog.timestamp >= period_start,
             APILog.timestamp < period_end,
             APILog.status == "Success",
+            _purchase_or_return_filter(),
         )
     ).one()
     prev_success = session.exec(
@@ -71,6 +81,7 @@ def build_report_summary(
             APILog.timestamp >= prev_start,
             APILog.timestamp < prev_end,
             APILog.status == "Success",
+            _purchase_or_return_filter(),
         )
     ).one()
     success_rate = (
@@ -282,9 +293,6 @@ def build_revenue_trend(
         buckets[day_key] = buckets.get(day_key, 0.0) + m.value
 
     return [{"date": d, "value": round(v, 2)} for d, v in buckets.items()]
-
-
-_RETURN_ACTION_PATTERN = "Produto % devolvido pelo cliente %"
 
 
 def build_logs_paginated(

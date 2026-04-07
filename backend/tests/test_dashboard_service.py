@@ -92,8 +92,8 @@ def test_build_stats_janelas_e_pct_change(session: Session):
 
     out = build_stats(session, a.id)
     assert out["total_users"] == 2
-    assert out["api_requests"] == 2
-    assert out["requests_change"] == pct_change(1, 1)
+    assert out["api_requests"] == 1
+    assert out["requests_change"] == pct_change(0, 1)
     assert out["revenue"] == 10.0
     assert out["revenue_change"] == pct_change(10.0, 0.0)
     assert out["returns_count"] == 1
