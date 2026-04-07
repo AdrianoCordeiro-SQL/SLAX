@@ -6,9 +6,10 @@ import uuid
 from datetime import UTC, datetime
 
 import pytest
-from app.models import APILog
 from fastapi.testclient import TestClient
 from sqlmodel import Session
+
+from app.models import APILog
 
 PROTECTED_PATHS = [
     "/stats",
