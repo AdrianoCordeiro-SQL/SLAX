@@ -66,7 +66,11 @@ def _price_for_product(product_name: str) -> float:
 class RevenueRecorder:
     @staticmethod
     def record_purchase(
-        session: Session, account_id: int, user_id: int, amount: float, when: datetime | None = None
+        session: Session,
+        account_id: int,
+        user_id: int,
+        amount: float,
+        when: datetime | None = None,
     ) -> None:
         metric_data = {
             "account_id": account_id,
@@ -126,7 +130,10 @@ class UserActivityGenerator:
         existing_returns = int(existing_totals[1] or 0)
 
         target_returns = round((existing_total_events + event_count) * 0.10)
-        returns_to_generate = max(0, min(event_count, target_returns - existing_returns))
+        returns_to_generate = max(
+            0,
+            min(event_count, target_returns - existing_returns),
+        )
         event_types = ["return"] * returns_to_generate + [
             random.choice(["comment", "cart", "purchase"])
             for _ in range(event_count - returns_to_generate)

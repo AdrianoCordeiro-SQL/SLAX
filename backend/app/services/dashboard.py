@@ -132,8 +132,18 @@ def build_stats(session: Session, account_id: int) -> dict:
 def build_sparklines(session: Session, account_id: int) -> dict:
     now = datetime.now(UTC)
     aid = account_id
-    window_start = (now - timedelta(days=6)).replace(hour=0, minute=0, second=0, microsecond=0)
-    window_end = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    window_start = (now - timedelta(days=6)).replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+    window_end = now.replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    ) + timedelta(days=1)
     users_series: list[dict] = []
     requests_series: list[dict] = []
     revenue_series: list[dict] = []
@@ -229,7 +239,12 @@ def build_performance_series(session: Session, account_id: int) -> list[dict]:
     window_start = (now - timedelta(days=29)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
-    window_end = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    window_end = now.replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    ) + timedelta(days=1)
     requests_by_day = {
         _as_day_key(day): count
         for day, count in session.exec(

@@ -8,7 +8,11 @@ from freezegun import freeze_time
 from sqlmodel import Session
 
 from app.models import Account, APILog, RevenueMetric, User
-from app.services.dashboard import build_activity_feed_paginated, build_sparklines, build_stats
+from app.services.dashboard import (
+    build_activity_feed_paginated,
+    build_sparklines,
+    build_stats,
+)
 from app.utils import pct_change
 
 
