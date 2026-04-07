@@ -15,10 +15,12 @@ import {
 import type { User } from "@/lib/api/users";
 import { formatShortDate, getInitials } from "@/lib/format";
 
+// Tabela de clientes com ações de edição, exclusão e abertura do histórico individual.
+
 function SkeletonRow() {
   return (
     <TableRow>
-      {Array.from({ length: 4 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <TableCell key={i}>
           <div
             className="h-4 rounded bg-gray-200 animate-pulse"
@@ -32,11 +34,12 @@ function SkeletonRow() {
 
 interface UserRowProps {
   user: User;
+  onViewHistory: (user: User) => void;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
 }
 
-function UserRow({ user, onEdit, onDelete }: UserRowProps) {
+function UserRow({ user, onViewHistory, onEdit, onDelete }: UserRowProps) {
   return (
     <TableRow>
       <TableCell>
@@ -57,6 +60,15 @@ function UserRow({ user, onEdit, onDelete }: UserRowProps) {
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
         {formatShortDate(user.created_at)}
+      </TableCell>
+      <TableCell>
+        <button
+          type="button"
+          onClick={() => onViewHistory(user)}
+          className="cursor-pointer text-sm font-medium text-blue-700 hover:text-blue-800 hover:underline"
+        >
+          Ver
+        </button>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-1">
@@ -84,6 +96,7 @@ interface UsersTableProps {
   users: User[] | undefined;
   isLoading: boolean;
   error: Error | null;
+  onViewHistory: (user: User) => void;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
 }
@@ -92,6 +105,7 @@ export function UsersTable({
   users,
   isLoading,
   error,
+  onViewHistory,
   onEdit,
   onDelete,
 }: UsersTableProps) {
@@ -110,6 +124,7 @@ export function UsersTable({
                 <TableHead className="pl-6">Cliente</TableHead>
                 <TableHead>ID</TableHead>
                 <TableHead>Cadastro</TableHead>
+                <TableHead>Histórico</TableHead>
                 <TableHead className="pr-6">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -119,13 +134,19 @@ export function UsersTable({
                 : users?.length === 0
                   ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                      <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
                         Ainda não há clientes cadastrados. Adicione o primeiro cliente acima.
                       </TableCell>
                     </TableRow>
                   )
                   : users?.map((user) => (
-                      <UserRow key={user.id} user={user} onEdit={onEdit} onDelete={onDelete} />
+                      <UserRow
+                        key={user.id}
+                        user={user}
+                        onViewHistory={onViewHistory}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                      />
                     ))}
             </TableBody>
           </Table>

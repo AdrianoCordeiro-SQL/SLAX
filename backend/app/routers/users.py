@@ -6,8 +6,8 @@ from sqlmodel import Session
 from ..auth import get_current_account
 from ..database import get_session
 from ..models import Account
-from ..schemas import UserCreate, UserOut, UserUpdate
-from ..services.users import create_user, delete_user, list_users
+from ..schemas import ActivityItem, UserCreate, UserOut, UserUpdate
+from ..services.users import create_user, delete_user, list_user_activity, list_users
 from ..services.users import update_user as update_user_svc
 
 # Rotas HTTP do prefixo /users: listagem e CRUD de usuários do tenant autenticado.
@@ -40,3 +40,10 @@ def update_user(
 @router.delete("/{user_id}", status_code=204)
 def delete_user_route(user_id: int, session: SessionDep, account: CurrentAccount):
     delete_user(session, account.id, user_id)
+
+
+@router.get("/{user_id}/activity", response_model=list[ActivityItem])
+def list_user_activity_route(
+    user_id: int, session: SessionDep, account: CurrentAccount
+):
+    return list_user_activity(session, account.id, user_id)

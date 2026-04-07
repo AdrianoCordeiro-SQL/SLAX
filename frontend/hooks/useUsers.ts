@@ -2,12 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createUser,
   deleteUser,
+  fetchUserActivity,
   fetchUsers,
   updateUser,
   type CreateUserInput,
   type EditUserInput,
+  type UserActivityItem,
   type Users,
 } from "@/lib/api/users";
+
+// Hooks React Query de usuários para listagem, mutações e histórico por usuário.
 
 export type { Users };
 
@@ -50,5 +54,19 @@ export function useDeleteUser() {
       queryClient.invalidateQueries({ queryKey: ["stats"] });
       queryClient.invalidateQueries({ queryKey: ["activity"] });
     },
+  });
+}
+
+export function useUserActivity(userId: number | null) {
+  return useQuery<UserActivityItem[], Error>({
+    queryKey: ["user-activity", userId],
+    queryFn: () => {
+      if (userId === null) {
+        throw new Error("Usuário não informado para carregar histórico");
+      }
+      return fetchUserActivity(userId);
+    },
+    enabled: userId !== null,
+    staleTime: 15_000,
   });
 }
