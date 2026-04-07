@@ -1,6 +1,13 @@
 "use client";
 
-import { Activity, DollarSign, RotateCcw, Users } from "lucide-react";
+import {
+  Activity,
+  CalendarClock,
+  DollarSign,
+  HandCoins,
+  RotateCcw,
+  Users,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
 import { useReportSummary } from "@/hooks/useReports";
@@ -23,6 +30,26 @@ function formatLossCurrencyPtBr(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+}
+
+function formatCurrencyPtBr(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatSignedCurrencyPtBr(value: number): string {
+  const sign = value >= 0 ? "+" : "-";
+  return `${sign}${formatCurrencyPtBr(Math.abs(value))}`;
+}
+
+function getProfitValueClassName(value: number): string {
+  return value >= 0
+    ? "text-2xl font-bold leading-tight text-green-600 tabular-nums"
+    : "text-2xl font-bold leading-tight text-red-600 tabular-nums";
 }
 
 function SummaryCard({
@@ -71,8 +98,8 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
           <SummaryMetricCardSkeleton key={i} />
         ))}
       </div>
@@ -101,12 +128,7 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
     },
     {
       title: "Receita",
-      value: new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(data.total_revenue),
+      value: formatCurrencyPtBr(data.total_revenue),
       change: data.revenue_change,
       icon: DollarSign,
     },
@@ -123,6 +145,30 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
       icon: RotateCcw,
     },
     {
+      title: "Lucro",
+      value: formatSignedCurrencyPtBr(data.profit),
+      change: "",
+      icon: HandCoins,
+      valueClassName: getProfitValueClassName(data.profit),
+      changeNode: (
+        <span className="text-xs font-semibold text-muted-foreground">
+          Vendas: {data.total_requests.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      title: "Lucro Médio Mensal",
+      value: formatSignedCurrencyPtBr(data.monthly_avg_profit),
+      change: "",
+      icon: CalendarClock,
+      valueClassName: getProfitValueClassName(data.monthly_avg_profit),
+      changeNode: (
+        <span className="text-xs font-semibold text-muted-foreground">
+          Média dos últimos 12 meses
+        </span>
+      ),
+    },
+    {
       title: "Clientes ativos",
       value: data.active_users.toLocaleString(),
       change: data.active_users_change,
@@ -131,7 +177,7 @@ export function ReportSummaryCards({ start, end }: ReportSummaryCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
       {cards.map((card) => (
         <SummaryCard key={card.title} {...card} />
       ))}

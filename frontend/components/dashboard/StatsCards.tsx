@@ -1,6 +1,13 @@
 "use client";
 
-import { Activity, DollarSign, RotateCcw, Users } from "lucide-react";
+import {
+  Activity,
+  CalendarClock,
+  DollarSign,
+  HandCoins,
+  RotateCcw,
+  Users,
+} from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryMetricCardSkeleton } from "@/components/metrics/SummaryMetricCardSkeleton";
@@ -20,6 +27,26 @@ function formatLossPtBr(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+}
+
+function formatCurrencyPtBr(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatSignedCurrencyPtBr(value: number): string {
+  const sign = value >= 0 ? "+" : "-";
+  return `${sign}${formatCurrencyPtBr(Math.abs(value))}`;
+}
+
+function getProfitValueClassName(value: number): string {
+  return value >= 0
+    ? "text-2xl font-bold leading-tight text-green-600 tabular-nums"
+    : "text-2xl font-bold leading-tight text-red-600 tabular-nums";
 }
 
 interface StatCardProps {
@@ -102,8 +129,8 @@ export function StatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
           <SummaryMetricCardSkeleton key={i} withSparklinePlaceholder />
         ))}
       </div>
@@ -155,20 +182,41 @@ export function StatsCards() {
     },
     {
       title: "Receita",
-      value: new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(stats.revenue),
+      value: formatCurrencyPtBr(stats.revenue),
       change: stats.revenue_change,
       icon: DollarSign,
       sparklineData: sparklines?.revenue ?? empty,
     },
+    {
+      title: "Lucro",
+      value: formatSignedCurrencyPtBr(stats.profit),
+      change: "",
+      icon: HandCoins,
+      sparklineData: empty,
+      valueClassName: getProfitValueClassName(stats.profit),
+      changeNode: (
+        <span className="text-xs font-semibold text-muted-foreground">
+          Vendas: {stats.api_requests.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      title: "Lucro Médio Mensal",
+      value: formatSignedCurrencyPtBr(stats.monthly_avg_profit),
+      change: "",
+      icon: CalendarClock,
+      sparklineData: empty,
+      valueClassName: getProfitValueClassName(stats.monthly_avg_profit),
+      changeNode: (
+        <span className="text-xs font-semibold text-muted-foreground">
+          Média dos últimos 12 meses
+        </span>
+      ),
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
       {cards.map((card) => (
         <StatCard key={card.title} {...card} />
       ))}

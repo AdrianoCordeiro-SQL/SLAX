@@ -77,13 +77,15 @@ def test_build_report_summary_contagens_e_variacoes(session: Session):
     out = build_report_summary(session, aid, START, END)
     assert out["total_requests"] == 5
     assert out["success_rate"] == 80.0  # 4/5
-    assert out["total_revenue"] == 50.0
+    assert out["total_revenue"] == 100.0
     # Distinct user_id no período: 2
     assert out["active_users"] == 2
     assert out["requests_change"] == pct_change(5, 2)
-    assert out["revenue_change"] == pct_change(50.0, 30.0)
+    assert out["revenue_change"] == pct_change(100.0, 30.0)
     assert out["returns_count"] == 0
     assert out["returns_lost_value"] == 50.0
+    assert out["profit"] == 50.0
+    assert out["monthly_avg_profit"] == 6.67
     assert out["active_users_change"] == pct_change(2, 1)
 
 
@@ -99,6 +101,8 @@ def test_build_report_summary_sem_pedidos_taxa_zero(session: Session):
     assert out["success_rate"] == 0.0
     assert out["returns_count"] == 0
     assert out["returns_lost_value"] == 0.0
+    assert out["profit"] == 0.0
+    assert out["monthly_avg_profit"] == 0.0
 
 
 def test_build_logs_paginated_filtros_e_pagina(session: Session):

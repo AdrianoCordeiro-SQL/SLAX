@@ -1,6 +1,7 @@
 import math
 import re
 from collections import Counter
+from datetime import timedelta
 
 from sqlmodel import Session, col, func, select
 
@@ -85,6 +86,18 @@ def build_report_summary(
                 RevenueMetric.account_id == aid,
                 RevenueMetric.recorded_at >= period_start,
                 RevenueMetric.recorded_at < period_end,
+                RevenueMetric.value > 0,
+            )
+        ).one()
+        or 0.0
+    )
+    loss_value = (
+        session.exec(
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.recorded_at >= period_start,
+                RevenueMetric.recorded_at < period_end,
+                RevenueMetric.value < 0,
             )
         ).one()
         or 0.0
@@ -95,6 +108,7 @@ def build_report_summary(
                 RevenueMetric.account_id == aid,
                 RevenueMetric.recorded_at >= prev_start,
                 RevenueMetric.recorded_at < prev_end,
+                RevenueMetric.value > 0,
             )
         ).one()
         or 0.0
@@ -122,17 +136,20 @@ def build_report_summary(
             APILog.action.ilike("Produto % devolvido pelo cliente %"),
         )
     ).one()
-    returns_lost_value = (
+    returns_lost_value = loss_value
+    profit = total_revenue - abs(loss_value)
+    rolling_window_start = period_end - timedelta(days=365)
+    rolling_profit_sum = (
         session.exec(
             select(func.sum(RevenueMetric.value)).where(
                 RevenueMetric.account_id == aid,
-                RevenueMetric.recorded_at >= period_start,
+                RevenueMetric.recorded_at >= rolling_window_start,
                 RevenueMetric.recorded_at < period_end,
-                RevenueMetric.value < 0,
             )
         ).one()
         or 0.0
     )
+    monthly_avg_profit = rolling_profit_sum / 12
 
     return {
         "total_requests": total_requests,
@@ -145,6 +162,8 @@ def build_report_summary(
         "active_users_change": pct_change(active_users, prev_active),
         "returns_count": returns_count,
         "returns_lost_value": round(abs(returns_lost_value), 2),
+        "profit": round(profit, 2),
+        "monthly_avg_profit": round(monthly_avg_profit, 2),
     }
 
 

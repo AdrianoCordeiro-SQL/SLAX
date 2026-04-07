@@ -21,6 +21,8 @@ export const reportSummarySchema = z.object({
   active_users_change: z.string(),
   returns_count: z.number(),
   returns_lost_value: z.number(),
+  profit: z.number(),
+  monthly_avg_profit: z.number(),
 });
 
 export type ReportSummary = z.infer<typeof reportSummarySchema>;

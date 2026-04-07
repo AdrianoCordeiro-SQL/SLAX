@@ -14,6 +14,8 @@ const validStatsPayload = {
   revenue_change: "+0.0%",
   returns_count: 3,
   returns_lost_value: 1200.0,
+  profit: 12.34,
+  monthly_avg_profit: 1.02,
 };
 
 describe("statsSchema", () => {

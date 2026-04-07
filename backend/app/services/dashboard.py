@@ -77,14 +77,28 @@ def build_stats(session: Session, account_id: int) -> dict:
 
     revenue_total = (
         session.exec(
-            select(func.sum(RevenueMetric.value)).where(RevenueMetric.account_id == aid)
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.value > 0,
+            )
+        ).one()
+        or 0.0
+    )
+    loss_total = (
+        session.exec(
+            select(func.sum(RevenueMetric.value)).where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.value < 0,
+            )
         ).one()
         or 0.0
     )
     revenue_this_week = (
         session.exec(
             select(func.sum(RevenueMetric.value)).where(
-                RevenueMetric.account_id == aid, RevenueMetric.recorded_at >= week_start
+                RevenueMetric.account_id == aid,
+                RevenueMetric.recorded_at >= week_start,
+                RevenueMetric.value > 0,
             )
         ).one()
         or 0.0
@@ -95,6 +109,7 @@ def build_stats(session: Session, account_id: int) -> dict:
                 RevenueMetric.account_id == aid,
                 RevenueMetric.recorded_at >= prev_week_start,
                 RevenueMetric.recorded_at < week_start,
+                RevenueMetric.value > 0,
             )
         ).one()
         or 0.0
@@ -107,15 +122,20 @@ def build_stats(session: Session, account_id: int) -> dict:
             APILog.action.ilike("Produto % devolvido pelo cliente %"),
         )
     ).one()
-    returns_lost_value = (
+    returns_lost_value = loss_total
+    profit = revenue_total - abs(loss_total)
+    rolling_window_start = now - timedelta(days=365)
+    rolling_profit_sum = (
         session.exec(
             select(func.sum(RevenueMetric.value)).where(
                 RevenueMetric.account_id == aid,
-                RevenueMetric.value < 0,
+                RevenueMetric.recorded_at >= rolling_window_start,
+                RevenueMetric.recorded_at < now,
             )
         ).one()
         or 0.0
     )
+    monthly_avg_profit = rolling_profit_sum / 12
 
     return {
         "total_users": total_users,
@@ -126,6 +146,8 @@ def build_stats(session: Session, account_id: int) -> dict:
         "revenue_change": revenue_change,
         "returns_count": returns_count,
         "returns_lost_value": round(abs(returns_lost_value), 2),
+        "profit": round(profit, 2),
+        "monthly_avg_profit": round(monthly_avg_profit, 2),
     }
 
 
