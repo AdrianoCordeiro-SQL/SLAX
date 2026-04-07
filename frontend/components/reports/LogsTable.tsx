@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -85,7 +85,16 @@ interface LogsTableProps {
 
 export function LogsTable({ start, end }: LogsTableProps) {
   const [filters, setFilters] = useState<LogFilters>({ page: 1 });
+  const [actionSearchInput, setActionSearchInput] = useState("");
   const [actionSearch, setActionSearch] = useState("");
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setActionSearch(actionSearchInput);
+    }, 400);
+    return () => window.clearTimeout(timeout);
+  }, [actionSearchInput]);
+
   const { data, isLoading, error, isFetching } = useReportLogs(start, end, {
     ...filters,
     action: actionSearch || undefined,
@@ -127,9 +136,9 @@ export function LogsTable({ start, end }: LogsTableProps) {
 
           <Input
             placeholder="Filtrar evento..."
-            value={actionSearch}
+            value={actionSearchInput}
             onChange={(e) => {
-              setActionSearch(e.target.value);
+              setActionSearchInput(e.target.value);
               setFilters((f) => ({ ...f, page: 1 }));
             }}
             className="h-8 w-[160px] text-xs"

@@ -13,19 +13,7 @@ export const accountUpdateSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
 });
 
-export const passwordChangeSchema = z
-  .object({
-    current_password: z.string().min(1, "Informe a senha atual"),
-    new_password: z.string().min(6, "Nova senha deve ter pelo menos 6 caracteres"),
-    confirm_password: z.string(),
-  })
-  .refine((d) => d.new_password === d.confirm_password, {
-    message: "As senhas não coincidem",
-    path: ["confirm_password"],
-  });
-
 export type AccountUpdateInput = z.infer<typeof accountUpdateSchema>;
-export type PasswordChangeInput = z.infer<typeof passwordChangeSchema>;
 
 export const loginResponseSchema = z.object({
   access_token: z.string(),
@@ -102,21 +90,3 @@ export async function updateMe(
   return accountSchema.parse(data);
 }
 
-export async function changePassword(
-  token: string,
-  payload: { current_password: string; new_password: string },
-): Promise<void> {
-  const res = await fetch(`${API_BASE}/auth/change-password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (res.status === 400) {
-    const data = await res.json();
-    throw new Error(data.detail ?? "Senha atual incorreta");
-  }
-  if (!res.ok) throw new Error(`Failed to change password: HTTP ${res.status}`);
-}

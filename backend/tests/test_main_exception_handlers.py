@@ -45,8 +45,8 @@ def test_handler_user_nao_encontrado_404(session: Session, client: TestClient):
     assert r.json()["detail"] == "User not found"
 
 
-def test_handler_senha_atual_incorreta_400(session: Session, client: TestClient):
-    """WrongCurrentPassword deve responder 400."""
+def test_handler_troca_de_senha_bloqueada_403(session: Session, client: TestClient):
+    """Troca de senha bloqueada deve responder 403."""
 
     register_account(
         session,
@@ -62,5 +62,5 @@ def test_handler_senha_atual_incorreta_400(session: Session, client: TestClient)
         headers={"Authorization": f"Bearer {token}"},
         json={"current_password": "wrong", "new_password": "newpass123"},
     )
-    assert r.status_code == 400
-    assert r.json()["detail"] == "Current password is incorrect"
+    assert r.status_code == 403
+    assert r.json()["detail"] == "Função bloqueada temporariamente"

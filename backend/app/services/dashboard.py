@@ -22,6 +22,12 @@ def _external_action_filter():
     return col(APILog.action).notin_(DASHBOARD_INTERNAL_ACTIONS)
 
 
+def _as_day_key(value: object) -> str:
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%d")
+    return str(value)
+
+
 def build_stats(session: Session, account_id: int) -> dict:
     now = datetime.now(UTC)
     week_start = now - timedelta(days=7)
@@ -126,64 +132,97 @@ def build_stats(session: Session, account_id: int) -> dict:
 def build_sparklines(session: Session, account_id: int) -> dict:
     now = datetime.now(UTC)
     aid = account_id
+    window_start = (now - timedelta(days=6)).replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+    window_end = now.replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    ) + timedelta(days=1)
     users_series: list[dict] = []
     requests_series: list[dict] = []
     revenue_series: list[dict] = []
     health_series: list[dict] = []
 
+    users_by_day = {
+        _as_day_key(day): count
+        for day, count in session.exec(
+            select(func.date(User.created_at), func.count(col(User.id)))
+            .where(
+                User.account_id == aid,
+                User.created_at >= window_start,
+                User.created_at < window_end,
+            )
+            .group_by(func.date(User.created_at))
+        ).all()
+    }
+    requests_by_day = {
+        _as_day_key(day): count
+        for day, count in session.exec(
+            select(func.date(APILog.timestamp), func.count(col(APILog.id)))
+            .where(
+                APILog.account_id == aid,
+                APILog.timestamp >= window_start,
+                APILog.timestamp < window_end,
+            )
+            .group_by(func.date(APILog.timestamp))
+        ).all()
+    }
+    success_by_day = {
+        _as_day_key(day): count
+        for day, count in session.exec(
+            select(func.date(APILog.timestamp), func.count(col(APILog.id)))
+            .where(
+                APILog.account_id == aid,
+                APILog.timestamp >= window_start,
+                APILog.timestamp < window_end,
+                APILog.status == "Success",
+            )
+            .group_by(func.date(APILog.timestamp))
+        ).all()
+    }
+    revenue_by_day = {
+        _as_day_key(day): round(total or 0.0, 2)
+        for day, total in session.exec(
+            select(func.date(RevenueMetric.recorded_at), func.sum(RevenueMetric.value))
+            .where(
+                RevenueMetric.account_id == aid,
+                RevenueMetric.recorded_at >= window_start,
+                RevenueMetric.recorded_at < window_end,
+            )
+            .group_by(func.date(RevenueMetric.recorded_at))
+        ).all()
+    }
+
     for i in range(6, -1, -1):
         day_start = (now - timedelta(days=i)).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
-        day_end = day_start + timedelta(days=1)
+        day_key = day_start.strftime("%Y-%m-%d")
 
-        new_users = session.exec(
-            select(func.count(col(User.id))).where(
-                User.account_id == aid,
-                User.created_at >= day_start,
-                User.created_at < day_end,
-            )
-        ).one()
+        new_users = users_by_day.get(day_key, 0)
         users_series.append(
-            {"date": day_start.strftime("%Y-%m-%d"), "value": new_users}
+            {"date": day_key, "value": new_users}
         )
 
-        total_logs = session.exec(
-            select(func.count(col(APILog.id))).where(
-                APILog.account_id == aid,
-                APILog.timestamp >= day_start,
-                APILog.timestamp < day_end,
-            )
-        ).one()
+        total_logs = requests_by_day.get(day_key, 0)
         requests_series.append(
-            {"date": day_start.strftime("%Y-%m-%d"), "value": total_logs}
+            {"date": day_key, "value": total_logs}
         )
 
-        day_revenue = (
-            session.exec(
-                select(func.sum(RevenueMetric.value)).where(
-                    RevenueMetric.account_id == aid,
-                    RevenueMetric.recorded_at >= day_start,
-                    RevenueMetric.recorded_at < day_end,
-                )
-            ).one()
-            or 0.0
-        )
         revenue_series.append(
-            {"date": day_start.strftime("%Y-%m-%d"), "value": round(day_revenue, 2)}
+            {"date": day_key, "value": revenue_by_day.get(day_key, 0.0)}
         )
 
-        success_logs = session.exec(
-            select(func.count(col(APILog.id))).where(
-                APILog.account_id == aid,
-                APILog.timestamp >= day_start,
-                APILog.timestamp < day_end,
-                APILog.status == "Success",
-            )
-        ).one()
+        success_logs = success_by_day.get(day_key, 0)
         health_pct = round(success_logs / total_logs * 100, 1) if total_logs else 100.0
         health_series.append(
-            {"date": day_start.strftime("%Y-%m-%d"), "value": health_pct}
+            {"date": day_key, "value": health_pct}
         )
 
     return {
@@ -197,47 +236,46 @@ def build_sparklines(session: Session, account_id: int) -> dict:
 def build_performance_series(session: Session, account_id: int) -> list[dict]:
     now = datetime.now(UTC)
     aid = account_id
+    window_start = (now - timedelta(days=29)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    window_end = now.replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    ) + timedelta(days=1)
+    requests_by_day = {
+        _as_day_key(day): count
+        for day, count in session.exec(
+            select(func.date(APILog.timestamp), func.count(col(APILog.id)))
+            .where(
+                APILog.account_id == aid,
+                APILog.timestamp >= window_start,
+                APILog.timestamp < window_end,
+            )
+            .group_by(func.date(APILog.timestamp))
+        ).all()
+    }
     result = []
     for i in range(29, -1, -1):
         day_start = (now - timedelta(days=i)).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
-        day_end = day_start + timedelta(days=1)
-
-        logs = session.exec(
-            select(APILog).where(
-                APILog.account_id == aid,
-                APILog.timestamp >= day_start,
-                APILog.timestamp < day_end,
-            )
-        ).all()
-
-        requests_count = len(logs)
+        day_key = day_start.strftime("%Y-%m-%d")
+        requests_count = requests_by_day.get(day_key, 0)
         latency = round(50 + (requests_count % 20) * 2.5, 1) if requests_count else 50.0
 
         result.append(
             {
                 "day": 30 - i,
-                "date": day_start.strftime("%Y-%m-%d"),
+                "date": day_key,
                 "requests": requests_count,
                 "latency": latency,
             }
         )
 
     return result
-
-
-def build_activity_feed(
-    session: Session, account_id: int, limit: int = 20
-) -> list[dict]:
-    logs = session.exec(
-        select(APILog)
-        .where(APILog.account_id == account_id)
-        .order_by(col(APILog.timestamp).desc())
-        .limit(limit)
-    ).all()
-
-    return [serialize_api_log_row(session, log) for log in logs]
 
 
 def build_activity_feed_paginated(

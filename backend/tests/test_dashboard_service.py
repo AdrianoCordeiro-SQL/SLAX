@@ -8,7 +8,11 @@ from freezegun import freeze_time
 from sqlmodel import Session
 
 from app.models import Account, APILog, RevenueMetric, User
-from app.services.dashboard import build_activity_feed, build_sparklines, build_stats
+from app.services.dashboard import (
+    build_activity_feed_paginated,
+    build_sparklines,
+    build_stats,
+)
 from app.utils import pct_change
 
 
@@ -149,8 +153,8 @@ def test_build_sparklines_sete_dias_e_valores(session: Session):
     assert day_612["value"] == 5.0
 
 
-def test_build_activity_feed_smoke(session: Session):
-    """Smoke: feed de atividade devolve itens serializados."""
+def test_build_activity_feed_paginated_smoke(session: Session):
+    """Smoke: feed paginado de atividade devolve itens serializados."""
 
     a = _acc(session)
     log = APILog(
@@ -163,7 +167,7 @@ def test_build_activity_feed_smoke(session: Session):
     session.add(log)
     session.commit()
     session.refresh(log)
-    feed = build_activity_feed(session, a.id, limit=5)
-    assert len(feed) == 1
-    assert feed[0]["action"] == "ping"
-    assert feed[0]["user"] == "Unknown"
+    feed = build_activity_feed_paginated(session, a.id, page=1, per_page=5)
+    assert len(feed["items"]) == 1
+    assert feed["items"][0]["action"] == "ping"
+    assert feed["items"][0]["user"] == "Unknown"

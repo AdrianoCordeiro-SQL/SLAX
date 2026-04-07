@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -32,18 +33,38 @@ class DaysWithoutPurchaseParams(BaseModel):
     min_days: int = Field(default=7, ge=1, le=365)
 
 
+RuleParamsParser = Callable[[dict[str, Any]], dict[str, Any]]
+RuleEvaluator = Callable[[Session, int, dict[str, Any]], dict[str, Any] | None]
+
+
+def _parse_returns_rate_params(data: dict[str, Any]) -> dict[str, Any]:
+    return ReturnsRateParams.model_validate(data).model_dump()
+
+
+def _parse_revenue_drop_params(data: dict[str, Any]) -> dict[str, Any]:
+    return RevenueDropParams.model_validate(data).model_dump()
+
+
+def _parse_days_without_purchase_params(data: dict[str, Any]) -> dict[str, Any]:
+    return DaysWithoutPurchaseParams.model_validate(data).model_dump()
+
+
+RULE_PARAM_PARSERS: dict[str, RuleParamsParser] = {
+    "returns_rate_above": _parse_returns_rate_params,
+    "revenue_drop": _parse_revenue_drop_params,
+    "days_without_purchase": _parse_days_without_purchase_params,
+}
+
+
 def _parse_params(rule_type: str, raw: str) -> dict[str, Any]:
     try:
         data = json.loads(raw) if raw else {}
     except json.JSONDecodeError as e:
         raise ValueError("params_json inválido") from e
-    if rule_type == "returns_rate_above":
-        return ReturnsRateParams.model_validate(data).model_dump()
-    if rule_type == "revenue_drop":
-        return RevenueDropParams.model_validate(data).model_dump()
-    if rule_type == "days_without_purchase":
-        return DaysWithoutPurchaseParams.model_validate(data).model_dump()
-    raise ValueError("Tipo de regra desconhecido")
+    parser = RULE_PARAM_PARSERS.get(rule_type)
+    if parser is None:
+        raise ValueError("Tipo de regra desconhecido")
+    return parser(data)
 
 
 def _pct_change_numeric(current: float, previous: float) -> float:
@@ -227,6 +248,60 @@ def _cooldown_ok(session: Session, rule_id: int, cooldown_hours: int) -> bool:
     return (fired_at + timedelta(hours=cooldown_hours)) <= _now_utc()
 
 
+def _evaluate_returns_rate_above(
+    session: Session, account_id: int, params: dict[str, Any]
+) -> dict[str, Any] | None:
+    rate, snap = _metric_returns_rate(
+        session, account_id, int(params["window_days"]), int(params["min_events"])
+    )
+    if rate is None:
+        return None
+    max_p = float(params["max_percent"])
+    if rate <= max_p:
+        return None
+    msg = (
+        f"Taxa de devoluções ({rate:.1f}%) acima do limite ({max_p}%) "
+        f"nos últimos {params['window_days']} dias."
+    )
+    return {"message": msg, "snapshot": snap}
+
+
+def _evaluate_revenue_drop(
+    session: Session, account_id: int, params: dict[str, Any]
+) -> dict[str, Any] | None:
+    _, pct, snap = _metric_revenue_drop(session, account_id, int(params["window_days"]))
+    if pct is None:
+        return None
+    drop_p = float(params["drop_percent"])
+    if pct >= -drop_p:
+        return None
+    msg = (
+        f"Queda de receita de {abs(pct):.1f}% comparado ao período anterior "
+        f"(limite: {drop_p}%)."
+    )
+    return {"message": msg, "snapshot": snap}
+
+
+def _evaluate_days_without_purchase(
+    session: Session, account_id: int, params: dict[str, Any]
+) -> dict[str, Any] | None:
+    days, snap = _metric_days_without_purchase(session, account_id)
+    if days is None:
+        return None
+    min_d = int(params["min_days"])
+    if days < min_d:
+        return None
+    msg = f"Sem compras há {days} dias (limite: {min_d})."
+    return {"message": msg, "snapshot": snap}
+
+
+RULE_EVALUATORS: dict[str, RuleEvaluator] = {
+    "returns_rate_above": _evaluate_returns_rate_above,
+    "revenue_drop": _evaluate_revenue_drop,
+    "days_without_purchase": _evaluate_days_without_purchase,
+}
+
+
 def evaluate_rule(session: Session, rule: AlertRule) -> dict[str, Any] | None:
     """Retorna dict com message e snapshot se a regra disparar; senão None."""
     if not rule.enabled:
@@ -237,47 +312,10 @@ def evaluate_rule(session: Session, rule: AlertRule) -> dict[str, Any] | None:
         return None
 
     params = _parse_params(rule.rule_type, rule.params_json)
-    aid = rule.account_id
-
-    if rule.rule_type == "returns_rate_above":
-        rate, snap = _metric_returns_rate(
-            session, aid, int(params["window_days"]), int(params["min_events"])
-        )
-        if rate is None:
-            return None
-        max_p = float(params["max_percent"])
-        if rate <= max_p:
-            return None
-        msg = (
-            f"Taxa de devoluções ({rate:.1f}%) acima do limite ({max_p}%) "
-            f"nos últimos {params['window_days']} dias."
-        )
-        return {"message": msg, "snapshot": snap}
-
-    if rule.rule_type == "revenue_drop":
-        _, pct, snap = _metric_revenue_drop(session, aid, int(params["window_days"]))
-        if pct is None:
-            return None
-        drop_p = float(params["drop_percent"])
-        if pct >= -drop_p:
-            return None
-        msg = (
-            f"Queda de receita de {abs(pct):.1f}% comparado ao período anterior "
-            f"(limite: {drop_p}%)."
-        )
-        return {"message": msg, "snapshot": snap}
-
-    if rule.rule_type == "days_without_purchase":
-        days, snap = _metric_days_without_purchase(session, aid)
-        if days is None:
-            return None
-        min_d = int(params["min_days"])
-        if days < min_d:
-            return None
-        msg = f"Sem compras há {days} dias (limite: {min_d})."
-        return {"message": msg, "snapshot": snap}
-
-    return None
+    evaluator = RULE_EVALUATORS.get(rule.rule_type)
+    if evaluator is None:
+        return None
+    return evaluator(session, rule.account_id, params)
 
 
 def evaluate_all_enabled(session: Session, account_id: int) -> list[dict[str, Any]]:
