@@ -5,7 +5,7 @@ from .seed import ensure_admin_account
 
 
 def create_admin(
-    email: str = "admin@slax.com", password: str = "admin", name: str = "Admin"
+    email: str = "admin@email.com", password: str = "admin123", name: str = "Admin"
 ) -> None:
     account = ensure_admin_account(email=email, password=password, name=name)
     print(f"Conta administrativa pronta: {account.email}")
