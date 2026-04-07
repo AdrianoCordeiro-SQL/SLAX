@@ -210,30 +210,34 @@ def build_top_users(
 ) -> list[dict]:
     period_start, period_end = parse_period(start, end)
     rows = session.exec(
-        select(APILog.user_id, func.count(col(APILog.id)))
+        select(
+            APILog.user_id,
+            func.count(col(APILog.id)),
+            User.name,
+            User.avatar_url,
+        )
+        .select_from(APILog)
+        .join(User, User.id == APILog.user_id, isouter=True)
         .where(
             APILog.account_id == account_id,
             APILog.timestamp >= period_start,
             APILog.timestamp < period_end,
             col(APILog.user_id).is_not(None),
         )
-        .group_by(col(APILog.user_id))
+        .group_by(APILog.user_id, User.name, User.avatar_url)
         .order_by(func.count(col(APILog.id)).desc())
         .limit(10)
     ).all()
 
-    result = []
-    for user_id, count in rows:
-        user = session.get(User, user_id)
-        result.append(
-            {
-                "user_id": user_id,
-                "name": user.name if user else "Unknown",
-                "avatar_url": user.avatar_url if user else None,
-                "count": count,
-            }
-        )
-    return result
+    return [
+        {
+            "user_id": user_id,
+            "name": name if name else "Unknown",
+            "avatar_url": avatar_url,
+            "count": count,
+        }
+        for user_id, count, name, avatar_url in rows
+    ]
 
 
 def build_revenue_trend(
@@ -317,7 +321,13 @@ def build_logs_paginated(
         .limit(per_page)
     ).all()
 
-    items = [serialize_api_log_row(session, log) for log in logs]
+    user_ids = {log.user_id for log in logs if log.user_id is not None}
+    users_by_id: dict[int, User] = {}
+    if user_ids:
+        users = session.exec(select(User).where(col(User.id).in_(user_ids))).all()
+        users_by_id = {user.id: user for user in users}
+
+    items = [serialize_api_log_row(session, log, users_by_id) for log in logs]
 
     return {
         "items": items,

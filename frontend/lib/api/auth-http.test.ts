@@ -7,7 +7,6 @@ import {
   accountSchema,
   accountUpdateSchema,
   loginResponseSchema,
-  passwordChangeSchema,
 } from "./auth-http";
 
 const validAccount = {
@@ -34,26 +33,6 @@ describe("accountUpdateSchema", () => {
   it("exige nome com pelo menos 2 caracteres", () => {
     expect(() => accountUpdateSchema.parse({ name: "A" })).toThrow();
     expect(accountUpdateSchema.parse({ name: "Ab" }).name).toBe("Ab");
-  });
-});
-
-describe("passwordChangeSchema", () => {
-  it("rejeita quando nova senha e confirmação diferem", () => {
-    const r = passwordChangeSchema.safeParse({
-      current_password: "old",
-      new_password: "123456",
-      confirm_password: "654321",
-    });
-    expect(r.success).toBe(false);
-  });
-
-  it("aceita quando coincidem", () => {
-    const r = passwordChangeSchema.safeParse({
-      current_password: "old",
-      new_password: "123456",
-      confirm_password: "123456",
-    });
-    expect(r.success).toBe(true);
   });
 });
 

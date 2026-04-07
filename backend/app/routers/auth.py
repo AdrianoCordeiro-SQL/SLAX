@@ -1,3 +1,4 @@
+import os
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -17,6 +18,7 @@ from ..schemas import (
 from ..services.account import (
     account_to_auth_dict,
     build_auth_response,
+    change_account_password,
     register_account,
     update_account_profile,
 )
@@ -25,6 +27,12 @@ from ..services.account import (
 # senha.
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+CHANGE_PASSWORD_ENABLED = os.getenv("FEATURE_CHANGE_PASSWORD", "").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 SessionDep = Annotated[Session, Depends(get_session)]
 CurrentAccount = Annotated[Account, Depends(get_current_account)]
@@ -59,4 +67,6 @@ def update_me(payload: AccountUpdate, account: CurrentAccount, session: SessionD
 def change_password(
     payload: PasswordChange, account: CurrentAccount, session: SessionDep
 ):
-    raise HTTPException(status_code=403, detail="Função bloqueada temporariamente")
+    if not CHANGE_PASSWORD_ENABLED:
+        raise HTTPException(status_code=403, detail="Função bloqueada temporariamente")
+    change_account_password(session, account, payload)

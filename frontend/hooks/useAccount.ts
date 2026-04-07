@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  changePassword,
   fetchMe,
   getToken,
   updateMe,
@@ -33,16 +32,6 @@ export function useUpdateAccount() {
     },
     onSuccess: (updated) => {
       queryClient.setQueryData(["account"], updated);
-    },
-  });
-}
-
-export function useChangePassword() {
-  return useMutation<void, Error, { current_password: string; new_password: string }>({
-    mutationFn: (payload) => {
-      const token = getToken();
-      if (!token) throw new Error("Not authenticated");
-      return changePassword(token, payload);
     },
   });
 }

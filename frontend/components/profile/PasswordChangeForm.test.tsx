@@ -7,15 +7,10 @@ import { describe, expect, it } from "vitest";
 import { PasswordChangeForm } from "./PasswordChangeForm";
 
 describe("PasswordChangeForm", () => {
-  it("mantem campos e botao desabilitados com aviso de bloqueio", () => {
+  it("exibe aviso de bloqueio e instrução de feature flag", () => {
     render(<PasswordChangeForm />);
 
-    expect(screen.getByLabelText(/senha atual/i)).toBeDisabled();
-    expect(screen.getByLabelText(/^nova senha$/i)).toBeDisabled();
-    expect(screen.getByLabelText(/confirmar nova senha/i)).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: /funcao bloqueada temporariamente/i }),
-    ).toBeDisabled();
-    expect(screen.getAllByText(/funcao bloqueada temporariamente/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/funcao bloqueada temporariamente/i)).toBeInTheDocument();
+    expect(screen.getByText(/feature flag no backend/i)).toBeInTheDocument();
   });
 });
