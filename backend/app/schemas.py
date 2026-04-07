@@ -11,8 +11,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class UserCreate(BaseModel):
     first_name: str
-    product: str
-    value: float = Field(gt=0)
+    product: str | None = None
+    value: float | None = Field(default=None, gt=0)
     generate_platform_activity: bool = False
     last_name: str | None = None
     email: str | None = None

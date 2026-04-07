@@ -23,8 +23,6 @@ export const createUserSchema = z.object({
   first_name: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
   last_name: z.string().optional(),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
-  product: z.string().min(2, "Produto deve ter ao menos 2 caracteres"),
-  value: z.coerce.number().positive("Valor deve ser maior que zero"),
   generate_platform_activity: z.boolean().default(false),
   avatar_url: z.string().optional(),
 });
@@ -50,8 +48,6 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       first_name: input.first_name,
-      product: input.product,
-      value: input.value,
       generate_platform_activity: input.generate_platform_activity ?? false,
       last_name: input.last_name || null,
       email: input.email || null,
