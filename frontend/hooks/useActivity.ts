@@ -7,7 +7,8 @@ export function useActivity(page = 1, perPage = 20) {
   return useQuery<ActivityResponse, Error>({
     queryKey: ["activity", page, perPage],
     queryFn: () => fetchActivity(page, perPage),
-    staleTime: 15 * 1000,
+    staleTime: 60 * 1000,
     placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
   });
 }

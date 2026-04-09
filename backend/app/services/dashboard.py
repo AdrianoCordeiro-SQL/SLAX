@@ -1,5 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
+from sqlalchemy import and_, case
 from sqlmodel import Session, col, func, select
 
 from ..models import APILog, RevenueMetric, User
@@ -39,110 +40,127 @@ def build_stats(session: Session, account_id: int) -> dict:
     now = datetime.now(UTC)
     week_start = now - timedelta(days=7)
     prev_week_start = now - timedelta(days=14)
+    rolling_window_start = now - timedelta(days=365)
     aid = account_id
 
-    total_users = session.exec(
-        select(func.count(col(User.id))).where(User.account_id == aid)
+    total_users, new_users_this_week, prev_new_users = session.exec(
+        select(
+            func.count(col(User.id)),
+            func.sum(case((User.created_at >= week_start, 1), else_=0)),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            User.created_at >= prev_week_start,
+                            User.created_at < week_start,
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ),
+        ).where(User.account_id == aid)
     ).one()
-    prev_users = session.exec(
-        select(func.count(col(User.id))).where(
-            User.account_id == aid, User.created_at < week_start
-        )
-    ).one()
-    new_users_this_week = total_users - prev_users
-    prev_new_users = (
-        prev_users
-        - session.exec(
-            select(func.count(col(User.id))).where(
-                User.account_id == aid, User.created_at < prev_week_start
-            )
-        ).one()
-    )
+    total_users = int(total_users or 0)
+    new_users_this_week = int(new_users_this_week or 0)
+    prev_new_users = int(prev_new_users or 0)
     users_change = pct_change(new_users_this_week, prev_new_users)
 
-    api_requests = session.exec(
-        select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid,
-            _purchase_or_return_filter(),
-        )
+    purchase_or_return = _purchase_or_return_filter()
+    api_requests, requests_this_week, requests_prev_week, returns_count = session.exec(
+        select(
+            func.sum(case((purchase_or_return, 1), else_=0)),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            APILog.timestamp >= week_start,
+                            purchase_or_return,
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            APILog.timestamp >= prev_week_start,
+                            APILog.timestamp < week_start,
+                            purchase_or_return,
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ),
+            func.sum(case((APILog.action.ilike(RETURN_ACTION_PATTERN), 1), else_=0)),
+        ).where(APILog.account_id == aid)
     ).one()
-    requests_this_week = session.exec(
-        select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid,
-            APILog.timestamp >= week_start,
-            _purchase_or_return_filter(),
-        )
-    ).one()
-    requests_prev_week = session.exec(
-        select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid,
-            APILog.timestamp >= prev_week_start,
-            APILog.timestamp < week_start,
-            _purchase_or_return_filter(),
-        )
-    ).one()
+    api_requests = int(api_requests or 0)
+    requests_this_week = int(requests_this_week or 0)
+    requests_prev_week = int(requests_prev_week or 0)
+    returns_count = int(returns_count or 0)
     requests_change = pct_change(requests_this_week, requests_prev_week)
 
-    revenue_total = (
-        session.exec(
-            select(func.sum(RevenueMetric.value)).where(
-                RevenueMetric.account_id == aid,
-                RevenueMetric.value > 0,
-            )
-        ).one()
-        or 0.0
-    )
-    loss_total = (
-        session.exec(
-            select(func.sum(RevenueMetric.value)).where(
-                RevenueMetric.account_id == aid,
-                RevenueMetric.value < 0,
-            )
-        ).one()
-        or 0.0
-    )
-    revenue_this_week = (
-        session.exec(
-            select(func.sum(RevenueMetric.value)).where(
-                RevenueMetric.account_id == aid,
-                RevenueMetric.recorded_at >= week_start,
-                RevenueMetric.value > 0,
-            )
-        ).one()
-        or 0.0
-    )
-    revenue_prev_week = (
-        session.exec(
-            select(func.sum(RevenueMetric.value)).where(
-                RevenueMetric.account_id == aid,
-                RevenueMetric.recorded_at >= prev_week_start,
-                RevenueMetric.recorded_at < week_start,
-                RevenueMetric.value > 0,
-            )
-        ).one()
-        or 0.0
-    )
-    revenue_change = pct_change(revenue_this_week, revenue_prev_week)
-
-    returns_count = session.exec(
-        select(func.count(col(APILog.id))).where(
-            APILog.account_id == aid,
-            APILog.action.ilike("Produto % devolvido pelo cliente %"),
-        )
+    (
+        revenue_total,
+        loss_total,
+        revenue_this_week,
+        revenue_prev_week,
+        rolling_profit_sum,
+    ) = session.exec(
+        select(
+            func.sum(case((RevenueMetric.value > 0, RevenueMetric.value), else_=0.0)),
+            func.sum(case((RevenueMetric.value < 0, RevenueMetric.value), else_=0.0)),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            RevenueMetric.recorded_at >= week_start,
+                            RevenueMetric.value > 0,
+                        ),
+                        RevenueMetric.value,
+                    ),
+                    else_=0.0,
+                )
+            ),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            RevenueMetric.recorded_at >= prev_week_start,
+                            RevenueMetric.recorded_at < week_start,
+                            RevenueMetric.value > 0,
+                        ),
+                        RevenueMetric.value,
+                    ),
+                    else_=0.0,
+                )
+            ),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            RevenueMetric.recorded_at >= rolling_window_start,
+                            RevenueMetric.recorded_at < now,
+                        ),
+                        RevenueMetric.value,
+                    ),
+                    else_=0.0,
+                )
+            ),
+        ).where(RevenueMetric.account_id == aid)
     ).one()
+    revenue_total = float(revenue_total or 0.0)
+    loss_total = float(loss_total or 0.0)
+    revenue_this_week = float(revenue_this_week or 0.0)
+    revenue_prev_week = float(revenue_prev_week or 0.0)
+    rolling_profit_sum = float(rolling_profit_sum or 0.0)
+    revenue_change = pct_change(revenue_this_week, revenue_prev_week)
     returns_lost_value = loss_total
     profit = revenue_total - abs(loss_total)
-    rolling_window_start = now - timedelta(days=365)
-    rolling_profit_sum = (
-        session.exec(
-            select(func.sum(RevenueMetric.value)).where(
-                RevenueMetric.account_id == aid,
-                RevenueMetric.recorded_at >= rolling_window_start,
-                RevenueMetric.recorded_at < now,
-            )
-        ).one()
-        or 0.0
-    )
     monthly_avg_profit = rolling_profit_sum / 12
 
     return {
@@ -321,9 +339,14 @@ def build_activity_feed_paginated(
         .offset((page - 1) * per_page)
         .limit(per_page)
     ).all()
+    user_ids = {log.user_id for log in logs if log.user_id is not None}
+    users_by_id: dict[int, User] = {}
+    if user_ids:
+        users = session.exec(select(User).where(col(User.id).in_(user_ids))).all()
+        users_by_id = {user.id: user for user in users if user.id is not None}
 
     return {
-        "items": [serialize_api_log_row(session, log) for log in logs],
+        "items": [serialize_api_log_row(session, log, users_by_id) for log in logs],
         "total": total,
         "page": page,
         "per_page": per_page,

@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+from functools import lru_cache
 from typing import Annotated
 
 import jwt
@@ -17,6 +19,29 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 
 
+@lru_cache(maxsize=2048)
+def _decode_access_token_cached(token: str) -> tuple[int, int | None]:
+    payload = decode_access_token(token)
+    account_id = int(payload["sub"])
+    exp = payload.get("exp")
+    if isinstance(exp, datetime):
+        exp_ts = int(exp.timestamp())
+    elif isinstance(exp, (int, float)):
+        exp_ts = int(exp)
+    else:
+        exp_ts = None
+    return account_id, exp_ts
+
+
+def _resolve_account_id_from_token(token: str) -> int:
+    account_id, exp_ts = _decode_access_token_cached(token)
+    # Protege contra aceitação de token expirado após acerto em cache.
+    if exp_ts is not None and int(datetime.now(UTC).timestamp()) >= exp_ts:
+        _decode_access_token_cached.cache_clear()
+        raise jwt.ExpiredSignatureError("Token expired")
+    return account_id
+
+
 def hash_password(plain: str) -> str:
     return pwd_context.hash(plain)
 
@@ -30,7 +55,7 @@ def get_current_account(
     session: Annotated[Session, Depends(get_session)],
 ) -> Account:
     try:
-        payload = decode_access_token(credentials.credentials)
+        account_id = _resolve_account_id_from_token(credentials.credentials)
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired"
@@ -39,7 +64,6 @@ def get_current_account(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         ) from None
-    account_id = int(payload["sub"])
     account = session.get(Account, account_id)
     if not account:
         raise HTTPException(

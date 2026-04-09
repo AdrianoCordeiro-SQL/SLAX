@@ -10,6 +10,11 @@ import {
   type UpdateAlertRuleInput,
 } from "@/lib/api/alerts";
 
+interface UseAlertFiringsOptions {
+  enabled?: boolean;
+  refetchInterval?: number | false;
+}
+
 export function useAlertRules() {
   return useQuery({
     queryKey: ["alert-rules"],
@@ -18,11 +23,13 @@ export function useAlertRules() {
   });
 }
 
-export function useAlertFirings(page: number) {
+export function useAlertFirings(page: number, options: UseAlertFiringsOptions = {}) {
   return useQuery({
     queryKey: ["alert-firings", page],
     queryFn: () => fetchAlertFirings(page),
-    staleTime: 15_000,
+    staleTime: 60_000,
+    enabled: options.enabled,
+    refetchInterval: options.refetchInterval,
   });
 }
 
