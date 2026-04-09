@@ -131,6 +131,12 @@ docker compose exec backend python -m app.seed
 > - **Login:** `admin@email.com`
 > - **Senha:** `admin123`
 
+> **Aviso de carregamento inicial**
+>
+> Hospedei o backend no plano gratuito do Render, que pode entrar em suspensão após inatividade.
+> Por isso, o primeiro acesso pode levar cerca de **30–60 segundos** enquanto o servidor é reativado.
+> Depois disso, a navegação volta ao normal.
+
 ## Variaveis de Ambiente
 
 ### Raiz (`.env`)
