@@ -10,8 +10,13 @@ const PREVIEW_COUNT = 8;
 
 export function AlertsNotificationBell() {
   const [open, setOpen] = useState(false);
+  const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading, isError, error } = useAlertFirings(1);
+  const shouldFetch = open || hasOpenedOnce;
+  const { data, isLoading, isError, error } = useAlertFirings(1, {
+    enabled: shouldFetch,
+    refetchInterval: open ? 30_000 : false,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -37,7 +42,13 @@ export function AlertsNotificationBell() {
         aria-label="Alertas recentes"
         aria-expanded={open}
         aria-haspopup="dialog"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() =>
+          setOpen((current) => {
+            const next = !current;
+            if (next) setHasOpenedOnce(true);
+            return next;
+          })
+        }
       >
         <Bell size={18} />
         {hasAlerts && (

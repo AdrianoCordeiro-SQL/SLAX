@@ -13,6 +13,7 @@ from . import models  # noqa: F401 — registra todas as tabelas no metadata
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://user:password@db:5432/portfolio_db"
 )
+DB_ECHO_ENABLED = os.getenv("DB_ECHO", "").lower() in {"1", "true", "yes", "on"}
 
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
@@ -22,7 +23,7 @@ if DATABASE_URL.startswith("sqlite"):
         echo=False,
     )
 else:
-    engine = create_engine(DATABASE_URL, echo=True)
+    engine = create_engine(DATABASE_URL, echo=DB_ECHO_ENABLED)
 
 
 def create_db_and_tables():

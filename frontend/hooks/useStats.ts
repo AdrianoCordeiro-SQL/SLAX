@@ -7,6 +7,6 @@ export function useStats() {
   return useQuery<Stats, Error>({
     queryKey: ["stats"],
     queryFn: fetchStats,
-    staleTime: 30 * 1000,
+    staleTime: 60 * 1000,
   });
 }

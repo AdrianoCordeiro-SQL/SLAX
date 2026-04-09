@@ -7,6 +7,6 @@ export function useSparklines() {
   return useQuery<Sparklines, Error>({
     queryKey: ["sparklines"],
     queryFn: fetchSparklines,
-    staleTime: 30 * 1000,
+    staleTime: 120 * 1000,
   });
 }

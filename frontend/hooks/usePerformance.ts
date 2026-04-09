@@ -7,6 +7,6 @@ export function usePerformance() {
   return useQuery<Performance, Error>({
     queryKey: ["performance"],
     queryFn: fetchPerformance,
-    staleTime: 60 * 1000,
+    staleTime: 120 * 1000,
   });
 }
