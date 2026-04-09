@@ -5,12 +5,13 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlmodel import Session, select
+
 from app.exceptions import UserNotFoundForAccount
 from app.models import APILog, RevenueMetric, User
 from app.schemas import RegisterRequest, UserCreate, UserUpdate
 from app.services.account import register_account
 from app.services.users import create_user, delete_user, update_user
-from sqlmodel import Session, select
 
 
 def test_update_user_other_tenant_raises(session: Session):
