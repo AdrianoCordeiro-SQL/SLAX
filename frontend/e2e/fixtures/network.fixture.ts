@@ -15,33 +15,33 @@ type NetworkFixture = {
 };
 
 export const test = base.extend<NetworkFixture>({
-  mockAuth: async ({ page }, use) => {
-    await use(async () => {
+  mockAuth: async ({ page }, provideFixture) => {
+    await provideFixture(async () => {
       await mockAuthMe(page);
     });
   },
-  mockUsers: async ({ page }, use) => {
-    await use(async () => {
+  mockUsers: async ({ page }, provideFixture) => {
+    await provideFixture(async () => {
       await mockUsersCrud(page);
     });
   },
-  mockReports: async ({ page }, use) => {
-    await use(async () => {
+  mockReports: async ({ page }, provideFixture) => {
+    await provideFixture(async () => {
       await mockReports(page);
     });
   },
-  mockAlerts: async ({ page }, use) => {
-    await use(async () => {
+  mockAlerts: async ({ page }, provideFixture) => {
+    await provideFixture(async () => {
       await mockAlerts(page);
     });
   },
-  mockDashboard: async ({ page }, use) => {
-    await use(async () => {
+  mockDashboard: async ({ page }, provideFixture) => {
+    await provideFixture(async () => {
       await mockDashboard(page);
     });
   },
-  mockLogin: async ({ page }, use) => {
-    await use(async () => {
+  mockLogin: async ({ page }, provideFixture) => {
+    await provideFixture(async () => {
       await mockLogin(page);
     });
   },

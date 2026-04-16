@@ -5,7 +5,7 @@ type AuthFixture = {
 };
 
 export const test = base.extend<AuthFixture>({
-  setAuthCookie: async ({ page }, use) => {
+  setAuthCookie: async ({ page }, provideFixture) => {
     const appUrl = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
     const setAuthCookie = async () => {
       await page.context().addCookies([
@@ -17,7 +17,7 @@ export const test = base.extend<AuthFixture>({
       ]);
     };
 
-    await use(setAuthCookie);
+    await provideFixture(setAuthCookie);
   },
 });
 
