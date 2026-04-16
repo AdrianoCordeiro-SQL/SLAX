@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./e2e",
+  testDir: "./e2e/specs",
   fullyParallel: true,
   reporter: "html",
   use: {
@@ -29,5 +29,6 @@ export default defineConfig({
       use: { ...devices["Desktop Safari"] },
     },
   ],
+  grep: process.env.PLAYWRIGHT_GREP ? new RegExp(process.env.PLAYWRIGHT_GREP) : undefined,
 });
 
