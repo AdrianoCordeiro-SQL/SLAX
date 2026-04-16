@@ -56,6 +56,7 @@ Essa massa e gerada em janelas temporais realistas, distribuindo eventos de ate 
 - `React Hook Form` + `Zod`
 - `Recharts`
 - `Vitest` + `Testing Library`
+- `Playwright` (E2E)
 
 ### Backend
 
@@ -199,6 +200,35 @@ O workflow de CI executa pipeline para backend e frontend em push/PR:
 
 Arquivo de referencia: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
+## Testes E2E (Playwright)
+
+Os testes E2E do frontend ficam em [`frontend/e2e`](frontend/e2e) e seguem uma organizacao por dominio.
+
+- Estrutura principal:
+  - `frontend/e2e/specs/smoke/` para cenarios essenciais (auth, dashboard, users, reports e alerts)
+  - `frontend/e2e/fixtures/` para fixtures compartilhadas
+  - `frontend/e2e/mocks/` para mocks por dominio
+  - `frontend/e2e/helpers/` para factories e matchers auxiliares
+- Suite smoke (CI): roda em Chromium com tag `@smoke`
+
+### Comandos E2E (frontend)
+
+Execute os comandos dentro da pasta `frontend/`:
+
+```bash
+npm run test:e2e
+npm run test:e2e:ui
+npm run test:e2e:smoke
+```
+
+### CI de E2E
+
+Existe um workflow dedicado para Playwright em [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml), que:
+
+- instala dependencias e browsers do Playwright
+- executa a suite smoke no Chromium
+- publica o relatorio HTML como artifact
+
 ---
 
 # SLAX (English Version)
@@ -259,6 +289,7 @@ This data is generated with realistic timestamps, spanning from up to **365 days
 - `React Hook Form` + `Zod`
 - `Recharts`
 - `Vitest` + `Testing Library`
+- `Playwright` (E2E)
 
 ### Backend
 
@@ -397,3 +428,32 @@ The CI workflow runs backend and frontend pipelines on push/PR:
 - **Frontend:** `npm ci`, `npm run lint`, `npm run test:run`, and `npm run build`.
 
 Reference file: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+## E2E Tests (Playwright)
+
+Frontend E2E tests live in [`frontend/e2e`](frontend/e2e) and are organized by domain.
+
+- Main structure:
+  - `frontend/e2e/specs/smoke/` for essential scenarios (auth, dashboard, users, reports, and alerts)
+  - `frontend/e2e/fixtures/` for shared fixtures
+  - `frontend/e2e/mocks/` for domain mocks
+  - `frontend/e2e/helpers/` for factories and route matchers
+- Smoke suite (CI): runs on Chromium using the `@smoke` tag
+
+### E2E Commands (frontend)
+
+Run commands inside the `frontend/` directory:
+
+```bash
+npm run test:e2e
+npm run test:e2e:ui
+npm run test:e2e:smoke
+```
+
+### E2E CI
+
+There is a dedicated Playwright workflow at [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml), which:
+
+- installs dependencies and Playwright browsers
+- runs the smoke suite on Chromium
+- uploads the HTML report as an artifact
