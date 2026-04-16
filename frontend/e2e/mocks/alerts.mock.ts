@@ -1,8 +1,19 @@
 import type { Page } from "@playwright/test";
 import { isApiRequest, routes } from "../helpers/routes";
 
+type MockAlertRule = {
+  id: number;
+  account_id: number;
+  rule_type: "returns_rate_above" | "revenue_drop" | "days_without_purchase";
+  params: Record<string, unknown>;
+  enabled: boolean;
+  cooldown_hours: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export async function mockAlerts(page: Page) {
-  const rules = [
+  const rules: MockAlertRule[] = [
     {
       id: 1,
       account_id: 1,
